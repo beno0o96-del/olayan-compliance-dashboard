@@ -107,6 +107,16 @@ const FALLBACK_BOARD = {
     { "name": "Project A", "roi": "14.5%", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
     { "name": "Project B", "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
     { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
+  ],
+  "gauges": [
+    { "label": { "en": "Ops", "ar": "العمليات" }, "value": "67%", "p": "67deg" },
+    { "label": { "en": "HR", "ar": "الموارد البشرية" }, "value": "85%", "p": "85deg" },
+    { "label": { "en": "IT", "ar": "التقنية" }, "value": "92%", "p": "92deg" }
+  ],
+  "stars": [
+    { "label": { "en": "Sales", "ar": "المبيعات" }, "value": "77%" },
+    { "label": { "en": "Audit", "ar": "التدقيق" }, "value": "83%" },
+    { "label": { "en": "Admin", "ar": "الإدارة" }, "value": "90%" }
   ]
 };
 
@@ -831,6 +841,48 @@ function updateBoardDashboard(data) {
                     </div>
                     <span>${proj.name}</span>
                     <small style="color:${proj.color || '#fff'};">${proj.roi}</small>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    // 5. Gauges (Operating Efficiency)
+    if (data.gauges) {
+        const container = document.getElementById('b-gauge-grid');
+        if (container) {
+            container.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+            data.gauges.forEach(g => {
+                const label = g.label[currentLang] || g.label.en;
+                const div = document.createElement('div');
+                div.className = 'gauge-item';
+                div.innerHTML = `
+                    <div class="gauge-circle" style="--p: ${g.p};">
+                        <div class="gauge-inner">${g.value}</div>
+                    </div>
+                    <span style="font-size:0.8rem;">${label}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    // 6. Stars (Dept Performance)
+    if (data.stars) {
+        const container = document.getElementById('b-star-grid');
+        if (container) {
+            container.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+            data.stars.forEach(s => {
+                const label = s.label[currentLang] || s.label.en;
+                const div = document.createElement('div');
+                div.className = 'star-item';
+                div.innerHTML = `
+                    <div class="star-shape">
+                        <span class="star-val">${s.value}</span>
+                    </div>
+                    <div style="font-size:0.8rem; margin-top:5px;">${label}</div>
                 `;
                 container.appendChild(div);
             });

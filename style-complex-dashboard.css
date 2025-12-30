@@ -124,9 +124,10 @@ body.ar .dash-table th, body.ar .dash-table td {
     position: absolute;
     width: 30px;
     height: 30px;
-    background: rgba(45, 108, 223, 0.7);
+    background: rgba(45, 108, 223, 1);
     border-radius: 50% 0 50% 0;
     transform-origin: bottom right;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
 /* Gauge Charts */
