@@ -108,6 +108,18 @@ const FALLBACK_BOARD = {
     { "name": "Project B", "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
     { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
   ],
+  "western_violations": {
+    "summary": [
+      { "label": { "en": "Total Violations", "ar": "إجمالي المخالفات" }, "value": "73", "trend": "up", "color": "#f44336" },
+      { "label": { "en": "Total Amount", "ar": "إجمالي المبالغ" }, "value": "170,750", "trend": "down", "color": "#FFC107" },
+      { "label": { "en": "Resolution Rate", "ar": "نسبة المعالجة" }, "value": "88%", "trend": "up", "color": "#4caf50" }
+    ],
+    "top_issues": [
+      { "issue": { "en": "License Expired", "ar": "انتهاء الرخصة" }, "count": 12 },
+      { "issue": { "en": "Hygiene", "ar": "النظافة العامة" }, "count": 8 },
+      { "issue": { "en": "Uniform", "ar": "الزي الموحد" }, "count": 5 }
+    ]
+  },
   "gauges": [
     { "label": { "en": "Western", "ar": "الغربية" }, "value": "67%", "p": "67deg" },
     { "label": { "en": "Central", "ar": "الوسطى" }, "value": "85%", "p": "85deg" },
@@ -883,6 +895,28 @@ function updateBoardDashboard(data) {
                         <span class="star-val">${s.value}</span>
                     </div>
                     <div style="font-size:0.8rem; margin-top:5px;">${label}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    // 7. Western Region Violations
+    if (data.western_violations && data.western_violations.summary) {
+        const container = document.getElementById('b-western-violations');
+        if (container) {
+            container.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+            data.western_violations.summary.forEach(item => {
+                const label = item.label[currentLang] || item.label.en;
+                const trendIcon = item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '▬';
+                const div = document.createElement('div');
+                div.style.textAlign = 'center';
+                div.innerHTML = `
+                    <div style="font-size: 0.9rem; color: #a0c4ff; margin-bottom: 5px;">${label}</div>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: ${item.color || '#fff'};">
+                        ${item.value} <span style="font-size: 1rem;">${trendIcon}</span>
+                    </div>
                 `;
                 container.appendChild(div);
             });
