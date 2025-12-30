@@ -98,121 +98,197 @@ body.ar .dash-table th, body.ar .dash-table td {
 
 /* Flower/Fan Charts */
 .flower-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 15px;
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    flex-wrap: wrap;
 }
-
 .flower-chart {
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
+    width: 100px;
 }
-
 .flower-shape {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     margin-bottom: 10px;
+    animation: rotateFlower 20s linear infinite;
 }
-
 .petal {
     position: absolute;
-    width: 30px;
-    height: 30px;
-    background: rgba(45, 108, 223, 1);
-    border-radius: 50% 0 50% 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50% 50% 0 50%;
+    top: 0; left: 0;
     transform-origin: bottom right;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    mix-blend-mode: screen;
+}
+.flower-chart:nth-child(1) .petal { background: rgba(76, 175, 80, 0.4); opacity: 1 !important; }
+.flower-chart:nth-child(2) .petal { background: rgba(45, 108, 223, 0.4); opacity: 1 !important; }
+.flower-chart:nth-child(3) .petal { background: rgba(255, 193, 7, 0.4); opacity: 1 !important; }
+
+@keyframes rotateFlower {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-/* Gauge Charts */
+/* Gauges */
 .gauge-grid {
     display: flex;
     justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
+    padding-top: 10px;
 }
-
 .gauge-item {
     text-align: center;
 }
-
 .gauge-circle {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: conic-gradient(#2d6cdf var(--p), #1a1a2e 0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 10px;
-    position: relative;
-}
-
-.gauge-inner {
     width: 80px;
     height: 80px;
-    background: #0b0e2b;
     border-radius: 50%;
+    background: conic-gradient(#00d2be var(--p), #222 0deg);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto 5px;
+    position: relative;
+}
+.gauge-circle::before {
+    content: '';
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: #0b0e2b;
+    border-radius: 50%;
+}
+.gauge-inner {
+    position: relative;
+    z-index: 2;
     font-weight: bold;
-    font-size: 1.1rem;
 }
 
-/* Star Ratings */
+/* Stars */
 .star-grid {
     display: flex;
     justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
+    padding-top: 10px;
 }
-
 .star-item {
     text-align: center;
 }
-
 .star-shape {
-    font-size: 3rem;
-    color: transparent;
-    -webkit-text-stroke: 1px #2d6cdf;
+    width: 60px;
+    height: 60px;
+    background: #FFC107;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    color: #000;
+    font-weight: bold;
+}
+
+/* Radar Scanner (New Creative) */
+.radar-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.radar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 2px solid #2d6cdf;
     position: relative;
-    display: inline-block;
+    background: radial-gradient(circle, rgba(45, 108, 223, 0.1) 0%, rgba(11, 14, 43, 0.8) 100%);
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(45, 108, 223, 0.3);
+    flex-shrink: 0;
 }
-.star-shape::after {
-    content: '★';
-    position: absolute;
-    left: 0;
-    top: 0;
-    color: #16213e; /* Fill bg */
-    z-index: -1;
-}
-.star-val {
+.radar::after {
+    content: '';
     position: absolute;
     top: 50%;
     left: 50%;
+    width: 4px;
+    height: 4px;
+    background: #00d2be;
+    border-radius: 50%;
     transform: translate(-50%, -50%);
-    font-size: 0.9rem;
-    color: #fff;
-    font-weight: bold;
-    -webkit-text-stroke: 0;
+    box-shadow: 0 0 5px #00d2be;
+}
+.sweep {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(45, 108, 223, 0.5) 360deg);
+    animation: sweep 2s linear infinite;
+    transform-origin: center;
+}
+.blip {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #f44336;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #f44336;
+    opacity: 0;
+    animation: blink 2.5s ease-out infinite;
+}
+.blip-1 { top: 30%; left: 60%; animation-delay: 0.5s; }
+.blip-2 { top: 70%; left: 30%; animation-delay: 1.2s; }
+.blip-3 { top: 40%; left: 20%; animation-delay: 0.8s; }
+
+@keyframes sweep {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes blink {
+    0% { opacity: 0; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+    100% { opacity: 0; transform: scale(2); }
 }
 
-/* Sparklines */
-.sparkline {
-    display: inline-block;
-    width: 60px;
-    height: 20px;
-    vertical-align: middle;
+.radar-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
 }
-.spark-path {
-    stroke: #fff;
-    stroke-width: 2;
-    fill: none;
+.radar-item {
+    background: rgba(244, 67, 54, 0.1);
+    border-left: 3px solid #f44336;
+    padding: 8px 12px;
+    border-radius: 0 4px 4px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+}
+.radar-item:hover {
+    transform: translateX(5px);
+    background: rgba(244, 67, 54, 0.2);
+}
+.radar-item small { color: #ccc; }
+.radar-item strong { color: #fff; display:block; }
+
+body.ar .radar-item {
+    border-left: none;
+    border-right: 3px solid #f44336;
+    border-radius: 4px 0 0 4px;
+}
+body.ar .radar-item:hover {
+    transform: translateX(-5px);
 }
