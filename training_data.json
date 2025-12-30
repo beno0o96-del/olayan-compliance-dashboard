@@ -1,0 +1,706 @@
+{
+    "training": {
+        "compliance_percentage": 84.67289719626169,
+        "total_staff": 535,
+        "counts": {
+            "Expired": 14,
+            "Expiring Soon": 21,
+            "N/a": 47,
+            "Resigned": 0,
+            "Sick Leave": 0,
+            "vacation": 0,
+            "Valid": 453
+        }
+    },
+    "health_cards": {
+        "compliance_percentage": 74.01869158878505,
+        "total_staff": 535,
+        "counts": {
+            "Expired": 10,
+            "Expiring Soon": 47,
+            "N/a": 39,
+            "Resigned": 38,
+            "Sick Leave": 1,
+            "vacation": 4,
+            "Valid": 396
+        }
+    },
+    "categories": [
+        "Expired",
+        "Expiring Soon",
+        "N/a",
+        "Resigned",
+        "Sick Leave",
+        "vacation",
+        "Valid"
+    ],
+    "ops_data": [
+        {
+            "name": "Rayan Banjabi",
+            "count": 200,
+            "brand": "BK"
+        },
+        {
+            "name": "Hesahm Farouk",
+            "count": 190,
+            "brand": "BK"
+        },
+        {
+            "name": "Islam Osama Aly",
+            "count": 83,
+            "brand": "TC"
+        },
+        {
+            "name": "Anthony G. Mcreynolds",
+            "count": 24,
+            "brand": "BWW"
+        }
+    ],
+    "city_data": [
+        {
+            "city": "Jeddah",
+            "count": 239,
+            "region": "Western Region"
+        },
+        {
+            "city": "Makkah",
+            "count": 101,
+            "region": "Western Region"
+        },
+        {
+            "city": "Madinah",
+            "count": 50,
+            "region": "Western Region"
+        },
+        {
+            "city": "Tabuk",
+            "count": 38,
+            "region": "Western Region"
+        },
+        {
+            "city": "Abha",
+            "count": 36,
+            "region": "Western Region"
+        },
+        {
+            "city": "Taif",
+            "count": 24,
+            "region": "Western Region"
+        },
+        {
+            "city": "Jazan",
+            "count": 9,
+            "region": "Western Region"
+        }
+    ],
+    "cost_centers": [
+        {
+            "code": "61206120630000 - TC - King Khaled Taif",
+            "branch_name": "King Khaled Taif",
+            "cost_center_full": "61206120630000 - TC - King Khaled Taif",
+            "brand": "TC"
+        },
+        {
+            "code": "61206120330054 - BK - Abraj",
+            "branch_name": "Abraj",
+            "cost_center_full": "61206120330054 - BK - Abraj",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330015 - BK-Aliat Mall Madina",
+            "branch_name": "Aliat Mall Madina",
+            "cost_center_full": "61206120330015 - BK-Aliat Mall Madina",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330003 - BK-Batha Qurish Maka",
+            "branch_name": "Batha Qurish Maka",
+            "cost_center_full": "61206120330003 - BK-Batha Qurish Maka",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330089 - BK- Benzol Station",
+            "branch_name": "Benzol Station",
+            "cost_center_full": "61206120330089 - BK- Benzol Station",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330063 - BK - Dhiafa Mall",
+            "branch_name": "Dhiafa Mall",
+            "cost_center_full": "61206120330063 - BK - Dhiafa Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330066 - BK-Holly Mosque -I",
+            "branch_name": "I",
+            "cost_center_full": "61206120330066 - BK-Holly Mosque -I",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330092 - BK - Neom Kiosk",
+            "branch_name": "Neom Kiosk",
+            "cost_center_full": "61206120330092 - BK - Neom Kiosk",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330083 - BK - Al Nawariyah",
+            "branch_name": "Al Nawariyah",
+            "cost_center_full": "61206120330083 - BK - Al Nawariyah",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330043 - BK - Makkah Mall",
+            "branch_name": "Makkah Mall",
+            "cost_center_full": "61206120330043 - BK - Makkah Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330035 - BK - Madina Airport",
+            "branch_name": "Madina Airport",
+            "cost_center_full": "61206120330035 - BK - Madina Airport",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330010 - BK -King Khalid Taif",
+            "branch_name": "King Khalid Taif",
+            "cost_center_full": "61206120330010 - BK -King Khalid Taif",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330034 - BK - Juri Mall",
+            "branch_name": "Juri Mall",
+            "cost_center_full": "61206120330034 - BK - Juri Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330093 - BK - Shrayia Makkah",
+            "branch_name": "Shrayia Makkah",
+            "cost_center_full": "61206120330093 - BK - Shrayia Makkah",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330009 - BK - Sasco Thuloom",
+            "branch_name": "Sasco Thuloom",
+            "cost_center_full": "61206120330009 - BK - Sasco Thuloom",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330004 - BK-Rayah Stat Maka",
+            "branch_name": "Rayah Stat Maka",
+            "cost_center_full": "61206120330004 - BK-Rayah Stat Maka",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330050 - BK - Rashed Madina",
+            "branch_name": "Rashed Madina",
+            "cost_center_full": "61206120330050 - BK - Rashed Madina",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330045 - BK - Noor Mall",
+            "branch_name": "Noor Mall",
+            "cost_center_full": "61206120330045 - BK - Noor Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120430004 - BWW -  OBHUR",
+            "branch_name": "OBHUR",
+            "cost_center_full": "61206120430004 - BWW -  OBHUR",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330090 - BK - The Park",
+            "branch_name": "The Park",
+            "cost_center_full": "61206120330090 - BK - The Park",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330081 - BK - Tabuk Boulevard",
+            "branch_name": "Tabuk Boulevard",
+            "cost_center_full": "61206120330081 - BK - Tabuk Boulevard",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120310004 - BK -Tabouk Park Mall",
+            "branch_name": "Tabouk Park Mall",
+            "cost_center_full": "61206120310004 - BK -Tabouk Park Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630022 - TC - The Village",
+            "branch_name": "The Village",
+            "cost_center_full": "61206120630022 - TC - The Village",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630018 - TC - Town Square",
+            "branch_name": "Town Square",
+            "cost_center_full": "61206120630018 - TC - Town Square",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630019 - TC - Tabuk Boulevard",
+            "branch_name": "Tabuk Boulevard",
+            "cost_center_full": "61206120630019 - TC - Tabuk Boulevard",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630002 - TC - Rashid Mall Ab",
+            "branch_name": "Rashid Mall Ab",
+            "cost_center_full": "61206120630002 - TC - Rashid Mall Ab",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630021 - TC - Macarona",
+            "branch_name": "Macarona",
+            "cost_center_full": "61206120630021 - TC - Macarona",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630025 - TC - Jabal Omar",
+            "branch_name": "Jabal Omar",
+            "cost_center_full": "61206120630025 - TC - Jabal Omar",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630026 - TC - Arab Mall",
+            "branch_name": "Arab Mall",
+            "cost_center_full": "61206120630026 - TC - Arab Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630024 - TC - Alhamdaniyah",
+            "branch_name": "Alhamdaniyah",
+            "cost_center_full": "61206120630024 - TC - Alhamdaniyah",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630023 - TC - Istinya Park",
+            "branch_name": "Istinya Park",
+            "cost_center_full": "61206120630023 - TC - Istinya Park",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630002 - TC - Rashid Mall Ab",
+            "branch_name": "Rashid Mall Ab",
+            "cost_center_full": "61206120630002 - TC - Rashid Mall Ab",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120630010 - TC - RASHID",
+            "branch_name": "RASHID",
+            "cost_center_full": "61206120630010 - TC - RASHID",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330026 - BK - Petromin Saher",
+            "branch_name": "Petromin Saher",
+            "cost_center_full": "61206120330026 - BK - Petromin Saher",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330056 - BK - Aziz Mall",
+            "branch_name": "Aziz Mall",
+            "cost_center_full": "61206120330056 - BK - Aziz Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330060 - BK - Jarir",
+            "branch_name": "Jarir",
+            "cost_center_full": "61206120330060 - BK - Jarir",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330059 - BK - Serafy Mall",
+            "branch_name": "Serafy Mall",
+            "cost_center_full": "61206120330059 - BK - Serafy Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330076 - BK - Al Samer",
+            "branch_name": "Al Samer",
+            "cost_center_full": "61206120330076 - BK - Al Samer",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330088 - BK - Macarona",
+            "branch_name": "Macarona",
+            "cost_center_full": "61206120330088 - BK - Macarona",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330086 - BK - Al Alhamdaniyah",
+            "branch_name": "Al Alhamdaniyah",
+            "cost_center_full": "61206120330086 - BK - Al Alhamdaniyah",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330047 - BK - Event Mall",
+            "branch_name": "Event Mall",
+            "cost_center_full": "61206120330047 - BK - Event Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330052 - BK - Andalus Mall",
+            "branch_name": "Andalus Mall",
+            "cost_center_full": "61206120330052 - BK - Andalus Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330049 - BK - Arab Mall",
+            "branch_name": "Arab Mall",
+            "cost_center_full": "61206120330049 - BK - Arab Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330006 - BK-Ave Mall Khamis",
+            "branch_name": "Ave Mall Khamis",
+            "cost_center_full": "61206120330006 - BK-Ave Mall Khamis",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330000 - BK - Lulu Event Mall",
+            "branch_name": "Lulu Event Mall",
+            "cost_center_full": "61206120330000 - BK - Lulu Event Mall",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330001 - BK - Kadi Mall Jizan",
+            "branch_name": "Kadi Mall Jizan",
+            "cost_center_full": "61206120330001 - BK - Kadi Mall Jizan",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330023 - BK - Ruhaily",
+            "branch_name": "Ruhaily",
+            "cost_center_full": "61206120330023 - BK - Ruhaily",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330011 - BK - Obhur 2",
+            "branch_name": "Obhur 2",
+            "cost_center_full": "61206120330011 - BK - Obhur 2",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330040 - BK - Sasco Akhal",
+            "branch_name": "Sasco Akhal",
+            "cost_center_full": "61206120330040 - BK - Sasco Akhal",
+            "brand": "BK"
+        },
+        {
+            "code": "61206120330037 - BK - Hera3",
+            "branch_name": "Hera3",
+            "cost_center_full": "61206120330037 - BK - Hera3",
+            "brand": "BK"
+        }
+    ],
+    "top_branches": [
+        {
+            "name": "Tabuk Boulevard",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 2
+        },
+        {
+            "name": "The Village",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 2
+        },
+        {
+            "name": "Rashid Mall Ab",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 2
+        },
+        {
+            "name": "Macarona",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 2
+        },
+        {
+            "name": "Arab Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 2
+        },
+        {
+            "name": "King Khaled Taif",
+            "brand": "TC",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Abraj",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Aliat Mall Madina",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Batha Qurish Maka",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Benzol Station",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Dhiafa Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "I",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Neom Kiosk",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Al Nawariyah",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Makkah Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "King Khalid Taif",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Juri Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Shrayia Makkah",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Sasco Thuloom",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Rayah Stat Maka",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Rashed Madina",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "The Park",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Tabouk Park Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Town Square",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Alhamdaniyah",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Istinya Park",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "RASHID",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Petromin Saher",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Aziz Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Jarir",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Serafy Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Al Samer",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Al Alhamdaniyah",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Event Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Andalus Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Ave Mall Khamis",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Lulu Event Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Kadi Mall Jizan",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Ruhaily",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Obhur 2",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Sasco Akhal",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Hera3",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Jeddah Corniche",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Kaec",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Kaust",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Red Sea Mall",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Rashed Mall Jezan",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Sasco Sail",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Sasco Shalalha",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Sasco Dahban",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        },
+        {
+            "name": "Tabuk MBS Road",
+            "brand": "BK",
+            "compliance": 100,
+            "total_staff": 1
+        }
+    ]
+}

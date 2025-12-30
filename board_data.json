@@ -1,0 +1,24 @@
+{
+  "header_kpis": {
+    "roi": { "value": "37.8%", "trend": "up", "color": "#4caf50" },
+    "effectiveness": { "value": "93.0%", "trend": "flat", "color": "#FFC107" },
+    "risks": { "value": "12.0", "trend": "down", "color": "#f44336" }
+  },
+  "financials": {
+    "revenue": [
+      { "sector": "Retail", "actual": "209.8m", "target": "204.9m", "var": "2.4%", "trend": "up" },
+      { "sector": "Corporate", "actual": "3,323m", "target": "2,266m", "var": "2.5%", "trend": "up" },
+      { "sector": "Online", "actual": "189.5m", "target": "186.6m", "var": "(1.6%)", "trend": "down" }
+    ],
+    "expenses": [
+      { "type": { "en": "Operational", "ar": "تشغيلي" }, "actual": "2,156m", "budget": "2,058m", "var": "(4.8%)", "trend": "down" },
+      { "type": { "en": "Marketing", "ar": "تسويق" }, "actual": "410.5m", "budget": "393.2m", "var": "4.4%", "trend": "up" },
+      { "type": { "en": "Admin", "ar": "إداري" }, "actual": "264.3m", "budget": "255.9m", "var": "3.3%", "trend": "up" }
+    ]
+  },
+  "projects": [
+    { "name": "Project A", "roi": "14.5%", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
+    { "name": "Project B", "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
+    { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
+  ]
+}

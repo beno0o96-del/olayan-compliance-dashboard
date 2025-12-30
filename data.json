@@ -1,0 +1,8 @@
+{
+    "kpis": {
+        "openViolations": 15,
+        "closedViolations": 128,
+        "totalFines": "335,150",
+        "healthCards": "74.0%"
+    }
+}

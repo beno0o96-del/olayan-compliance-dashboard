@@ -1,0 +1,62 @@
+/* Trend Chart Styles */
+.trend-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 200px;
+    padding: 0 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    margin-top: 20px;
+}
+
+.trend-bar {
+    width: 12px;
+    margin: 0 5px;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.trend-bar:hover {
+    transform: scaleY(1.05);
+    opacity: 1 !important; /* Override inline opacity */
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.trend-tooltip {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(255, 255, 255, 0.9);
+    color: #0b0e2b;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.trend-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.9) transparent transparent transparent;
+}
+
+.trend-bar:hover .trend-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}

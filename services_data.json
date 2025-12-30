@@ -1,0 +1,50 @@
+{
+  "kpis": {
+    "activeRequests": 142,
+    "completedToday": 28,
+    "avgResponseTime": "2h 15m",
+    "employeeSatisfaction": "98%"
+  },
+  "requests": [
+    {
+      "id": "#REQ-8821",
+      "type": { "en": "Maintenance", "ar": "صيانة" },
+      "requester": "Burger King - Riyadh 01",
+      "status": "pending",
+      "date": "2025-01-16",
+      "priority": { "en": "High", "ar": "عالية" }
+    },
+    {
+      "id": "#REQ-8820",
+      "type": { "en": "IT Support", "ar": "دعم فني" },
+      "requester": "Texas - Jeddah 05",
+      "status": "closed",
+      "date": "2025-01-15",
+      "priority": { "en": "Medium", "ar": "متوسطة" }
+    },
+    {
+      "id": "#REQ-8819",
+      "type": { "en": "Supply Chain", "ar": "سلسلة الإمداد" },
+      "requester": "BWW - Dammam 02",
+      "status": "closed",
+      "date": "2025-01-15",
+      "priority": { "en": "Low", "ar": "منخفضة" }
+    },
+    {
+      "id": "#REQ-8818",
+      "type": { "en": "Cleaning", "ar": "نظافة" },
+      "requester": "Burger King - Riyadh 03",
+      "status": "in_progress",
+      "date": "2025-01-14",
+      "priority": { "en": "Medium", "ar": "متوسطة" }
+    },
+    {
+      "id": "#REQ-8817",
+      "type": { "en": "HR Request", "ar": "طلب موارد بشرية" },
+      "requester": "Head Office",
+      "status": "completed",
+      "date": "2025-01-14",
+      "priority": { "en": "High", "ar": "عالية" }
+    }
+  ]
+}

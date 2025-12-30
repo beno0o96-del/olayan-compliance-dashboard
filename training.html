@@ -1,0 +1,776 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training & Health Cards - Olayan Compliance</title>
+    <link rel="stylesheet" href="style-base.css">
+    <link rel="stylesheet" href="style-home.css">
+    <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
+    <link rel="apple-touch-icon" href="olayan-logo.png">
+    <link rel="mask-icon" href="olayan-mark.svg" color="#2d6cdf">
+    <meta name="theme-color" content="#0b0e2b">
+    <script src="app.js?v=4" defer></script>
+    <script src="od_config.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.37.0/dist/msal-browser.min.js" defer></script>
+    <script src="onedrive_activity.js" defer></script>
+    <script src="github_activity.js" defer></script>
+    <style>
+        :root {
+            --bg-dark: #0b0e2b;
+            --card-dark: #16213e;
+            --text-white: #ffffff;
+            --bar-purple: #6a4c93;
+            --bar-teal: #00d2be;
+            --bar-gold: #c5a059;
+        }
+        
+        body.en, body.ar {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 1000px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .data-card {
+            background-color: var(--card-dark);
+            border: 1px solid #2a3b55;
+            border-radius: 4px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .card-header {
+            background-color: #05081a;
+            color: var(--text-white);
+            padding: 8px;
+            font-weight: bold;
+            text-align: center;
+            margin: -10px -10px 10px -10px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* Tables */
+        table.compact-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        table.compact-table th, table.compact-table td {
+            border: 1px solid #2a3b55;
+            padding: 4px 8px;
+            text-align: left;
+            color: var(--text-white);
+        }
+        body.ar table.compact-table th, body.ar table.compact-table td {
+            text-align: right;
+        }
+        table.compact-table th {
+            background-color: #05081a;
+            color: var(--text-white);
+        }
+        table.compact-table tr:nth-child(even) {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        /* Chart Grid */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container {
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px 10px 40px 10px; /* Bottom padding for labels */
+            position: relative;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin: 0 2px;
+            position: relative;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .bar {
+            width: 60%;
+            transition: height 0.5s ease;
+            position: relative;
+        }
+        
+        .bar:hover::after {
+            content: none; /* Disable hover effect */
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -35px;
+            font-size: 0.7rem;
+            text-align: center;
+            width: 100%;
+            transform: rotate(-45deg);
+            white-space: nowrap;
+            color: var(--text-white);
+        }
+        
+        .bar-value-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-shadow: 1px 1px 2px black;
+            pointer-events: none;
+        }
+
+        .bar-value-top {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-white);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+            pointer-events: none;
+        }
+
+        /* Horizontal Bar Chart */
+        .h-chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: auto;
+            min-height: 300px;
+        }
+        .h-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .h-bar-label {
+            width: 120px;
+            font-size: 0.8rem;
+            text-align: right;
+            color: var(--text-white);
+        }
+        body.ar .h-bar-label { text-align: left; }
+        
+        .h-bar-track {
+            flex-grow: 1;
+            background: rgba(255,255,255,0.1);
+            height: 20px;
+            position: relative;
+            border-radius: 4px;
+            overflow: visible; /* Allow text to spill if needed */
+            display: flex; /* Enable flex for aligning external text */
+            align-items: center;
+        }
+        .h-bar-fill {
+            height: 100%;
+            background-color: var(--bar-gold);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 5px;
+            font-size: 0.7rem;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            font-weight: bold;
+            white-space: nowrap;
+            border-radius: 4px; /* Round corners */
+        }
+
+        /* KPI Cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .kpi-box {
+            background-color: var(--card-dark);
+            border: 2px solid var(--bar-gold);
+            text-align: center;
+            padding: 15px;
+        }
+        .kpi-title {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-white);
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--bar-gold);
+        }
+
+        /* Pie Chart */
+        .pie-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+        }
+        .pie-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 0.8rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+            .chart-container {
+                height: 250px;
+                padding: 10px 5px 30px 5px;
+            }
+            .kpi-row {
+                grid-template-columns: 1fr 1fr; /* 2 per row on mobile */
+            }
+            .bar-label {
+                font-size: 0.6rem;
+                bottom: -30px;
+            }
+            /* Make tables scrollable */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+            /* Adjust Horizontal Chart labels */
+            .h-bar-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .h-bar-label {
+                width: 100%;
+                text-align: left;
+            }
+            body.ar .h-bar-label {
+                text-align: right;
+            }
+            .h-bar-track {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="en">
+    <div class="brand-bar">
+      <img src="olayan-logo.png" alt="Olayan">
+      <span class="brand-name">Olayan Compliance Dashboard</span>
+      <span class="brand-info" id="file-activity"></span>
+    </div>
+
+    <!-- Hamburger Button -->
+    <button class="hamburger-btn" onclick="toggleMenu()">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+
+    <!-- Sliding Side Menu -->
+    <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleMenu()"></div>
+    <aside class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <img src="olayan-logo.png" class="side-menu-logo" alt="Logo">
+            <button class="close-menu-btn" onclick="toggleMenu()">&times;</button>
+        </div>
+        <nav class="side-menu-nav">
+            <a href="index.html" class="side-link">
+                <i>🏠</i> <span data-en="Home" data-ar="الرئيسية">Home</span>
+            </a>
+            <a href="violations.html" class="side-link">
+                <i>⚠️</i> <span data-en="Violations" data-ar="المخالفات">Violations</span>
+            </a>
+            <a href="training.html" class="side-link active">
+                <i>🎓</i> <span data-en="Training" data-ar="التدريب">Training</span>
+            </a>
+            <a href="branches.html" class="side-link">
+                <i>🏬</i> <span data-en="Branches" data-ar="الفروع">Branches</span>
+            </a>
+            <a href="board.html" class="side-link">
+                <i>📊</i> <span data-en="Board Report" data-ar="تقرير الإدارة">Board Report</span>
+            </a>
+            <hr style="border-color: rgba(255,255,255,0.1); width: 100%;">
+            <a href="#" onclick="toggleServicesDashboard(); return false;" class="side-link">
+                <i>🛠</i> <span data-en="Services Dashboard" data-ar="لوحة الخدمات">Services Dashboard</span>
+            </a>
+            <a href="admin.html" class="side-link">
+                <i>⚙️</i> <span data-en="Admin Panel" data-ar="لوحة التحكم">Admin Panel</span>
+            </a>
+        </nav>
+        <div style="margin-top: auto; padding-top: 20px;">
+            <div class="lang-switch" style="display: flex; gap: 10px; justify-content: center;"> 
+                <button class="lang-btn" onclick="setLang('ar')" style="flex:1;">العربية</button> 
+                <button class="lang-btn" onclick="setLang('en')" style="flex:1;">English</button> 
+            </div>
+        </div>
+    </aside>
+
+    <!-- Services Dashboard Modal (Full Screen) -->
+    <div id="services-modal" class="services-modal">
+        <div class="services-modal-content">
+            <div class="services-header">
+                <h2 data-en="Services Dashboard" data-ar="لوحة الخدمات">Services Dashboard</h2>
+                <button class="close-services-btn" onclick="toggleServicesDashboard()">&times;</button>
+            </div>
+            
+            <div class="toolbar">
+                <button class="toolbar-btn btn-print" onclick="printServices()">
+                    <span data-en="Print" data-ar="طباعة">Print</span> 🖨
+                </button>
+                <button class="toolbar-btn btn-rate" onclick="window.open('https://forms.gle/1z5jwhtF7LLqWvbQ9', '_blank')" style="background: rgba(155, 89, 182, 0.2); border: 1px solid rgba(155, 89, 182, 0.3); color: #9b59b6;"><span data-en="Rate Us" data-ar="قيمنا">Rate Us</span> </button><button class="toolbar-btn btn-export" onclick="exportServicesExcel()">
+                    <span data-en="Export Excel" data-ar="تصدير Excel">Export Excel</span> 📊
+                </button>
+            </div>
+
+            <div class="kpi-grid">
+                 <div class="kpi-card">
+                    <span class="kpi-title" data-en="Active Requests" data-ar="الطلبات النشطة">Active Requests</span>
+                    <h3>142</h3>
+                 </div>
+                 <div class="kpi-card">
+                    <span class="kpi-title" data-en="Completed Today" data-ar="أنجزت اليوم">Completed Today</span>
+                    <h3>28</h3>
+                 </div>
+                 <div class="kpi-card">
+                    <span class="kpi-title" data-en="Avg Response Time" data-ar="متوسط زمن الاستجابة">Avg Response Time</span>
+                    <h3>2.4h</h3>
+                 </div>
+                 <div class="kpi-card">
+                    <span class="kpi-title" data-en="Employee Satisfaction" data-ar="رضا الموظفين">Employee Satisfaction</span>
+                    <h3>98%</h3>
+                 </div>
+            </div>
+
+            <div class="services-table-container">
+                <table id="servicesTable" class="services-table">
+                    <thead>
+                        <tr>
+                            <th data-en="ID" data-ar="رقم الطلب">ID</th>
+                            <th data-en="Service Type" data-ar="نوع الخدمة">Service Type</th>
+                            <th data-en="Status" data-ar="الحالة">Status</th>
+                            <th data-en="Priority" data-ar="الأولوية">Priority</th>
+                            <th data-en="Date" data-ar="التاريخ">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>#REQ-001</td><td>Maintenance</td><td>In Progress</td><td>High</td><td>2025-01-10</td></tr>
+                        <tr><td>#REQ-002</td><td>IT Support</td><td>Pending</td><td>Medium</td><td>2025-01-11</td></tr>
+                        <tr><td>#REQ-003</td><td>Logistics</td><td>Completed</td><td>Low</td><td>2025-01-09</td></tr>
+                        <tr><td>#REQ-004</td><td>HR Request</td><td>Completed</td><td>High</td><td>2025-01-08</td></tr>
+                        <tr><td>#REQ-005</td><td>Cleaning</td><td>In Progress</td><td>Medium</td><td>2025-01-12</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <header class="main-header">
+        <div class="header-left" style="display: flex; align-items: center;">
+            <img src="olayan-logo.png" class="logo" alt="Olayan Logo">
+            <div class="company-text">
+                <h1 data-en="Olayan Food Division" data-ar="شركة العليان الغذائية">Olayan Food Division</h1>
+                <p data-en="Burger King · Texas Chicken · Buffalo Wild Wings" data-ar="برجر كنج · دجاج تكساس · بافلو وايلد وينجز">Burger King · Texas Chicken · Buffalo Wild Wings</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav class="main-nav" style="display: none;">
+                <button class="nav-btn" onclick="location.href='index.html'" data-en="Home" data-ar="الرئيسية">Home</button>
+                <button class="nav-btn" onclick="location.href='violations.html'" data-en="Violations" data-ar="المخالفات">Violations</button>
+                <button class="nav-btn active" onclick="location.href='training.html'" data-en="Training" data-ar="التدريب">Training</button>
+                <button class="nav-btn" onclick="location.href='branches.html'" data-en="Branches" data-ar="الفروع">Branches</button>
+                <button class="nav-btn" onclick="location.href='board.html'" data-en="Board Report" data-ar="تقرير الإدارة">Board Report</button>
+            </nav>
+            <div class="lang-switch">
+                <button class="lang-btn" onclick="setLang('ar')">AR</button>
+                <button class="lang-btn" onclick="setLang('en')">EN</button>
+            </div>
+        </div>
+    </header>
+    <div class="header-spacer"></div>
+
+    <div class="dashboard-container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            
+            <!-- Status Table -->
+            <div class="data-card">
+                <div class="card-header" data-en="Training & Health Cards Status" data-ar="حالة التدريب والكروت الصحية">Training & Health Cards Status</div>
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th data-en="Status" data-ar="الحالة">Status</th>
+                            <th data-en="Training Expiry" data-ar="انتهاء التدريب">Training Expiry</th>
+                            <th data-en="Health Card Expiry" data-ar="انتهاء الكرت الصحي">Health Card Expiry</th>
+                        </tr>
+                    </thead>
+                    <tbody id="status-table-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- OPS Table -->
+            <div class="data-card">
+                <div class="card-header" data-en="# OPS Managers" data-ar="مدراء التشغيل"># OPS Managers</div>
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th data-en="Name" data-ar="الاسم">Name</th>
+                            <th data-en="Brand" data-ar="العلامة">Brand</th>
+                            <th data-en="Count" data-ar="العدد">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ops-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- City Table -->
+            <div class="data-card">
+                <div class="card-header" data-en="City Stats" data-ar="إحصائيات المدن">City Stats</div>
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th data-en="City" data-ar="المدينة">City</th>
+                            <th data-en="Count" data-ar="العدد">Count</th>
+                            <th data-en="Region" data-ar="المنطقة">Region</th>
+                        </tr>
+                    </thead>
+                    <tbody id="city-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Cost Center Table -->
+            <div class="data-card" style="max-height: 300px; overflow-y: auto;">
+                <div class="card-header" data-en="Cost Centers" data-ar="مراكز التكلفة">Cost Centers</div>
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th data-en="Branch Name" data-ar="اسم الفرع">Branch Name</th>
+                            <th data-en="Cost Center" data-ar="مركز التكلفة">Cost Center</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cc-table-body"></tbody>
+                </table>
+            </div>
+            
+
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            
+            <!-- Row 0: KPI Cards (Moved to top) -->
+            <div class="kpi-row" style="margin-top: 0; margin-bottom: 20px;">
+                <div class="kpi-box">
+                    <div class="kpi-title" data-en="Expired Training" data-ar="تدريب منتهي">Expired Training</div>
+                    <div class="kpi-value" id="kpi-exp-train">--</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-title" data-en="Expired Health Card" data-ar="كرت صحي منتهي">Expired Health Card</div>
+                    <div class="kpi-value" id="kpi-exp-health">--</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-title" data-en="Valid Training" data-ar="تدريب ساري">Valid Training</div>
+                    <div class="kpi-value" id="kpi-valid-train">--</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-title" data-en="Valid Health Cards" data-ar="كروت صحية سارية">Valid Health Cards</div>
+                    <div class="kpi-value" id="kpi-valid-health">--</div>
+                </div>
+            </div>
+
+            <!-- Row 1: Vertical Bars -->
+            <div class="charts-row">
+                <div class="data-card">
+                    <div class="card-header" data-en="TRAINING Status" data-ar="حالة التدريب">TRAINING Status</div>
+                    <div class="chart-container" id="training-chart"></div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header" data-en="HEALTHCARDS Status" data-ar="حالة الكروت الصحية">HEALTHCARDS Status</div>
+                    <div class="chart-container" id="health-chart"></div>
+                </div>
+            </div>
+
+            <!-- Row 2: Horizontal Bar (OPS) & Pie -->
+            <div class="charts-row">
+                <div class="data-card">
+                    <div class="card-header" data-en="OPS Managers Performance" data-ar="أداء مدراء التشغيل">OPS Managers Performance</div>
+                    <div class="h-chart-container" id="ops-chart"></div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header" data-en="EXPIRED HEALTH CARDS" data-ar="الكروت الصحية المنتهية">EXPIRED HEALTH CARDS</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px;">
+                        <div class="pie-container" id="pie-chart"></div>
+                        <div class="pie-legend" id="pie-legend"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= FOOTER ================= --> 
+    <footer class="main-footer"> 
+        <span data-ar="جميع الحقوق محفوظة لدى شركة العليان للخدمات الغذائية © 2025" 
+                data-en="All rights reserved – Olayan Food Services Company © 2025"> 
+            جميع الحقوق محفوظة لدى شركة العليان للخدمات الغذائية © 2025 
+        </span> 
+        <br> 
+        Developed by <strong>Bandar A. Abdulwahab</strong> 
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply language
+            const savedLang = localStorage.getItem('preferred-lang') || 'en';
+            setLang(savedLang);
+
+            fetch('training_data.json?t=' + new Date().getTime())
+                .then(response => response.json())
+                .then(data => {
+                    renderTables(data);
+                    renderCharts(data);
+                    renderKPIs(data);
+                    
+                    // Re-apply language to translate new elements
+                    setLang(localStorage.getItem('preferred-lang') || 'en');
+                })
+                .catch(err => console.error('Error:', err));
+
+        });
+
+        const catTrans = {
+            'Expired': 'منتهي',
+            'Expiring Soon': 'ينتهي قريباً',
+            'N/a': 'غير متوفر',
+            'Resigned': 'مستقيل',
+            'Sick Leave': 'إجازة مرضية',
+            'vacation': 'إجازة',
+            'Valid': 'ساري'
+        };
+        
+
+        function renderTables(data) {
+            // 1. Status Table
+            const statusBody = document.getElementById('status-table-body');
+            const categories = data.categories || [];
+            categories.forEach(cat => {
+                const tr = document.createElement('tr');
+                const tCount = data.training.counts[cat] || 0;
+                const hCount = data.health_cards.counts[cat] || 0;
+                const catAr = catTrans[cat] || cat;
+                tr.innerHTML = `
+                    <td><span data-en="${cat}" data-ar="${catAr}">${cat}</span></td>
+                    <td style="text-align: center">${tCount}</td>
+                    <td style="text-align: center">${hCount}</td>
+                `;
+                statusBody.appendChild(tr);
+            });
+
+            // 2. OPS Table
+            const opsBody = document.getElementById('ops-table-body');
+            data.ops_data.slice(0, 10).forEach(item => { // Limit to top 10
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${item.name}</td><td>${item.brand}</td><td>${item.count}</td>`;
+                opsBody.appendChild(tr);
+            });
+
+            // 3. City Table
+            const cityBody = document.getElementById('city-table-body');
+            data.city_data.slice(0, 10).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${item.city}</td><td>${item.count}</td><td>${item.region}</td>`;
+                cityBody.appendChild(tr);
+            });
+
+            // 4. Cost Center Table
+            const ccBody = document.getElementById('cc-table-body');
+            data.cost_centers.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${item.branch_name}</td><td>${item.cost_center_full}</td>`;
+                ccBody.appendChild(tr);
+            });
+        }
+
+        function renderCharts(data) {
+            const categories = data.categories || [];
+            
+            // 1. Vertical Bars (Training & Health)
+            renderVerticalChart('training-chart', categories, data.training.counts, '#6a4c93'); // Purple for Training
+            renderVerticalChart('health-chart', categories, data.health_cards.counts, '#c5a059'); // Gold for Health
+
+            // 2. Horizontal Bar (OPS)
+            const opsContainer = document.getElementById('ops-chart');
+            const maxOps = Math.max(...data.ops_data.map(d => d.count));
+            data.ops_data.slice(0, 8).forEach(item => {
+                const percent = (item.count / maxOps) * 100;
+                
+                // If bar is small (<10%), show number outside
+                let insideText = '';
+                let outsideText = '';
+                if (percent > 10) {
+                    insideText = item.count;
+                } else {
+                    outsideText = `<span style="margin-left: 5px; color: var(--bar-gold); font-size: 0.8rem;">${item.count}</span>`;
+                }
+
+                const row = document.createElement('div');
+                row.className = 'h-bar-row';
+                row.innerHTML = `
+                    <div class="h-bar-label">${item.name}</div>
+                    <div class="h-bar-track">
+                        <div class="h-bar-fill" style="width: ${percent}%">${insideText}</div>
+                        ${outsideText}
+                    </div>
+                `;
+                opsContainer.appendChild(row);
+            });
+
+
+            // 3. Pie Chart (Expired Categories breakdown)
+            // Let's visualize "Expired" vs "Expiring Soon" vs "Resigned" etc. for Health Cards
+            // Excluding "Valid" to focus on issues
+            const pieData = [];
+            const colors = ['#f44336', '#ff9800', '#9e9e9e', '#607d8b', '#E91E63', '#9C27B0'];
+            let colorIdx = 0;
+            let totalIssues = 0;
+
+            categories.forEach(cat => {
+                if (cat !== 'Valid') {
+                    const count = data.health_cards.counts[cat];
+                    if (count > 0) {
+                        pieData.push({ label: cat, value: count, color: colors[colorIdx % colors.length] });
+                        totalIssues += count;
+                        colorIdx++;
+                    }
+                }
+            });
+
+            if (totalIssues > 0) {
+                let gradientStr = '';
+                let currentDeg = 0;
+                const legendEl = document.getElementById('pie-legend');
+
+                pieData.forEach(item => {
+                    const sliceDeg = (item.value / totalIssues) * 360;
+                    gradientStr += `${item.color} ${currentDeg}deg ${currentDeg + sliceDeg}deg, `;
+                    currentDeg += sliceDeg;
+
+                    // Legend
+                    const li = document.createElement('div');
+                    li.className = 'legend-item';
+                    const catAr = catTrans[item.label] || item.label;
+                    li.innerHTML = `
+                        <div class="legend-color" style="background: ${item.color}"></div>
+                        <span data-en="${item.label}" data-ar="${catAr}">${item.label}</span> (${item.value})
+                    `;
+                    legendEl.appendChild(li);
+                });
+                
+                gradientStr = gradientStr.slice(0, -2); // Remove last comma
+                document.getElementById('pie-chart').style.background = `conic-gradient(${gradientStr})`;
+            }
+        }
+
+        function renderVerticalChart(id, categories, counts, color) {
+            const container = document.getElementById(id);
+            const maxVal = Math.max(...Object.values(counts));
+            
+            categories.forEach(cat => {
+                const val = counts[cat] || 0;
+                const percent = maxVal > 0 ? (val / maxVal) * 100 : 0;
+                const catAr = catTrans[cat] || cat;
+                
+                const group = document.createElement('div');
+                group.className = 'bar-group';
+                
+                // Determine where to place the value
+                let valHtml = '';
+                if (val > 0) {
+                    // If bar is tall enough (>15%), center inside. Otherwise top.
+                    const valClass = percent > 15 ? 'bar-value-center' : 'bar-value-top';
+                    valHtml = `<span class="${valClass}">${val}</span>`;
+                }
+
+                group.innerHTML = `
+                    <div class="bar" style="height: ${percent}%; background-color: ${color};" data-value="${val}">
+                        ${valHtml}
+                    </div>
+                    <div class="bar-label">
+                        <span data-en="${cat}" data-ar="${catAr}">${cat}</span>
+                    </div>
+                `;
+                container.appendChild(group);
+            });
+        }
+
+        function renderKPIs(data) {
+            // KPI Logic based on Screenshot
+            // Expired Training Health Cards (Maybe Sum of Expired for both?)
+            // Screenshot says: "Expired Traninig Health Cards" -> 14. 
+            // In my data, Training Expired = 14. So it means "Expired Training".
+            
+            document.getElementById('kpi-exp-train').textContent = data.training.counts['Expired'];
+            document.getElementById('kpi-exp-health').textContent = data.health_cards.counts['Expired'];
+            document.getElementById('kpi-valid-train').textContent = data.training.counts['Valid'];
+            document.getElementById('kpi-valid-health').textContent = data.health_cards.counts['Valid'];
+        }
+    </script>
+</body>
+</html>

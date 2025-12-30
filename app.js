@@ -1,0 +1,1187 @@
+// Fallback Data Constants (Embedded for local execution/offline support)
+const FALLBACK_DATA = {
+    "kpis": {
+        "openViolations": 15,
+        "closedViolations": 128,
+        "totalFines": "335,150",
+        "healthCards": "74.0%"
+    }
+};
+
+const FALLBACK_VIOLATIONS = {
+    "summary": {
+        "total_violations": 143,
+        "total_amount": 335150.48,
+        "open_violations": 15,
+        "closed_violations": 128
+    },
+    "regions": [
+        {"name": "Western", "count": 73, "amount": 170750.00},
+        {"name": "Central", "count": 39, "amount": 124300.48},
+        {"name": "Eastern", "count": 16, "amount": 40100.00}
+    ],
+    "top_branches_frequency": [
+        {"branch": "30744-BK Benzoul", "count": 6},
+        {"branch": "15856-BK- Abraj", "count": 5},
+        {"branch": "18721-BK Noor Mall", "count": 4},
+        {"branch": "26614-BK Batha Qurais", "count": 4},
+        {"branch": "11734-TXC-The Village", "count": 3}
+    ],
+    "top_branches_risk": [
+        {"branch": "BK Al ulla", "amount": 30000.0},
+        {"branch": "BK ulla", "amount": 30000.0},
+        {"branch": "26614-BK Batha Qurais", "amount": 13000.0},
+        {"branch": "11926-BK Holly Mosque-I", "amount": 12000.0}
+    ],
+    "common_types": [
+        {
+            "type": "عدم وجود المحل على الطبيعة",
+            "count": 18,
+            "icon": "🏢",
+            "branches": [{"name": "26614-BK Batha Qurais", "count": 5}, {"name": "15313-BK Serafy Mall", "count": 4}]
+        },
+        {
+            "type": "عدم التقيد بدرجات الحرارة المناسبة لحفظ المواد الغذائية",
+            "count": 15,
+            "icon": "🌡️",
+            "branches": [{"name": "15856-BK- Abraj", "count": 8}, {"name": "BK ulla", "count": 4}]
+        },
+        {
+            "type": "تلوث الغذاء بالميكروبات أو السموم الممرضة في المنشأة",
+            "count": 12,
+            "icon": "🦠",
+            "branches": [{"name": "BK Al ulla", "count": 2}, {"name": "15313-BK Serafy Mall", "count": 2}]
+        },
+        {
+            "type": "عدم تجديد كرت صحي",
+            "count": 10,
+            "icon": "🪪",
+            "branches": [{"name": "11926-BK Holly Mosque-I", "count": 4}]
+        },
+        {
+            "type": "عدم ارتداء الزي الموحد المخصص للعمل",
+            "count": 9,
+            "icon": "👕",
+            "branches": [{"name": "30744-BK Benzoul", "count": 3}]
+        },
+        {
+            "type": "تدني مستوى النظافة العامة",
+            "count": 8,
+            "icon": "🧹",
+            "branches": [{"name": "30505-BK Jabal Omar", "count": 3}]
+        },
+        {
+            "type": "وجود حشرات أو قوارض",
+            "count": 7,
+            "icon": "🐀",
+            "branches": [{"name": "11926-BK Holly Mosque-I", "count": 2}]
+        },
+        {
+            "type": "سوء تداول الغذاء",
+            "count": 6,
+            "icon": "🍔",
+            "branches": [{"name": "BK Al ulla", "count": 3}]
+        }
+    ]
+};
+
+const FALLBACK_BOARD = {
+  "header_kpis": {
+    "roi": { "value": "37.8%", "trend": "up", "color": "#4caf50" },
+    "effectiveness": { "value": "93.0%", "trend": "flat", "color": "#FFC107" },
+    "risks": { "value": "12.0", "trend": "down", "color": "#f44336" }
+  },
+  "financials": {
+    "revenue": [
+      { "sector": "Retail", "actual": "209.8m", "target": "204.9m", "var": "2.4%", "trend": "up" },
+      { "sector": "Corporate", "actual": "3,323m", "target": "2,266m", "var": "2.5%", "trend": "up" },
+      { "sector": "Online", "actual": "189.5m", "target": "186.6m", "var": "(1.6%)", "trend": "down" }
+    ],
+    "expenses": [
+      { "type": { "en": "Operational", "ar": "تشغيلي" }, "actual": "2,156m", "budget": "2,058m", "var": "(4.8%)", "trend": "down" },
+      { "type": { "en": "Marketing", "ar": "تسويق" }, "actual": "410.5m", "budget": "393.2m", "var": "4.4%", "trend": "up" },
+      { "type": { "en": "Admin", "ar": "إداري" }, "actual": "264.3m", "budget": "255.9m", "var": "3.3%", "trend": "up" }
+    ]
+  },
+  "projects": [
+    { "name": "Project A", "roi": "14.5%", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
+    { "name": "Project B", "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
+    { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
+  ]
+};
+
+const FALLBACK_SERVICES = {
+  "kpis": {
+    "activeRequests": 142,
+    "completedToday": 28,
+    "avgResponseTime": "2h 15m",
+    "employeeSatisfaction": "98%"
+  },
+  "requests": [
+    {
+      "id": "#REQ-8821",
+      "type": { "en": "Maintenance", "ar": "صيانة" },
+      "requester": "Burger King - Riyadh 01",
+      "status": "pending",
+      "date": "2025-01-16",
+      "priority": { "en": "High", "ar": "عالية" }
+    },
+    {
+      "id": "#REQ-8820",
+      "type": { "en": "IT Support", "ar": "دعم فني" },
+      "requester": "Texas - Jeddah 05",
+      "status": "closed",
+      "date": "2025-01-15",
+      "priority": { "en": "Medium", "ar": "متوسطة" }
+    },
+    {
+      "id": "#REQ-8819",
+      "type": { "en": "Supply Chain", "ar": "سلسلة الإمداد" },
+      "requester": "BWW - Dammam 02",
+      "status": "closed",
+      "date": "2025-01-15",
+      "priority": { "en": "Low", "ar": "منخفضة" }
+    },
+    {
+      "id": "#REQ-8818",
+      "type": { "en": "Cleaning", "ar": "نظافة" },
+      "requester": "Burger King - Riyadh 03",
+      "status": "in_progress",
+      "date": "2025-01-14",
+      "priority": { "en": "Medium", "ar": "متوسطة" }
+    },
+    {
+      "id": "#REQ-8817",
+      "type": { "en": "HR Request", "ar": "طلب موارد بشرية" },
+      "requester": "Head Office",
+      "status": "completed",
+      "date": "2025-01-14",
+      "priority": { "en": "High", "ar": "عالية" }
+    }
+  ]
+};
+
+// Language Switching Logic
+function setLang(lang) {
+    // Update Body Class
+    document.body.className = lang;
+    
+    // Update Text Content
+    const elements = document.querySelectorAll('[data-en], [data-ar]');
+    
+    elements.forEach(el => {
+        if (lang === 'en') {
+            if (el.dataset.en) el.textContent = el.dataset.en;
+        } else {
+            if (el.dataset.ar) el.textContent = el.dataset.ar;
+        }
+    });
+
+    // Save preference
+    localStorage.setItem('preferred-lang', lang);
+    
+    // Update direction
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+}
+
+// Translation Dictionary for Dynamic Content
+const dictionary = {
+    "عدم وجود المحل على الطبيعة": "Shop not physically found",
+    "عدم التقيد بدرجات الحرارة المناسبة لحفظ المواد الغذائية": "Non-compliance with food storage temperatures",
+    "تلوث الغذاء بالميكروبات أو السموم الممرضة في المنشأة": "Food contamination with microbes/toxins",
+    "عدم تجديد كرت صحي": "Failure to renew health card",
+    "عدم ارتداء الزي الموحد المخصص للعمل": "Failure to wear work uniform",
+    "تدني مستوى النظافة العامة": "Low level of general hygiene",
+    "وجود حشرات أو قوارض": "Presence of insects or rodents",
+    "سوء تداول الغذاء": "Poor food handling",
+    "مخالفة شروط التعبئة والتغليف": "Violation of packaging conditions",
+    "استخدام مواد أولية منتهية الصلاحية": "Use of expired raw materials"
+};
+
+function getTranslation(text, lang) {
+    if (!text) return "";
+    if (dictionary[text]) return dictionary[text];
+    return text; // Return original if no translation found
+}
+
+// Slideshow Logic
+let slideIndex = 0;
+let slideInterval;
+let slides = [];
+let dotsContainer = null;
+const slideIntervalTime = 5000; // 5 seconds
+
+function initSlideshow() {
+    slides = document.querySelectorAll('.slide');
+    dotsContainer = document.getElementById('dotsContainer');
+
+    if (slides.length === 0) return;
+
+    // Create dots
+    if (dotsContainer) {
+        dotsContainer.innerHTML = '';
+        slides.forEach((_, index) => {
+            const dot = document.createElement('span');
+            dot.classList.add('dot');
+            dot.onclick = () => { currentSlide(index); startTimer(); };
+            dotsContainer.appendChild(dot);
+        });
+    }
+
+    // Show initial slide
+    showSlide(slideIndex);
+    
+    // Start auto-play
+    startTimer();
+
+    const heroSection = document.querySelector('.hero');
+    const heroOverlay = document.querySelector('.hero-overlay');
+    if (heroSection && heroOverlay) {
+        heroSection.addEventListener('mousemove', (e) => {
+            const r = heroSection.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            heroOverlay.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
+        });
+        heroSection.addEventListener('mouseleave', () => {
+            heroOverlay.style.transform = 'translate(0,0)';
+        });
+    }
+
+    // Attach Event Listeners to Buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    if (prevBtn) {
+        prevBtn.onclick = () => { moveSlide(-1); startTimer(); };
+    }
+    if (nextBtn) {
+        nextBtn.onclick = () => { moveSlide(1); startTimer(); };
+    }
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+        stopTimer();
+    }
+    const hero = document.querySelector('.hero');
+    let touchStartX = 0;
+    if (hero) {
+        hero.addEventListener('touchstart', (e) => {
+            if (!e.changedTouches || e.changedTouches.length === 0) return;
+            touchStartX = e.changedTouches[0].clientX;
+        }, { passive: true });
+        hero.addEventListener('touchend', (e) => {
+            if (!e.changedTouches || e.changedTouches.length === 0) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(dx) > 30) {
+                moveSlide(dx < 0 ? 1 : -1);
+                startTimer();
+            }
+        }, { passive: true });
+    }
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopTimer();
+        else if (!reduceMotion) startTimer();
+    });
+}
+
+function showSlide(index) {
+    if (slides.length === 0) return;
+
+    // Handle index bounds
+    if (index >= slides.length) slideIndex = 0;
+    else if (index < 0) slideIndex = slides.length - 1;
+    else slideIndex = index;
+
+    // Hide all slides & Remove active from dots
+    slides.forEach(slide => slide.classList.remove('active'));
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach(dot => dot.classList.remove('active'));
+
+    // Show current slide & Activate dot
+    slides[slideIndex].classList.add('active');
+    if (dots.length > 0) {
+        dots[slideIndex].classList.add('active');
+    }
+}
+
+function moveSlide(n) {
+    showSlide(slideIndex + n);
+}
+
+function currentSlide(n) {
+    showSlide(n);
+}
+
+function startTimer() {
+    stopTimer(); // Ensure no duplicate intervals
+    slideInterval = setInterval(() => {
+        moveSlide(1);
+    }, slideIntervalTime);
+}
+
+function stopTimer() {
+    if (slideInterval) {
+        clearInterval(slideInterval);
+    }
+}
+
+// Data Fetching Logic
+async function fetchData() {
+    try {
+        const response = await fetch('data.json?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        updateDashboard(data);
+    } catch (error) {
+        console.warn('Error fetching data, using fallback:', error);
+        updateDashboard(FALLBACK_DATA);
+    }
+}
+
+function updateDashboard(data) {
+    if (!data.kpis) return;
+
+    // Animate KPI values
+    const kpiOpen = parseInt(data.kpis.openViolations) || 0;
+    const kpiClosed = parseInt(data.kpis.closedViolations) || 0;
+    
+    // Parse fines (remove commas)
+    const fines = parseInt((data.kpis.totalFines || "0").replace(/,/g, '')) || 0;
+    
+    // Parse health (remove %)
+    const health = parseFloat((data.kpis.healthCards || "0").replace('%', '')) || 0;
+
+    animateValue('kpi-open', 0, kpiOpen, 2000);
+    animateValue('kpi-closed', 0, kpiClosed, 2000);
+    animateValue('kpi-fines', 0, fines, 2000, true);
+    animateValue('kpi-health', 0, Math.floor(health), 2000, false, '%');
+}
+
+// Violations Data Fetching
+async function fetchViolationsData() {
+    // Only run on violations.html
+    if (!document.getElementById('v-total-count')) return;
+
+    try {
+        const response = await fetch('violations_data.json?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        console.log("Violations Data Loaded:", data);
+        updateViolationsDashboard(data);
+    } catch (error) {
+        console.warn('Error fetching violations data, using fallback:', error);
+        updateViolationsDashboard(FALLBACK_VIOLATIONS);
+    }
+}
+
+function updateViolationsDashboard(data) {
+    if (!data || !data.summary) {
+        console.error("Invalid violations data structure");
+        return;
+    }
+
+    // Summary Cards with Animation
+    animateValue('v-total-count', 0, data.summary.total_violations, 2000);
+    animateValue('v-total-amount', 0, data.summary.total_amount, 2000, true);
+    
+    // Top Frequency Branch
+    if (data.top_branches_frequency && data.top_branches_frequency.length > 0) {
+        document.getElementById('v-top-freq-branch').textContent = data.top_branches_frequency[0].branch;
+    }
+    
+    // Top Risk Branch
+    if (data.top_branches_risk && data.top_branches_risk.length > 0) {
+        document.getElementById('v-top-risk-branch').textContent = data.top_branches_risk[0].branch;
+    }
+
+    // Render Charts
+    if (data.top_branches_frequency) {
+        renderBarChart('chart-freq', data.top_branches_frequency, 'count');
+    }
+    if (data.regions) {
+        renderBarChart('chart-region', data.regions, 'count');
+    }
+    if (data.top_branches_risk) {
+        renderBarChart('chart-risk', data.top_branches_risk, 'amount');
+    }
+    
+    // Render Types List
+    const typesContainer = document.getElementById('list-types');
+    if (typesContainer) {
+        typesContainer.innerHTML = '';
+        // Support both keys for backward compatibility
+        const typesList = data.common_types || data.top_violation_types || [];
+        
+        if (Array.isArray(typesList)) {
+            // Find max count for progress bar calculation
+            const maxTypeCount = Math.max(...typesList.map(t => t.count || 0));
+
+            typesList.forEach((item, index) => {
+                const typeNameAr = item.type || "Unspecified Violation";
+                const typeNameEn = dictionary[typeNameAr] || typeNameAr;
+                const typeIcon = item.icon || "⚠️"; // Default icon
+                const percentage = maxTypeCount > 0 ? (item.count / maxTypeCount) * 100 : 0;
+                
+                // Determine current language to show initial text
+                const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+                const displayText = currentLang === 'ar' ? typeNameAr : typeNameEn;
+
+                const div = document.createElement('div');
+                div.className = 'type-item';
+                div.style.opacity = '0';
+                div.style.animation = `fadeUp 0.5s ease forwards ${0.5 + (index * 0.1)}s`;
+                div.style.cursor = 'pointer'; // Make it look clickable
+                
+                // Add click handler for modal
+                div.onclick = () => openViolationModal(item);
+                
+                div.innerHTML = `
+                    <div class="type-header">
+                        <div class="type-icon">${typeIcon}</div>
+                        <span class="type-count-badge">${item.count}</span>
+                    </div>
+                    <div class="type-name" data-ar="${typeNameAr}" data-en="${typeNameEn}">${displayText}</div>
+                    <div class="type-progress-track">
+                        <div class="type-progress-fill" style="width: 0%"></div>
+                    </div>
+                `;
+                typesContainer.appendChild(div);
+
+                // Animate progress bar width after render
+                setTimeout(() => {
+                    const fill = div.querySelector('.type-progress-fill');
+                    if (fill) fill.style.width = `${percentage}%`;
+                }, 100 + (index * 50));
+            });
+        }
+    }
+
+
+}
+
+// Modal Functions
+// Violation Metadata for Rich Details
+const violationMetadata = {
+    "عدم وجود المحل على الطبيعة": {
+        severity: "high",
+        descAr: "المحل غير موجود في الموقع المسجل في الرخصة، مما يعد مخالفة جسيمة لأنظمة البلدية.",
+        descEn: "The shop does not exist at the registered location, which is a major violation.",
+        actionsAr: ["تحديث إحداثيات الموقع فوراً", "مراجعة البلدية لتصحيح الرخصة", "تقديم إثبات وجود المحل"],
+        actionsEn: ["Update location coordinates immediately", "Visit municipality to correct license", "Provide proof of shop existence"]
+    },
+    "عدم التقيد بدرجات الحرارة المناسبة لحفظ المواد الغذائية": {
+        severity: "high",
+        descAr: "رصد درجات حرارة غير آمنة في وحدات التبريد أو التجميد، مما يعرض الغذاء للتلف.",
+        descEn: "Unsafe temperatures detected in cooling/freezing units, risking food spoilage.",
+        actionsAr: ["صيانة ثلاجات العرض والتخزين", "تسجيل درجات الحرارة كل ساعتين", "التخلص من المواد التالفة فوراً"],
+        actionsEn: ["Maintain display/storage fridges", "Log temperatures every 2 hours", "Discard spoiled items immediately"]
+    },
+    "تلوث الغذاء بالميكروبات أو السموم الممرضة في المنشأة": {
+        severity: "high",
+        descAr: "وجود مؤشرات تلوث ميكروبي أو خلط بين الأغذية النيئة والمطبوخة.",
+        descEn: "Indicators of microbial contamination or cross-contamination found.",
+        actionsAr: ["تعقيم شامل للمطبخ والأدوات", "فصل مناطق التحضير", "فحص العمالة طبياً"],
+        actionsEn: ["Full sanitization of kitchen/tools", "Separate preparation areas", "Medical checkup for staff"]
+    },
+    "عدم تجديد كرت صحي": {
+        severity: "medium",
+        descAr: "انتهاء صلاحية الكروت الصحية للعاملين، مما يمنعهم من ممارسة العمل قانونياً.",
+        descEn: "Health cards for staff have expired, preventing legal work.",
+        actionsAr: ["إيقاف العامل عن العمل فوراً", "تجديد الكرت الصحي عبر منصة بلدي", "دفع الغرامات المترتبة"],
+        actionsEn: ["Suspend worker immediately", "Renew health card via Balady", "Pay accrued fines"]
+    },
+    "عدم ارتداء الزي الموحد المخصص للعمل": {
+        severity: "low",
+        descAr: "عدم التزام العاملين بالزي الرسمي النظيف والموحد للمنشأة.",
+        descEn: "Staff not adhering to clean, uniform work attire.",
+        actionsAr: ["توفير زي نظيف وكامل", "إلزام الموظفين بالارتداء", "تطبيق لائحة الجزاءات الداخلية"],
+        actionsEn: ["Provide clean full uniform", "Enforce wearing it", "Apply internal penalties"]
+    },
+    "تدني مستوى النظافة العامة": {
+        severity: "medium",
+        descAr: "تراكم الأوساخ أو الغبار في الأرضيات أو الأسطح أو المعدات.",
+        descEn: "Accumulation of dirt/dust on floors, surfaces, or equipment.",
+        actionsAr: ["جدول تنظيف يومي صارم", "استخدام مواد تنظيف معتمدة", "تعيين مشرف للنظافة"],
+        actionsEn: ["Strict daily cleaning schedule", "Use approved cleaning agents", "Assign hygiene supervisor"]
+    },
+    "وجود حشرات أو قوارض": {
+        severity: "high",
+        descAr: "رصد آثار حشرات أو قوارض داخل المنشأة، وهو خطر صحي جسيم.",
+        descEn: "Traces of insects/rodents found, posing severe health risk.",
+        actionsAr: ["التعاقد مع شركة مكافحة فوراً", "إغلاق الفتحات والشقوق", "تنظيف مناطق التخزين"],
+        actionsEn: ["Contract pest control immediately", "Seal cracks/openings", "Clean storage areas"]
+    },
+    "سوء تداول الغذاء": {
+        severity: "high",
+        descAr: "طرق حفظ أو تحضير غير صحية (مثل التسييح الخاطئ).",
+        descEn: "Unsanitary storage/prep methods (e.g., wrong thawing).",
+        actionsAr: ["تدريب العمال على سلامة الغذاء", "توفير أدوات حفظ مناسبة", "مراقبة طرق التحضير"],
+        actionsEn: ["Train staff on food safety", "Provide proper storage tools", "Monitor prep methods"]
+    }
+};
+
+function openViolationModal(item) {
+    const modal = document.getElementById('violation-modal');
+    if (!modal) return;
+
+    // Hide original header as we use custom header in body
+    const originalHeader = modal.querySelector('.modal-header');
+    if (originalHeader) originalHeader.style.display = 'none';
+    
+    const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+    const typeNameAr = item.type || "Unspecified Violation";
+    const typeNameEn = dictionary[typeNameAr] || typeNameAr;
+    
+    // Get Metadata
+    const meta = violationMetadata[typeNameAr] || {
+        severity: "medium",
+        descAr: "مخالفة تتطلب التصحيح الفوري لتجنب الغرامات.",
+        descEn: "Violation requires immediate correction to avoid fines.",
+        actionsAr: ["مراجعة المخالفة", "تصحيح الوضع", "توثيق التصحيح"],
+        actionsEn: ["Review violation", "Correct situation", "Document correction"]
+    };
+
+    const severityClass = `severity-${meta.severity}`;
+    const severityLabel = {
+        high: { ar: "عالية الخطورة", en: "High Risk" },
+        medium: { ar: "متوسطة الخطورة", en: "Medium Risk" },
+        low: { ar: "منخفضة الخطورة", en: "Low Risk" }
+    }[meta.severity][currentLang];
+
+    const modalBody = document.getElementById('modal-body');
+    // Clear previous content
+    modalBody.innerHTML = '';
+    
+    // Also clear title/icon elements if they exist outside modal-body (based on original HTML structure)
+    // But here we are rebuilding the whole content inside modal-body.
+    // NOTE: The original HTML has modal-header with title/icon. We should probably hide them or reuse them.
+    // To be safe and fully custom, let's just override modal-body content and ignore the old header elements if possible,
+    // OR update them.
+    
+    // Original HTML structure:
+    // <div class="modal-header"> ... <h2 id="modal-title">...</h2> ... </div>
+    // <div class="modal-body" id="modal-body"> ... </div>
+    
+    // If we want a completely new look, we might need to manipulate the header too.
+    // Let's clear the old header text to avoid duplication if we are building our own header in body.
+    const oldTitle = document.getElementById('modal-title');
+    const oldIcon = document.getElementById('modal-icon');
+    if(oldTitle) oldTitle.textContent = ''; 
+    if(oldIcon) oldIcon.textContent = '';
+
+    modalBody.innerHTML = `
+        <div class="modal-content-wrapper">
+            <!-- Header Section (Inside Body for better control) -->
+            <div class="modal-header-section">
+                <div class="modal-icon-large">${item.icon || "⚠️"}</div>
+                <div class="modal-title-box">
+                    <h2>${currentLang === 'ar' ? typeNameAr : typeNameEn}</h2>
+                    <span class="severity-badge ${severityClass}">${severityLabel}</span>
+                    <div style="margin-top:10px; color:#a0c4ff;">
+                        ${currentLang === 'ar' ? "إجمالي التكرار:" : "Total Count:"} 
+                        <span style="color:#fff; font-weight:bold;">${item.count}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-details-grid">
+                <!-- Description Card -->
+                <div class="detail-card">
+                    <h3>${currentLang === 'ar' ? "وصف المخالفة" : "Description"}</h3>
+                    <p class="detail-text">${currentLang === 'ar' ? meta.descAr : meta.descEn}</p>
+                </div>
+
+                <!-- Actions Card -->
+                <div class="detail-card">
+                    <h3>${currentLang === 'ar' ? "الإجراءات التصحيحية المطلوبة" : "Required Actions"}</h3>
+                    <ul class="action-list">
+                        ${(currentLang === 'ar' ? meta.actionsAr : meta.actionsEn).map(action => `<li>${action}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <!-- Affected Branches (Existing Logic) -->
+                <div class="detail-card">
+                    <h3>${currentLang === 'ar' ? "الفروع المتأثرة" : "Affected Branches"}</h3>
+                    ${renderBranchesList(item.branches, currentLang)}
+                </div>
+
+                 <!-- Recent Reports (Mocked) -->
+                <div class="detail-card">
+                    <h3>${currentLang === 'ar' ? "سجل البلاغات الحديثة" : "Recent Reports Log"}</h3>
+                    ${renderReportsTable(item.branches, currentLang)}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Show Modal
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+    
+    // Close Logic
+    const closeBtn = modal.querySelector('.close-modal');
+    if (closeBtn) closeBtn.onclick = () => {
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+    };
+
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+    };
+}
+
+// Services Dashboard Logic
+async function toggleServicesDashboard() {
+    const modal = document.getElementById('services-modal');
+    if (!modal) return;
+
+    // Close side menu if open
+    const menu = document.getElementById('sideMenu');
+    if (menu && menu.classList.contains('active')) {
+        toggleMenu();
+    }
+
+    if (modal.classList.contains('show')) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+    } else {
+        // Fetch data before showing
+        await fetchServicesData();
+        
+        modal.style.display = 'flex';
+        // Small delay to allow display:flex to apply before adding class for transition
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+}
+
+async function fetchServicesData() {
+    try {
+        const response = await fetch('services_data.json?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        updateServicesDashboard(data);
+    } catch (error) {
+        console.error('Error fetching services data, using fallback:', error);
+        updateServicesDashboard(FALLBACK_SERVICES);
+    }
+}
+
+function updateServicesDashboard(data) {
+    if (!data) return;
+
+    // Update KPIs
+    if (data.kpis) {
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+
+        setVal('s-active-req', data.kpis.activeRequests);
+        setVal('s-completed', data.kpis.completedToday);
+        setVal('s-avg-time', data.kpis.avgResponseTime);
+        setVal('s-satisfaction', data.kpis.employeeSatisfaction);
+    }
+
+    // Update Table
+    const tbody = document.querySelector('#servicesTable tbody');
+    if (tbody && data.requests) {
+        tbody.innerHTML = '';
+        const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+        
+        data.requests.forEach(req => {
+            const tr = document.createElement('tr');
+            
+            // Status Styling
+            let statusClass = 'status-open';
+            let statusText = req.status;
+            if (req.status === 'completed' || req.status === 'closed') statusClass = 'status-closed';
+            
+            // Localize Type & Priority
+            const type = req.type[currentLang] || req.type.en;
+            const priority = req.priority[currentLang] || req.priority.en;
+
+            tr.innerHTML = `
+                <td>${req.id}</td>
+                <td>${type}</td>
+                <td>${req.requester}</td>
+                <td><span class="${statusClass}">${statusText}</span></td>
+                <td>${req.date}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+}
+
+// Print & Export Logic
+function printServices() {
+    window.print();
+}
+
+function exportServicesExcel() {
+    const table = document.getElementById('servicesTable');
+    if (!table) return;
+    
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // UTF-8 BOM
+    const rows = table.querySelectorAll("tr");
+    
+    rows.forEach(row => {
+        const cols = row.querySelectorAll("th, td");
+        let rowData = [];
+        cols.forEach(col => rowData.push('"' + col.innerText + '"'));
+        csvContent += rowData.join(",") + "\r\n";
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "services_dashboard.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Board Dashboard Logic
+async function fetchBoardData() {
+    if (!document.querySelector('.complex-dashboard')) return;
+
+    try {
+        const response = await fetch('board_data.json?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        updateBoardDashboard(data);
+    } catch (error) {
+        console.error('Error fetching board data, using fallback:', error);
+        updateBoardDashboard(FALLBACK_BOARD);
+    }
+}
+
+function updateBoardDashboard(data) {
+    if (!data) return;
+
+    // 1. Header KPIs
+    if (data.header_kpis) {
+        const updateHeaderKpi = (key, dataObj) => {
+            // This requires finding elements by text content or adding IDs.
+            // I'll add IDs to board.html for easier access.
+            const el = document.getElementById(`b-kpi-${key}`);
+            if (el) {
+                el.innerHTML = `${dataObj.value} <span style="font-size:0.8em">${dataObj.trend === 'up' ? '▲' : dataObj.trend === 'down' ? '▼' : '▬'}</span>`;
+                el.style.color = dataObj.color;
+            }
+        };
+        updateHeaderKpi('roi', data.header_kpis.roi);
+        updateHeaderKpi('eff', data.header_kpis.effectiveness);
+        updateHeaderKpi('risk', data.header_kpis.risks);
+    }
+
+    // 2. Financial Tables (Revenue)
+    if (data.financials && data.financials.revenue) {
+        const tbody = document.querySelector('#b-table-revenue tbody');
+        if (tbody) {
+            tbody.innerHTML = '';
+            data.financials.revenue.forEach(item => {
+                const tr = document.createElement('tr');
+                const trendIcon = item.trend === 'up' ? '▲' : '▼';
+                const valClass = item.trend === 'up' ? 'val-pos' : 'val-neg';
+                tr.innerHTML = `<td>${item.sector}</td><td>${item.actual}</td><td>${item.target}</td><td class="${valClass}">${item.var} ${trendIcon}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+    
+    // 3. Financial Tables (Expenses)
+    if (data.financials && data.financials.expenses) {
+        const tbody = document.querySelector('#b-table-expenses tbody');
+        if (tbody) {
+            tbody.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+            data.financials.expenses.forEach(item => {
+                const tr = document.createElement('tr');
+                const type = item.type[currentLang] || item.type.en;
+                const trendIcon = item.trend === 'up' ? '▲' : '▼';
+                const valClass = item.var.includes('(') ? 'val-neg' : 'val-pos'; 
+                tr.innerHTML = `<td>${type}</td><td>${item.actual}</td><td>${item.budget}</td><td class="${valClass}">${item.var} ${trendIcon}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+    
+    // 4. Projects (Flower Charts)
+    if (data.projects) {
+        const container = document.getElementById('b-flower-grid');
+        if (container) {
+            container.innerHTML = '';
+            data.projects.forEach(proj => {
+                let petalsHtml = '';
+                if (proj.petals) {
+                    proj.petals.forEach((scale, i) => {
+                        const deg = i * 72;
+                        petalsHtml += `<div class="petal" style="transform: rotate(${deg}deg) scale(${scale});"></div>`;
+                    });
+                }
+                
+                const div = document.createElement('div');
+                div.className = 'flower-chart';
+                div.innerHTML = `
+                    <div class="flower-shape">
+                        ${petalsHtml}
+                    </div>
+                    <span>${proj.name}</span>
+                    <small style="color:${proj.color || '#fff'};">${proj.roi}</small>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
+}
+
+// Global Init
+document.addEventListener('DOMContentLoaded', () => {
+    initSlideshow();
+    fetchData(); // Home KPIs
+    fetchViolationsData(); // Violations Page
+    fetchBoardData(); // Board Page
+    
+    // Services Modal Init (Hidden by default)
+});
+
+// ================= NEW FEATURES ================= //
+
+// Toggle Sliding Side Menu
+function toggleMenu() {
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('sideMenuOverlay');
+    if (!menu || !overlay) return;
+
+    if (menu.classList.contains('active')) {
+        menu.classList.remove('active');
+        overlay.classList.remove('active');
+    } else {
+        menu.classList.add('active');
+        overlay.classList.add('active');
+    }
+}
+
+
+
+
+function renderBranchesList(branches, lang) {
+    if (!branches || branches.length === 0) {
+        return `<p style="color:#888;">${lang === 'ar' ? "لا توجد بيانات" : "No data available"}</p>`;
+    }
+    let html = '<ul class="modal-branch-list">';
+    branches.forEach(b => {
+        html += `
+            <li class="modal-branch-item">
+                <span class="modal-branch-name">${b.name || b.branch}</span>
+                <span class="modal-branch-count">${b.count}</span>
+            </li>
+        `;
+    });
+    html += '</ul>';
+    return html;
+}
+
+function renderReportsTable(branches, lang) {
+    if (!branches || branches.length === 0) return '';
+    
+    let html = `
+        <table class="reports-table">
+            <thead>
+                <tr>
+                    <th>${lang === 'ar' ? "التاريخ" : "Date"}</th>
+                    <th>${lang === 'ar' ? "الفرع" : "Branch"}</th>
+                    <th>${lang === 'ar' ? "الحالة" : "Status"}</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // Take top 3 branches and generate fake recent dates
+    branches.slice(0, 3).forEach((b, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (i * 2 + 1));
+        const dateStr = date.toISOString().split('T')[0];
+        const status = i === 0 ? "open" : "closed";
+        const statusText = status === "open" 
+            ? (lang === 'ar' ? "مفتوح" : "Open") 
+            : (lang === 'ar' ? "مغلق" : "Closed");
+        
+        html += `
+            <tr>
+                <td>${dateStr}</td>
+                <td>${b.name || b.branch}</td>
+                <td class="status-${status}">${statusText}</td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    return html;
+}
+
+function renderBarChart(containerId, data, valueKey) {
+    const container = document.getElementById(containerId);
+    if (!container || !data || !Array.isArray(data)) return;
+    
+    container.innerHTML = '';
+    
+    if (data.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#888;">No data available</div>';
+        return;
+    }
+
+    const maxValue = Math.max(...data.map(d => d[valueKey] || 0));
+
+    data.forEach((item, index) => {
+        const value = item[valueKey] || 0;
+        const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+        const label = item.branch || item.name || "Unknown";
+        
+        const row = document.createElement('div');
+        row.className = 'bar-item';
+        // Staggered animation for rows
+        row.style.opacity = '0';
+        row.style.animation = `fadeUp 0.5s ease forwards ${index * 0.1}s`;
+        
+        row.innerHTML = `
+            <div class="bar-label" title="${label}">${label}</div>
+            <div class="bar-track">
+                <div class="bar-fill" style="width: 0%"></div>
+            </div>
+            <div class="bar-value">${value.toLocaleString()}</div>
+        `;
+        
+        container.appendChild(row);
+        
+        // Trigger width animation after a slight delay
+        setTimeout(() => {
+            const fill = row.querySelector('.bar-fill');
+            if (fill) fill.style.width = `${percentage}%`;
+        }, 100 + (index * 50));
+    });
+}
+
+function animateValue(id, start, end, duration, isCurrency = false, suffix = '') {
+    const obj = document.getElementById(id);
+    if (!obj) return;
+    
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        
+        obj.textContent = (isCurrency ? value.toLocaleString() : value) + suffix;
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Replace the old startSlideshow call with initSlideshow
+document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem('preferred-lang') || 'en';
+    setLang(savedLang);
+    const header = document.querySelector('.brand-bar');
+    const mainHeader = document.querySelector('.main-header');
+    const spacer = document.querySelector('.header-spacer');
+    const setSpacer = () => {
+        if (header && spacer) {
+            // Reduce spacer height slightly to avoid large gaps
+            // We use offsetHeight but subtract a bit to tighten layout
+            const totalHeight = (header.offsetHeight || 0) + (mainHeader ? mainHeader.offsetHeight : 0);
+            spacer.style.height = `${totalHeight - 2}px`; // Subtract 2px for border overlap
+        }
+    };
+    setSpacer();
+    window.addEventListener('resize', setSpacer);
+    const heroOverlay = document.querySelector('.hero-overlay');
+    const isAdmin = localStorage.getItem('is_admin') === 'true';
+    if (heroOverlay && isAdmin) {
+        const s = document.createElement('div');
+        s.className = 'slide';
+        const u = localStorage.getItem('admin_user') || 'Admin';
+        const odLink = "https://olayanfinancingcompany-my.sharepoint.com/:x:/g/personal/b1_ahmed_olayanfood_com/IQATTkGdfgOoRJuk2xYJnVIEAeoAQnH8uAZX__W3thNLLaM?email=beno0o96%40gmail.com&e=UZAecn";
+        
+        window.toggleLiteMode = function() {
+            const curr = document.body.classList.contains('lite');
+            if (curr) {
+                document.body.classList.remove('lite');
+                localStorage.setItem('prefers-lite','false');
+            } else {
+                document.body.classList.add('lite');
+                localStorage.setItem('prefers-lite','true');
+            }
+        };
+
+        s.innerHTML = `
+            <div class="hero-badge" style="background:#c62828;">أدمن</div>
+            <h2>لوحة التحكم</h2>
+            <p class="hero-sub-text">مرحباً ${u}، لديك الصلاحيات الكاملة</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:400px; margin:20px auto;">
+                <button onclick="window.open('${odLink}', '_blank')" class="nav-btn" style="background:#0078d4; color:white; font-size:0.9rem;">📂 ملف ون درايف</button>
+                <button onclick="location.href='admin.html'" class="nav-btn" style="background:#16213e; border:1px solid #fff; color:white; font-size:0.9rem;">⚙️ إدارة الصلاحيات</button>
+                <button onclick="location.href='validator.html'" class="nav-btn" style="background:#00d2be; color:black; font-size:0.9rem;">🧪 فحص JSON</button>
+                <button onclick="toggleLiteMode()" class="nav-btn" style="background:#f5f5f5; color:#333; font-size:0.9rem;">☀️/🌑 وضع العرض</button>
+            </div>
+        `;
+        heroOverlay.appendChild(s);
+    }
+    initSlideshow();
+    window.USE_JSON = true;
+    if (window.USE_JSON) {
+        fetchData();
+        fetchViolationsData();
+        fetchBoardData();
+    }
+    // initAssistant(); // Removed as per request
+    initAICustomerService();
+});
+
+function initAICustomerService() {
+    // Check if widget already exists
+    if (document.getElementById('ai-widget-btn')) return;
+
+    // Create Floating Button
+    const btn = document.createElement('button');
+    btn.id = 'ai-widget-btn';
+    btn.innerHTML = '🤖 خدمة العملاء';
+    Object.assign(btn.style, {
+        position: 'fixed', bottom: '20px', right: '20px',
+        zIndex: '1001', padding: '12px 20px', borderRadius: '30px',
+        border: 'none', background: '#2d6cdf', color: '#fff',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.3)', cursor: 'pointer',
+        fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
+    });
+    document.body.appendChild(btn);
+
+    // Create Chat Window
+    const chatWindow = document.createElement('div');
+    chatWindow.id = 'ai-chat-window';
+    Object.assign(chatWindow.style, {
+        position: 'fixed', bottom: '80px', right: '20px',
+        width: '350px', height: '500px', maxHeight: '80vh',
+        background: '#16213e', borderRadius: '15px',
+        boxShadow: '0 5px 25px rgba(0,0,0,0.5)', zIndex: '1001',
+        display: 'none', flexDirection: 'column', overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.1)'
+    });
+
+    chatWindow.innerHTML = `
+        <div style="background:#0b0e2b; padding:15px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:bold; color:#fff;">خدمة العملاء الذكية</span>
+            <button id="close-chat" style="background:none; border:none; color:#a0c4ff; cursor:pointer; font-size:1.2rem;">&times;</button>
+        </div>
+        <div id="chat-messages" style="flex:1; padding:15px; overflow-y:auto; display:flex; flexDirection:column; gap:10px;">
+            <div style="background:#2d6cdf; color:#fff; padding:8px 12px; borderRadius:10px 10px 0 10px; align-self:flex-end; max-width:80%;">مرحباً بك في شركة العليان الغذائية. كيف يمكنني مساعدتك اليوم؟</div>
+        </div>
+        <div style="padding:10px; background:#0b0e2b; display:grid; gap:5px;">
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="chat-input" placeholder="اكتب استفسارك..." style="flex:1; padding:10px; borderRadius:5px; border:none; background:#1a264e; color:#fff;">
+                <button id="send-btn" style="padding:0 15px; background:#00d2be; border:none; borderRadius:5px; cursor:pointer;">➤</button>
+            </div>
+            <button id="complaint-btn" style="width:100%; padding:8px; background:#c62828; color:#fff; border:none; borderRadius:5px; cursor:pointer; margin-top:5px;">رفع شكوى للإدارة</button>
+        </div>
+        
+        <!-- Complaint Form Overlay -->
+        <div id="complaint-form" style="position:absolute; top:0; left:0; width:100%; height:100%; background:#16213e; padding:20px; display:none; flex-direction:column; gap:10px; z-index:10;">
+            <h3 style="color:#fff; margin-bottom:10px;">رفع شكوى</h3>
+            <input id="comp-name" placeholder="الاسم" style="padding:10px; background:#0b0e2b; border:1px solid #333; color:#fff; borderRadius:5px;">
+            <input id="comp-contact" placeholder="رقم التواصل / البريد" style="padding:10px; background:#0b0e2b; border:1px solid #333; color:#fff; borderRadius:5px;">
+            <textarea id="comp-text" placeholder="تفاصيل الشكوى..." style="flex:1; padding:10px; background:#0b0e2b; border:1px solid #333; color:#fff; borderRadius:5px; resize:none;"></textarea>
+            <div style="display:flex; gap:10px;">
+                <button id="submit-comp" style="flex:1; padding:10px; background:#c62828; color:#fff; border:none; borderRadius:5px; cursor:pointer;">إرسال</button>
+                <button id="cancel-comp" style="flex:1; padding:10px; background:#333; color:#fff; border:none; borderRadius:5px; cursor:pointer;">إلغاء</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(chatWindow);
+
+    // Event Listeners
+    btn.onclick = () => chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+    document.getElementById('close-chat').onclick = () => chatWindow.style.display = 'none';
+    
+    const sendBtn = document.getElementById('send-btn');
+    const input = document.getElementById('chat-input');
+    const msgs = document.getElementById('chat-messages');
+
+    function addMsg(text, isUser = false) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        div.style.padding = '8px 12px';
+        div.style.maxWidth = '80%';
+        div.style.borderRadius = isUser ? '10px 10px 0 10px' : '10px 10px 10px 0';
+        div.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+        div.style.background = isUser ? '#2d6cdf' : '#333';
+        div.style.color = '#fff';
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function handleSend() {
+        const txt = input.value.trim();
+        if (!txt) return;
+        addMsg(txt, true);
+        input.value = '';
+        
+        // Simple AI Logic
+        setTimeout(() => {
+            let response = "شكراً لاستفسارك. سيتم الرد عليك قريباً.";
+            if (txt.includes('مخالفة') || txt.includes('غرامة')) response = "يمكنك الاطلاع على تفاصيل المخالفات في صفحة 'المخالفات'. إذا كنت تعتقد أن هناك خطأ، يمكنك رفع شكوى.";
+            else if (txt.includes('دوام') || txt.includes('وقت')) response = "ساعات العمل الرسمية من 8 صباحاً حتى 6 مساءً.";
+            else if (txt.includes('شكوى')) response = "لرفع شكوى، يرجى الضغط على زر 'رفع شكوى للإدارة' أسفل المحادثة.";
+            
+            addMsg(response);
+        }, 1000);
+    }
+
+    sendBtn.onclick = handleSend;
+    input.onkeypress = (e) => { if(e.key === 'Enter') handleSend(); };
+
+    // Complaint Logic
+    const compBtn = document.getElementById('complaint-btn');
+    const compForm = document.getElementById('complaint-form');
+    const submitComp = document.getElementById('submit-comp');
+    const cancelComp = document.getElementById('cancel-comp');
+
+    compBtn.onclick = () => compForm.style.display = 'flex';
+    cancelComp.onclick = () => compForm.style.display = 'none';
+
+    submitComp.onclick = () => {
+        const name = document.getElementById('comp-name').value;
+        const contact = document.getElementById('comp-contact').value;
+        const text = document.getElementById('comp-text').value;
+        
+        if (!name || !text) {
+            alert('يرجى تعبئة الاسم وتفاصيل الشكوى');
+            return;
+        }
+
+        const complaint = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            name,
+            contact,
+            text,
+            status: 'new'
+        };
+
+        const existing = JSON.parse(localStorage.getItem('complaints') || '[]');
+        existing.push(complaint);
+        localStorage.setItem('complaints', JSON.stringify(existing));
+
+        alert('تم إرسال الشكوى بنجاح للإدارة');
+        compForm.style.display = 'none';
+        document.getElementById('comp-name').value = '';
+        document.getElementById('comp-contact').value = '';
+        document.getElementById('comp-text').value = '';
+        
+        addMsg("تم استلام شكواك وسيتم مراجعتها من قبل الإدارة.");
+    };
+}

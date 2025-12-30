@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Validator – Olayan</title>
+  <link rel="stylesheet" href="style-base.css">
+  <link rel="stylesheet" href="style-home.css">
+  <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
+  <meta name="theme-color" content="#0b0e2b">
+</head>
+<body class="en">
+  <header class="main-header">
+    <div class="header-left" style="display:flex; align-items:center;">
+      <img src="olayan-logo.png" class="logo" alt="Olayan Logo">
+      <div class="company-text">
+        <h1>Olayan JSON Validator</h1>
+        <p>Validate training_data.json, violations_data.json, data.json</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <nav class="main-nav">
+        <button class="nav-btn" onclick="location.href='index.html'">Home</button>
+      </nav>
+    </div>
+  </header>
+  <div class="header-spacer"></div>
+  <section class="links-section">
+    <h2>Validation Results</h2>
+    <div class="links-grid" id="results-grid"></div>
+  </section>
+  <script src="validator.js" defer></script>
+</body>
+</html>

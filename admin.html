@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة الأدمن</title>
+  <link rel="stylesheet" href="style-base.css">
+  <link rel="stylesheet" href="style-home.css">
+  <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
+  <meta name="theme-color" content="#0b0e2b">
+  <script src="admin.js" defer></script>
+  <script src="app.js?v=4" defer></script>
+</head>
+<body class="ar">
+  <div class="brand-bar">
+    <img src="olayan-logo.png" alt="Olayan">
+    <span class="brand-name">Olayan Admin</span>
+    <span class="brand-info" id="admin-status"></span>
+  </div>
+
+  <!-- Hamburger Button -->
+  <button class="hamburger-btn" onclick="toggleMenu()">
+      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+  </button>
+
+  <!-- Sliding Side Menu -->
+  <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleMenu()"></div>
+  <aside class="side-menu" id="sideMenu">
+      <div class="side-menu-header">
+          <img src="olayan-logo.png" class="side-menu-logo" alt="Logo">
+          <button class="close-menu-btn" onclick="toggleMenu()">&times;</button>
+      </div>
+      <nav class="side-menu-nav">
+          <a href="index.html" class="side-link">
+              <i>🏠</i> <span data-en="Home" data-ar="الرئيسية">Home</span>
+          </a>
+          <a href="violations.html" class="side-link">
+              <i>⚠️</i> <span data-en="Violations" data-ar="المخالفات">Violations</span>
+          </a>
+          <a href="training.html" class="side-link">
+              <i>🎓</i> <span data-en="Training" data-ar="التدريب">Training</span>
+          </a>
+          <a href="branches.html" class="side-link">
+              <i>🏬</i> <span data-en="Branches" data-ar="الفروع">Branches</span>
+          </a>
+          <a href="board.html" class="side-link">
+              <i>📊</i> <span data-en="Board Report" data-ar="تقرير الإدارة">Board Report</span>
+          </a>
+          <hr style="border-color: rgba(255,255,255,0.1); width: 100%;">
+          <a href="#" onclick="toggleServicesDashboard(); return false;" class="side-link">
+              <i>🛠</i> <span data-en="Services Dashboard" data-ar="لوحة الخدمات">Services Dashboard</span>
+          </a>
+          <a href="admin.html" class="side-link active">
+              <i>⚙️</i> <span data-en="Admin Panel" data-ar="لوحة التحكم">Admin Panel</span>
+          </a>
+      </nav>
+      <div style="margin-top: auto; padding-top: 20px;">
+        <div class="lang-switch" style="display: flex; gap: 10px; justify-content: center;"> 
+            <button class="lang-btn" onclick="setLang('ar')" style="flex:1;">العربية</button> 
+            <button class="lang-btn" onclick="setLang('en')" style="flex:1;">English</button> 
+        </div>
+    </div>
+  </aside>
+
+  <!-- Services Dashboard Modal (Full Screen) -->
+  <div id="services-modal" class="services-modal">
+      <div class="services-modal-content">
+          <div class="services-header">
+              <h2 data-en="Services Dashboard" data-ar="لوحة الخدمات">Services Dashboard</h2>
+              <button class="close-services-btn" onclick="toggleServicesDashboard()">&times;</button>
+          </div>
+          
+          <div class="toolbar">
+              <button class="toolbar-btn btn-print" onclick="printServices()">
+                  <span data-en="Print" data-ar="طباعة">Print</span> 🖨
+              </button>
+              <button class="toolbar-btn btn-rate" onclick="window.open('https://forms.gle/1z5jwhtF7LLqWvbQ9', '_blank')" style="background: rgba(155, 89, 182, 0.2); border: 1px solid rgba(155, 89, 182, 0.3); color: #9b59b6;"><span data-en="Rate Us" data-ar="قيمنا">Rate Us</span> </button><button class="toolbar-btn btn-export" onclick="exportServicesExcel()">
+                  <span data-en="Export Excel" data-ar="تصدير Excel">Export Excel</span> 📊
+              </button>
+          </div>
+
+          <div class="kpi-grid">
+               <div class="kpi-card">
+                  <span class="kpi-title" data-en="Active Requests" data-ar="الطلبات النشطة">Active Requests</span>
+                  <h3>142</h3>
+               </div>
+               <div class="kpi-card">
+                  <span class="kpi-title" data-en="Completed Today" data-ar="أنجزت اليوم">Completed Today</span>
+                  <h3>28</h3>
+               </div>
+               <div class="kpi-card">
+                  <span class="kpi-title" data-en="Avg. Response Time" data-ar="متوسط زمن الاستجابة">Avg. Response Time</span>
+                  <h3>2h 15m</h3>
+               </div>
+          </div>
+
+          <div class="services-table-wrapper">
+              <table class="services-table" id="servicesTable">
+                  <thead>
+                      <tr>
+                          <th data-en="ID" data-ar="رقم">ID</th>
+                          <th data-en="Service Type" data-ar="نوع الخدمة">Service Type</th>
+                          <th data-en="Requester" data-ar="مقدم الطلب">Requester</th>
+                          <th data-en="Status" data-ar="الحالة">Status</th>
+                          <th data-en="Date" data-ar="التاريخ">Date</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr>
+                          <td>#REQ-8821</td>
+                          <td data-en="Maintenance" data-ar="صيانة">Maintenance</td>
+                          <td>Burger King - Riyadh 01</td>
+                          <td><span class="status-open">Pending</span></td>
+                          <td>2025-01-16</td>
+                      </tr>
+                      <tr>
+                          <td>#REQ-8820</td>
+                          <td data-en="IT Support" data-ar="دعم فني">Texas - Jeddah 05</td>
+                          <td><span class="status-closed">Closed</span></td>
+                          <td>2025-01-15</td>
+                      </tr>
+                       <tr>
+                          <td>#REQ-8819</td>
+                          <td data-en="Supply Chain" data-ar="سلسلة الإمداد">BWW - Dammam 02</td>
+                          <td><span class="status-closed">Closed</span></td>
+                          <td>2025-01-15</td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+
+  <div class="header-spacer"></div>
+  <section class="links-section" style="padding-top:60px;">
+    <h2>دخول الأدمن</h2>
+    <div class="data-card" style="max-width:480px;margin:0 auto;">
+      <div style="display:grid;gap:10px;">
+        <label>اسم المستخدم</label>
+        <input id="username" type="text" class="nav-btn" style="background:#16213e;color:#fff;text-align:right;">
+        <label>رقم المرور</label>
+        <input id="pin" type="password" class="nav-btn" style="background:#16213e;color:#fff;text-align:right;">
+        <button id="login" class="nav-btn">تسجيل الدخول</button>
+        <button id="setup" class="nav-btn" style="background:#00d2be;color:#000;">تعيين بيانات الأدمن</button>
+        <button id="logout" class="nav-btn" style="background:#c62828;">تسجيل الخروج</button>
+      </div>
+      <div id="msg" style="color:#a0c4ff;margin-top:10px;"></div>
+    </div>
+    <h2 style="margin-top:30px;">صلاحيات سريعة</h2>
+    <div class="links-grid">
+      <a class="link-card" href="index.html"><div class="link-icon">🏠</div><div class="link-title">الصفحة الرئيسية</div></a>
+      <a class="link-card" href="#" onclick="window.open('https://olayanfinancingcompany-my.sharepoint.com/:x:/g/personal/b1_ahmed_olayanfood_com/IQATTkGdfgOoRJuk2xYJnVIEAeoAQnH8uAZX__W3thNLLaM?email=beno0o96%40gmail.com&e=UZAecn', '_blank'); return false;"><div class="link-icon">📂</div><div class="link-title">ملف ون درايف</div></a>
+      <a class="link-card" href="violations.html"><div class="link-icon">⚠️</div><div class="link-title">المخالفات</div></a>
+      <a class="link-card" href="training.html"><div class="link-icon">📚</div><div class="link-title">التدريب</div></a>
+      <a class="link-card" href="validator.html"><div class="link-icon">🧪</div><div class="link-title">فحص JSON</div></a>
+    </div>
+    <div class="data-card" style="margin-top:20px;">
+      <h3>سجل الحركات (Updates Log)</h3>
+      <div id="activity-log" style="background:#0b0e2b; padding:10px; border-radius:5px; max-height:200px; overflow-y:auto; font-size:0.9rem; color:#ccc;">
+        <div>جاري تحميل السجلات...</div>
+      </div>
+    </div>
+
+    <div class="data-card" style="margin-top:20px;">
+      <h3>صندوق الشكاوى (Complaints Inbox)</h3>
+      <div id="complaints-list" style="display:grid; gap:10px;">
+        <!-- Complaints will be loaded here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Reply Modal -->
+  <div id="reply-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#16213e; padding:20px; width:90%; max-width:500px; border-radius:10px;">
+        <h3>الرد على الشكوى</h3>
+        <p id="reply-to-info" style="color:#a0c4ff; font-size:0.9rem; margin-bottom:10px;"></p>
+        <textarea id="reply-text" placeholder="اكتب ردك هنا..." style="width:100%; height:100px; padding:10px; background:#0b0e2b; border:1px solid #333; color:#fff; margin-bottom:10px;"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button onclick="sendReply()" class="nav-btn" style="background:#00d2be; color:#000; flex:1;">إرسال الرد</button>
+            <button onclick="closeReplyModal()" class="nav-btn" style="background:#333; flex:1;">إلغاء</button>
+        </div>
+    </div>
+  </div>
+</body>
+</html>

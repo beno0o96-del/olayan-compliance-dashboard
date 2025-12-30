@@ -1,0 +1,417 @@
+/* ================= BODY BACKGROUND ================= */
+body {
+    background: linear-gradient(rgba(11, 14, 43, 0.85), rgba(11, 14, 43, 0.95)), url('olayan-bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+body::after{
+    content:'';
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    width:220px;
+    height:220px;
+    background:url('olayan-mark.svg') center/contain no-repeat;
+    opacity:0.08;
+    filter:contrast(120%) drop-shadow(0 1px 0 #ffffff20) drop-shadow(0 -1px 0 #00000030);
+    mix-blend-mode:overlay;
+    pointer-events:none;
+    z-index:0;
+}
+
+/* ================= HEADER ================= */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 5%;
+    background-color: #0b0e2b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    height: 50px;
+    width: auto;
+    margin-right: 15px;
+}
+
+.company-text h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.company-text p {
+    font-size: 0.75rem;
+    margin: 0;
+    color: #a0c4ff;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+/* Navigation */
+.main-nav {
+    display: flex;
+    gap: 5px;
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: #ccc;
+    font-size: 0.95rem;
+    padding: 8px 15px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover, .nav-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.nav-btn.active {
+    background: #2d6cdf;
+    font-weight: 600;
+}
+
+/* Language Switch */
+.lang-switch {
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.lang-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    transition: background 0.3s;
+}
+
+.lang-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.header-spacer {
+    height: 0px;
+}
+
+/* ================= HERO SECTION ================= */
+.hero {
+    position: relative;
+    height: 400px;
+    background: transparent; /* Changed from gradient to transparent for body bg to show */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    margin-bottom: 40px;
+    z-index: 0;
+}
+.hero::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:url('olayan-bg.jpg') center/cover no-repeat;
+    transform:scale(1.05);
+    filter:brightness(0.7);
+    z-index:-1;
+    animation:kenburns 18s ease-in-out infinite alternate;
+}
+
+.hero-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slide {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    transform: translateX(30px);
+    width: 80%;
+}
+
+.slide.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.slide h2 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #fff, #a0c4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size:200% 100%;
+    animation:shimmerText 6s linear infinite;
+}
+
+.hero-main-text {
+    font-size: 1.5rem;
+    color: #e0e0e0;
+    margin-bottom: 5px;
+}
+
+.hero-sub-text {
+    font-size: 1.1rem;
+    color: #88aaff;
+}
+
+/* Slider Controls */
+.prev-btn, .next-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+    z-index: 10;
+}
+
+.prev-btn:hover, .next-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.prev-btn { left: 30px; }
+.next-btn { right: 30px; }
+body.ar .prev-btn { right: 30px; left: auto; }
+body.ar .next-btn { left: 30px; right: auto; }
+
+/* Dots */
+.dots-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    position:relative;
+}
+
+.dot.active, .dot:hover {
+    background-color: #2d6cdf;
+    transform: scale(1.2);
+}
+.dot.active::after{
+    content:'';
+    position:absolute;
+    inset:-6px;
+    border-radius:50%;
+    background:conic-gradient(#2d6cdf 0deg, transparent 0deg);
+    animation:dotProgress 5s linear forwards;
+}
+
+@keyframes shimmerText{
+    0%{background-position:0% 0%;}
+    100%{background-position:100% 0%;}
+}
+@keyframes kenburns{
+    0%{transform:scale(1.05) translate(0,0);}
+    100%{transform:scale(1.12) translate(-10px,-6px);}
+}
+@keyframes dotProgress{
+    0%{background:conic-gradient(#2d6cdf 0deg, transparent 0deg);}
+    100%{background:conic-gradient(#2d6cdf 360deg, transparent 0deg);}
+}
+
+/* ================= KPI SECTION ================= */
+.kpi-section {
+    padding: 0 5% 50px;
+}
+
+.links-section{
+    padding: 0 5% 30px;
+    text-align: center;
+}
+.links-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:20px;
+    margin-top:15px;
+}
+.link-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:20px;
+    border-radius:15px;
+    text-decoration:none;
+    background: rgba(22,33,62,0.7);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    color:#fff;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+}
+.link-card:hover{
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    background: rgba(22,33,62,0.85);
+}
+.link-icon{
+    font-size:1.6rem;
+}
+.link-title{
+    font-weight:700;
+}
+.link-sub{
+    color:#a0c4ff;
+    font-size:0.9rem;
+}
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.kpi-card {
+    background: rgba(22, 33, 62, 0.7); /* Fallback */
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    border: none; /* We use the pseudo-element for border */
+}
+
+/* The Inner Background (Mask) */
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    inset: 2px; /* Border width */
+    background: rgba(22, 33, 62, 0.85); /* Inner card bg */
+    border-radius: 13px;
+    z-index: -1;
+}
+
+/* The Rotating Border Effect */
+.kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300%; height: 300%; /* Large enough to cover corners during rotation */
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, transparent 70%, #2d6cdf, #00d4ff);
+    animation: rotate-border 4s linear infinite;
+    z-index: -2;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease;
+}
+
+.kpi-card:hover::after {
+    opacity: 1; /* Show on hover */
+}
+
+/* Always show a subtle border when not hovering? 
+   Or maybe the user wants it ALWAYS running?
+   "Make the strip that rotates... go all around and disappear nicely"
+   Usually implies continuous movement. 
+   Let's make it visible but subtle, or maybe only on hover?
+   "Don't leave them like this" implies the current state (static border) is boring.
+   I'll make it ALWAYS running but maybe subtle, or run on hover.
+   The user said "disappear nicely". Maybe the TAIL disappears.
+   I'll make it visible always for now as it's a "dashboard" and movement is good.
+   Actually, constant motion on all cards might be distracting.
+   I will make it run ALWAYS because "Don't leave them like this" suggests a permanent change.
+   And "disappear nicely" refers to the gradient tail.
+*/
+.kpi-card::after {
+    opacity: 1;
+}
+
+@keyframes rotate-border {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.kpi-title {
+    display: block;
+    font-size: 0.95rem;
+    color: #a0c4ff;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.kpi-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+}
+@media (max-width: 768px){
+    body{
+        background: linear-gradient(rgba(11, 14, 43, 0.9), rgba(11, 14, 43, 0.95)), url('olayan-bg.jpg') no-repeat center center;
+        background-size: cover;
+    }
+    .hero{ height: 280px; }
+    .slide h2{ font-size: 2rem; }
+    .hero-main-text{ font-size: 1.25rem; }
+    .hero-sub-text{ font-size: 1rem; }
+    .prev-btn, .next-btn{ padding: 12px; width: 44px; height: 44px; }
+    .dots-container{ bottom: 12px; }
+    .link-card{ backdrop-filter: none; background: rgba(22,33,62,0.85); }
+    .kpi-grid{ margin-top: 10px; }
+}
+@media (prefers-reduced-motion: reduce){
+    .hero::before{ animation: none; }
+    .kpi-card::after{ animation: none; }
+    .slide{ transition: none; }
+    .dot.active::after{ animation: none; }
+}
+body.lite .hero::before{ animation: none; filter: brightness(0.8); }
+body.lite .kpi-card::after{ animation: none; opacity: 0.5; }
+body.lite .link-card{ backdrop-filter: none; }
+@media (max-width: 768px){
+    body::after{ display: none; }
+}
