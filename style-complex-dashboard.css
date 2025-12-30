@@ -158,11 +158,11 @@
     transform: scale(1.05);
 }
 .radar-box:hover .radar {
-    box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+    box-shadow: 0 0 20px rgba(244, 67, 54, 0.4); /* Red Glow */
 }
 .radar-box:hover .sweep {
     animation-duration: 1.5s; /* Faster sweep */
-    background: conic-gradient(from 0deg, transparent 0deg, rgba(76, 175, 80, 0.8) 360deg);
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(244, 67, 54, 0.8) 360deg); /* Red Sweep */
 }
 
 /* HUD Radial Progress - Replaces Old Star Grid */

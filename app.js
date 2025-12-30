@@ -1033,12 +1033,14 @@ function renderViolations(region) {
         const type = item.type[currentLang] || item.type.en;
         const level = item.level[currentLang] || item.level.en;
         
-        // Dynamic Color Logic (Blue/Purple/Cyan Theme)
+        // Dynamic Color Logic (Legacy Red/High)
         let color = item.color;
-        // Override Red/Legacy Colors with Theme Colors
-        if (item.level.en === 'High') color = '#d500f9'; // Neon Purple
-        else if (item.level.en === 'Med') color = '#00e5ff'; // Cyan
-        else if (item.level.en === 'Low') color = '#2979ff'; // Blue
+        // Default color based on level if not specified
+        if (!color) {
+            if (item.level.en === 'High') color = '#f44336'; // Red
+            else if (item.level.en === 'Med') color = '#FFC107'; // Amber
+            else if (item.level.en === 'Low') color = '#4caf50'; // Green
+        }
         
         // Parse hex to rgb for background opacity
         let r=0, g=0, b=0;
