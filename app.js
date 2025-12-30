@@ -999,6 +999,137 @@ function updateBoardDashboard(data) {
         }
     }
 
+    // 8. Metrics Row (High Level)
+    if (data.metrics_row) {
+        const container = document.getElementById('b-metrics-row');
+        if (container) {
+            container.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+            data.metrics_row.forEach(m => {
+                const label = m.label[currentLang] || m.label.en;
+                const subtext = m.subtext[currentLang] || m.subtext.en;
+                
+                const div = document.createElement('div');
+                div.className = 'metric-card';
+                div.innerHTML = `
+                    <div class="metric-label">${label}</div>
+                    <div class="metric-value" style="color: ${m.color}">${m.value}</div>
+                    <div class="metric-subtext">
+                        <span class="sub-dot" style="background-color: ${m.subcolor}"></span>
+                        ${subtext}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    // 9. KPI Table
+    if (data.kpi_table) {
+        const table = document.getElementById('b-kpi-table');
+        if (table) {
+            // Create or clear tbody
+            let tbody = table.querySelector('tbody');
+            if (!tbody) {
+                tbody = document.createElement('tbody');
+                table.appendChild(tbody);
+            } else {
+                tbody.innerHTML = '';
+            }
+            
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+            
+            data.kpi_table.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                
+                const kpi = row.kpi[currentLang] || row.kpi.en;
+                const measurement = row.measurement[currentLang] || row.measurement.en;
+                const progress = (typeof row.progress === 'object') ? (row.progress[currentLang] || row.progress.en) : row.progress;
+                const status = row.status[currentLang] || row.status.en;
+                
+                // Color for progress/status
+                let statusColor = '#4caf50';
+                if (status === 'Excellent' || status === 'ممتاز' || status === 'Achieved' || status === 'محقق') statusColor = '#4caf50';
+                else if (status === 'Good' || status === 'جيد') statusColor = '#FFC107';
+                else statusColor = '#f44336';
+                
+                tr.innerHTML = `
+                    <td style="padding: 15px;">${row.id}</td>
+                    <td style="padding: 15px; color: #fff; font-weight: 500;">${kpi}</td>
+                    <td style="padding: 15px; color: #b0bec5;">${measurement}</td>
+                    <td style="padding: 15px; color: #fff;">${row.target}</td>
+                    <td style="padding: 15px; color: #fff;">${row.achieved}</td>
+                    <td style="padding: 15px; color: ${statusColor};">${progress}</td>
+                    <td style="padding: 15px;"><span class="status-badge" style="background: rgba(76, 175, 80, 0.1); color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    // 10. Brand Performance Chart
+    if (data.brand_performance) {
+        const container = document.getElementById('b-brand-chart');
+        if (container) {
+            container.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+            
+            data.brand_performance.forEach(b => {
+                const brand = b.brand[currentLang] || b.brand.en;
+                const score = parseFloat(b.score.replace('%',''));
+                
+                const div = document.createElement('div');
+                div.className = 's-bar';
+                div.style.height = '0%'; // Start at 0 for animation
+                div.style.background = b.color;
+                div.innerHTML = `
+                    <span>${b.score}</span>
+                    <small>${brand}</small>
+                `;
+                container.appendChild(div);
+                
+                // Animate
+                setTimeout(() => {
+                    div.style.height = `${score}%`;
+                }, 100);
+            });
+        }
+    }
+
+    // 11. Trend Charts (Monthly & Violations)
+    const renderTrend = (id, dataKey) => {
+        if (data[dataKey]) {
+            const container = document.getElementById(id);
+            if (container) {
+                container.innerHTML = '';
+                const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+                
+                data[dataKey].forEach((item, i) => {
+                    const label = (typeof item.label === 'object') ? (item.label[currentLang] || item.label.en) : item.label;
+                    const val = parseFloat((item.val || "").replace('%',''));
+                    const h = item.h || (val + '%');
+                    
+                    const div = document.createElement('div');
+                    div.className = 'trend-bar-item';
+                    div.style.setProperty('--h', '0%'); // Start 0
+                    div.setAttribute('data-val', val);
+                    if (item.color) div.style.background = item.color; // Optional override
+                    
+                    div.innerHTML = `<span>${label}</span>`;
+                    container.appendChild(div);
+                    
+                    setTimeout(() => {
+                        div.style.setProperty('--h', h);
+                    }, 100 + (i * 50));
+                });
+            }
+        }
+    };
+    
+    renderTrend('b-trend-monthly', 'monthly_trend');
+    renderTrend('b-trend-violations', 'violations_trend');
+
     // 7. Regional Violations (Tabbed)
     if (data.violations) {
         window.currentBoardData = data; // Store globally for switching

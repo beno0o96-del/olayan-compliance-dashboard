@@ -4,6 +4,13 @@
     "effectiveness": { "value": "93.0%", "trend": "flat", "color": "#FFC107" },
     "risks": { "value": "12.0", "trend": "down", "color": "#f44336" }
   },
+  "metrics_row": [
+    { "label": { "en": "Overall Compliance", "ar": "الامتثال العام" }, "value": "+95%", "color": "#00d2be", "subtext": { "en": "Licenses & Health Cards", "ar": "الرخص والشهادات الصحية" }, "subcolor": "#4caf50" },
+    { "label": { "en": "Critical Expiries", "ar": "حالات انتهاء حرجة" }, "value": "Zero", "color": "#4caf50", "subtext": { "en": "Impacting Operations", "ar": "تؤثر على التشغيل" }, "subcolor": "#fff" },
+    { "label": { "en": "Coordination Entities", "ar": "الجهات التي تم التنسيق معها" }, "value": "6+", "color": "#c5a059", "subtext": { "en": "Internal & External", "ar": "جهات داخلية وخارجية" }, "subcolor": "#a0a0a0" },
+    { "label": { "en": "Violations Under Review", "ar": "المخالفات تحت الدراسة" }, "value": "15", "color": "#FFC107", "subtext": { "en": "Open Violations", "ar": "مخالفات مفتوحة" }, "subcolor": "#fff" },
+    { "label": { "en": "Est. Cancelled Violations", "ar": "تقدير المخالفات الملغاة" }, "value": "SAR 45k", "color": "#f44336", "subtext": { "en": "Based on closed violations", "ar": "بناءً على المخالفات المغلقة" }, "subcolor": "#a0a0a0" }
+  ],
   "violations": {
     "western": [
         { "branch": { "en": "Jeddah Branch #4", "ar": "فرع جدة #4" }, "type": { "en": "Critical Safety Violation", "ar": "مخالفة سلامة حرجة" }, "level": { "en": "High", "ar": "عالي" }, "color": "#ff1744" },
@@ -47,5 +54,35 @@
     { "label": { "en": "IT", "ar": "التقنية" }, "value": "77%" },
     { "label": { "en": "Finance", "ar": "المالية" }, "value": "83%" },
     { "label": { "en": "Maintenance", "ar": "الصيانة" }, "value": "90%" }
+  ],
+  "brand_performance": [
+    { "brand": { "en": "BK", "ar": "برجر كنج" }, "score": "85%", "color": "#E91E63" },
+    { "brand": { "en": "Texas", "ar": "تكساس" }, "score": "92%", "color": "#FF9800" },
+    { "brand": { "en": "BWW", "ar": "بافلو" }, "score": "78%", "color": "#FFC107" }
+  ],
+  "monthly_trend": [
+    { "label": "Jan", "val": "40%" },
+    { "label": "Feb", "val": "55%" },
+    { "label": "Mar", "val": "35%" },
+    { "label": "Apr", "val": "70%" },
+    { "label": "May", "val": "60%" },
+    { "label": "Jun", "val": "85%" }
+  ],
+  "violations_trend": [
+    { "label": { "en": "Aug", "ar": "أغسطس" }, "val": "80", "h": "80%" },
+    { "label": { "en": "Sep", "ar": "سبتمبر" }, "val": "70", "h": "70%" },
+    { "label": { "en": "Oct", "ar": "أكتوبر" }, "val": "60", "h": "60%" },
+    { "label": { "en": "Nov", "ar": "نوفمبر" }, "val": "45", "h": "45%" },
+    { "label": { "en": "Dec", "ar": "ديسمبر" }, "val": "30", "h": "30%" },
+    { "label": { "en": "Jan", "ar": "يناير" }, "val": "25", "h": "25%" }
+  ],
+  "kpi_table": [
+    { "id": 1, "kpi": { "en": "Violations Processing Speed", "ar": "سرعة معالجة المخالفات" }, "measurement": { "en": "Processed / Total", "ar": "المخالفات المعالجة ÷ الإجمالي" }, "target": "90%", "achieved": "96%", "progress": "107%", "status": { "en": "Excellent", "ar": "ممتاز" } },
+    { "id": 2, "kpi": { "en": "Field Correction", "ar": "تصحيح المخالفات ميدانيًا" }, "measurement": { "en": "Corrected / Issued", "ar": "المخالفات المصححة ÷ الصادرة" }, "target": "85%", "achieved": "92%", "progress": "108%", "status": { "en": "Excellent", "ar": "ممتاز" } },
+    { "id": 3, "kpi": { "en": "Violations Reduction", "ar": "خفض المخالفات" }, "measurement": { "en": "(Prev - Curr) / Prev", "ar": "(السابق − الحالي) ÷ السابق" }, "target": "25%", "achieved": "33%", "progress": "132%", "status": { "en": "Excellent", "ar": "ممتاز" } },
+    { "id": 4, "kpi": { "en": "Recurring Violations", "ar": "المخالفات المتكررة" }, "measurement": { "en": "Count", "ar": "عدد المخالفات المتكررة" }, "target": "≤ 10", "achieved": "6", "progress": { "en": "40% Improved", "ar": "40% تحسن" }, "status": { "en": "Excellent", "ar": "ممتاز" } },
+    { "id": 5, "kpi": { "en": "Systematic Cancellation", "ar": "إلغاء المخالفات نظاميًا" }, "measurement": { "en": "Cancelled / Total", "ar": "المخالفات الملغاة ÷ الإجمالي" }, "target": "20%", "achieved": "27%", "progress": "135%", "status": { "en": "Excellent", "ar": "ممتاز" } },
+    { "id": 6, "kpi": { "en": "Municipal Correspondence", "ar": "مخاطبة البلديات" }, "measurement": { "en": "Completed Count", "ar": "عدد المخاطبات المنجزة" }, "target": "100%", "achieved": "100%", "progress": "100%", "status": { "en": "Achieved", "ar": "محقق" } },
+    { "id": 7, "kpi": { "en": "Ops Coordination", "ar": "التنسيق مع التشغيل" }, "measurement": { "en": "Correction Cases", "ar": "حالات التصحيح بالتنسيق" }, "target": "90%", "achieved": "95%", "progress": "106%", "status": { "en": "Excellent", "ar": "ممتاز" } }
   ]
 }
