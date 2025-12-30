@@ -17,10 +17,10 @@
     ]
   },
   "projects": [
-    { "name": { "en": "Strengths", "ar": "نقاط القوة" }, "roi": "14.5%", "growth": "High" },
-    { "name": { "en": "Weaknesses", "ar": "نقاط الضعف" }, "roi": "11.2%", "growth": "Medium" },
-    { "name": { "en": "Goal", "ar": "الهدف" }, "roi": "18.1%", "growth": "Very High" }
-  ],
+        { "name": { "en": "Strengths", "ar": "نقاط القوة" }, "roi": "14.5%", "growth": "High", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
+        { "name": { "en": "Weaknesses", "ar": "نقاط الضعف" }, "roi": "11.2%", "growth": "Medium", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
+        { "name": { "en": "Goal", "ar": "الهدف" }, "roi": "18.1%", "growth": "Very High", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
+    ],
   "gauges": [
     { "label": { "en": "Western", "ar": "الغربية" }, "value": "67%", "p": "67deg" },
     { "label": { "en": "Central", "ar": "الوسطى" }, "value": "85%", "p": "85deg" },
@@ -29,6 +29,6 @@
   "stars": [
     { "label": { "en": "IT", "ar": "التقنية" }, "value": "77%" },
     { "label": { "en": "Finance", "ar": "المالية" }, "value": "83%" },
-    { "label": { "en": "HR", "ar": "الموارد البشرية" }, "value": "90%" }
+    { "label": { "en": "Maintenance", "ar": "الصيانة" }, "value": "90%" }
   ]
 }
