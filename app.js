@@ -98,9 +98,9 @@ const FALLBACK_BOARD = {
       { "sector": "Online", "actual": "189.5m", "target": "186.6m", "var": "(1.6%)", "trend": "down" }
     ],
     "expenses": [
-      { "type": { "en": "Operational", "ar": "تشغيلي" }, "actual": "2,156m", "budget": "2,058m", "var": "(4.8%)", "trend": "down" },
-      { "type": { "en": "Marketing", "ar": "تسويق" }, "actual": "410.5m", "budget": "393.2m", "var": "4.4%", "trend": "up" },
-      { "type": { "en": "Admin", "ar": "إداري" }, "actual": "264.3m", "budget": "255.9m", "var": "3.3%", "trend": "up" }
+      { "type": { "en": "Municipal", "ar": "البلدية" }, "actual": "2,156", "budget": "2,058", "var": "(4.8%)", "trend": "down" },
+      { "type": { "en": "Labor Office", "ar": "مكتب العمل" }, "actual": "410.5", "budget": "393.2", "var": "4.4%", "trend": "up" },
+      { "type": { "en": "Civil Defense", "ar": "الدفاع المدني" }, "actual": "264.3", "budget": "255.9", "var": "3.3%", "trend": "up" }
     ]
   },
   "projects": [
