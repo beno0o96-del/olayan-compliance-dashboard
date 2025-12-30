@@ -156,7 +156,7 @@
 
                     <!-- Projects / Flower Charts -->
                     <div class="cms-section" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
-                        <h4 style="color:#4caf50; margin-bottom:10px;">العائد الاستثماري (Projects)</h4>
+                        <h4 style="color:#4caf50; margin-bottom:10px;">الأداء المتوقع (Projects)</h4>
                         <label>Strengths (نقاط القوة):</label> <input type="text" id="cms-proj-strength" class="cms-input">
                         <label>Weaknesses (نقاط الضعف):</label> <input type="text" id="cms-proj-weak" class="cms-input">
                         <label>Goal (الهدف):</label> <input type="text" id="cms-proj-goal" class="cms-input">
@@ -180,11 +180,17 @@
 
                 </div>
                 
-                <div style="margin-top: 20px; text-align: left;">
-                    <button onclick="saveCMSData()" class="nav-btn" style="background:#00d2be; color:#000; padding: 10px 30px; font-weight:bold;">حفظ التعديلات</button>
+                <div style="margin-top: 20px; text-align: left; display:flex; gap:10px; align-items:center;">
+                    <button onclick="saveCMSData()" class="nav-btn" style="background:#00d2be; color:#000; padding: 10px 30px; font-weight:bold;">حفظ محلي (Preview)</button>
+                    <button onclick="publishToGitHub()" class="nav-btn" style="background:#6f42c1; color:#fff; padding: 10px 30px; font-weight:bold;">نشر للموقع الحي (GitHub)</button>
                     <button onclick="resetCMSData()" class="nav-btn" style="background:#c62828; color:#fff;">استعادة الافتراضي</button>
-                    <span id="save-msg" style="margin-right: 10px; color: #4caf50;"></span>
                 </div>
+                <div id="github-auth-area" style="margin-top:15px; display:none; background:rgba(111, 66, 193, 0.2); padding:10px; border-radius:5px;">
+                    <p style="margin:0 0 5px 0; font-size:0.9em;">مطلوب مفتاح GitHub Token للنشر:</p>
+                    <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" style="width:100%; padding:8px; border-radius:4px; border:none; margin-bottom:5px;">
+                    <button onclick="saveTokenAndPublish()" style="background:#6f42c1; color:white; border:none; padding:5px 15px; cursor:pointer; border-radius:3px;">حفظ ونشر</button>
+                </div>
+                <p id="save-msg" style="margin-top: 10px; color: #00d2be; min-height: 20px;"></p>
             </div>
         </div>
 

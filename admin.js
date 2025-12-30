@@ -120,6 +120,131 @@ function resetCMSData() {
     }
 }
 
+// GITHUB PUBLISH LOGIC
+const REPO_OWNER = 'beno0o96-del';
+const REPO_NAME = 'olayan-compliance-dashboard';
+const FILE_PATH = 'board_data.json';
+
+function publishToGitHub() {
+    const token = localStorage.getItem('gh_token');
+    if(!token) {
+        document.getElementById('github-auth-area').style.display = 'block';
+        return;
+    }
+    
+    performGitHubUpdate(token);
+}
+
+function saveTokenAndPublish() {
+    const token = document.getElementById('gh-token').value.trim();
+    if(!token) {
+        alert('الرجاء إدخال التوكن');
+        return;
+    }
+    localStorage.setItem('gh_token', token);
+    document.getElementById('github-auth-area').style.display = 'none';
+    performGitHubUpdate(token);
+}
+
+async function performGitHubUpdate(token) {
+    const msg = document.getElementById('save-msg');
+    msg.textContent = 'جاري الاتصال بـ GitHub...';
+    
+    try {
+        // 1. Get current SHA of the file
+        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        if(!getRes.ok) throw new Error('فشل الاتصال بـ GitHub. تأكد من التوكن.');
+        const fileData = await getRes.json();
+        const sha = fileData.sha;
+        
+        // 2. Prepare new content
+        // We need to construct the FULL json object.
+        // First, fetch the ORIGINAL board_data.json logic to get base structure?
+        // Or better, just use what we have in memory + overrides.
+        // Wait, 'data' in fetchBoardData is local variable. We need to reconstruct it.
+        
+        // Let's reconstruct the full object based on current inputs (which represent the desired state)
+        // Note: This assumes inputs are populated.
+        
+        // Helper to get value
+        const val = (id) => document.getElementById(id).value.trim();
+        
+        const newContent = {
+            header_kpis: {
+                roi: { value: val('cms-roi') || "37.8%", trend: "up", color: "#4caf50" },
+                effectiveness: { value: val('cms-eff') || "93.0%", trend: "flat", color: "#FFC107" },
+                risks: { value: val('cms-risk') || "12.0", trend: "down", color: "#f44336" }
+            },
+            financials: {
+                revenue: [
+                   { sector: "Retail", actual: "4.2M", target: "4.0M", var: "+5%", trend: "up" },
+                   { sector: "Logistics", actual: "2.8M", target: "3.1M", var: "-9%", trend: "down" }
+                ],
+                expenses: [] 
+            },
+            projects: [
+                { name: { en: "Strengths", ar: "نقاط القوة" }, roi: val('cms-proj-strength') || "14.5%", color: "#4caf50", petals: [1, 0.8, 1.1, 0.9, 1.2] },
+                { name: { en: "Weaknesses", ar: "نقاط الضعف" }, roi: val('cms-proj-weak') || "11.2%", color: "#a0c4ff", petals: [0.9, 1.1, 0.8, 1.0, 0.9] },
+                { name: { en: "Goal", ar: "الهدف" }, roi: val('cms-proj-goal') || "18.1%", color: "#FFC107", petals: [1.2, 1.2, 1.1, 1.3, 1.2] }
+            ],
+            gauges: [
+                { label: { en: "Western", ar: "الغربية" }, value: val('cms-reg-west') || "67%", p: parseInt(val('cms-reg-west')) + "deg" },
+                { label: { en: "Central", ar: "الوسطى" }, value: val('cms-reg-cen') || "85%", p: parseInt(val('cms-reg-cen')) + "deg" },
+                { label: { en: "Eastern", ar: "الشرقية" }, value: val('cms-reg-east') || "92%", p: parseInt(val('cms-reg-east')) + "deg" }
+            ],
+            stars: [
+                { label: { en: "IT", ar: "التقنية" }, value: val('cms-dept-it') || "77%" },
+                { label: { en: "Finance", ar: "المالية" }, value: val('cms-dept-fin') || "83%" },
+                { label: { en: "HR", ar: "الموارد البشرية" }, value: val('cms-dept-hr') || "90%" }
+            ]
+        };
+        
+        // Encode to Base64
+        // Unicode problem with btoa: need to escape first
+        const jsonString = JSON.stringify(newContent, null, 2);
+        const encodedContent = btoa(unescape(encodeURIComponent(jsonString)));
+        
+        // 3. PUT update
+        msg.textContent = 'جاري رفع البيانات...';
+        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: "Update board data via Admin CMS",
+                content: encodedContent,
+                sha: sha
+            })
+        });
+        
+        if(putRes.ok) {
+            msg.textContent = '✅ تم النشر بنجاح! قد يستغرق التحديث دقيقة للظهور.';
+            // Clear overrides since now live is updated? 
+            // Maybe keep them to be safe.
+        } else {
+            const err = await putRes.json();
+            throw new Error('فشل الرفع: ' + (err.message || 'خطأ غير معروف'));
+        }
+        
+    } catch (e) {
+        msg.textContent = '❌ خطأ: ' + e.message;
+        if(e.message.includes('401') || e.message.includes('credentials')) {
+            localStorage.removeItem('gh_token');
+            document.getElementById('github-auth-area').style.display = 'block';
+        }
+    }
+}
+
+
 
 async function loadActivityLog() {
     const logDiv = document.getElementById('activity-log');
