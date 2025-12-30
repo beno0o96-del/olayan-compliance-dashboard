@@ -94,6 +94,7 @@ function checkLogin() {
         loadComplaints();
         loadUsers();
         loadCMSData();
+        updateAdminStats();
         
         // Default Section
         showSection('dashboard');
