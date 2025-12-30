@@ -769,15 +769,36 @@ function exportServicesExcel() {
 async function fetchBoardData() {
     if (!document.querySelector('.complex-dashboard')) return;
 
+    let data;
     try {
         const response = await fetch('board_data.json?t=' + new Date().getTime());
         if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        updateBoardDashboard(data);
+        data = await response.json();
     } catch (error) {
         console.error('Error fetching board data, using fallback:', error);
-        updateBoardDashboard(FALLBACK_BOARD);
+        data = FALLBACK_BOARD;
     }
+
+    // CHECK FOR LOCAL STORAGE OVERRIDES
+    const saved = localStorage.getItem('board_overrides');
+    if (saved) {
+        try {
+            const overrides = JSON.parse(saved);
+            
+            // Merge overrides deeply? Or just high level sections?
+            // Simple merge for now as structure matches
+            if (overrides.header_kpis) data.header_kpis = { ...data.header_kpis, ...overrides.header_kpis };
+            if (overrides.projects) data.projects = overrides.projects;
+            if (overrides.gauges) data.gauges = overrides.gauges;
+            if (overrides.stars) data.stars = overrides.stars;
+            // Add more merges if needed
+            
+        } catch (e) {
+            console.error('Error parsing board_overrides', e);
+        }
+    }
+
+    updateBoardDashboard(data);
 }
 
 function updateBoardDashboard(data) {

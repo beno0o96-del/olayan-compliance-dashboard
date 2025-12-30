@@ -131,8 +131,138 @@
       </div>
   </div>
 
-  <div class="header-spacer"></div>
-  <section class="links-section" style="padding-top:60px;">
+    </div>
+
+    <div class="header-spacer"></div>
+
+    <!-- ADMIN CONTENT -->
+    <div id="admin-content" style="display:none; padding: 20px;">
+        
+        <!-- CMS EDITOR -->
+        <div class="dash-row">
+            <div class="dash-card">
+                <h3>🛠 إدارة بيانات لوحة التحكم (CMS)</h3>
+                <p style="color:#aaa; font-size:0.9rem;">يمكنك تعديل النسب والأرقام هنا، وستنعكس فوراً على لوحة التحكم.</p>
+                
+                <div class="cms-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                    
+                    <!-- KPIs -->
+                    <div class="cms-section" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color:#00d2be; margin-bottom:10px;">المؤشرات الرئيسية (KPIs)</h4>
+                        <label>ROI (العائد):</label> <input type="text" id="cms-roi" class="cms-input">
+                        <label>Effectiveness (الكفاءة):</label> <input type="text" id="cms-eff" class="cms-input">
+                        <label>Risks (المخاطر):</label> <input type="text" id="cms-risk" class="cms-input">
+                    </div>
+
+                    <!-- Projects / Flower Charts -->
+                    <div class="cms-section" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color:#4caf50; margin-bottom:10px;">العائد الاستثماري (Projects)</h4>
+                        <label>Strengths (نقاط القوة):</label> <input type="text" id="cms-proj-strength" class="cms-input">
+                        <label>Weaknesses (نقاط الضعف):</label> <input type="text" id="cms-proj-weak" class="cms-input">
+                        <label>Goal (الهدف):</label> <input type="text" id="cms-proj-goal" class="cms-input">
+                    </div>
+
+                    <!-- Operational Performance -->
+                    <div class="cms-section" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color:#FFC107; margin-bottom:10px;">أداء التشغيل (Regional)</h4>
+                        <label>Western (الغربية):</label> <input type="text" id="cms-reg-west" class="cms-input">
+                        <label>Central (الوسطى):</label> <input type="text" id="cms-reg-cen" class="cms-input">
+                        <label>Eastern (الشرقية):</label> <input type="text" id="cms-reg-east" class="cms-input">
+                    </div>
+
+                    <!-- Dept Performance -->
+                    <div class="cms-section" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color:#a0c4ff; margin-bottom:10px;">أداء الأقسام (Depts)</h4>
+                        <label>IT (التقنية):</label> <input type="text" id="cms-dept-it" class="cms-input">
+                        <label>Finance (المالية):</label> <input type="text" id="cms-dept-fin" class="cms-input">
+                        <label>HR (الموارد):</label> <input type="text" id="cms-dept-hr" class="cms-input">
+                    </div>
+
+                </div>
+                
+                <div style="margin-top: 20px; text-align: left;">
+                    <button onclick="saveCMSData()" class="nav-btn" style="background:#00d2be; color:#000; padding: 10px 30px; font-weight:bold;">حفظ التعديلات</button>
+                    <button onclick="resetCMSData()" class="nav-btn" style="background:#c62828; color:#fff;">استعادة الافتراضي</button>
+                    <span id="save-msg" style="margin-right: 10px; color: #4caf50;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIVE PREVIEW (Embedded Board) -->
+        <h2 style="margin-top: 40px; border-bottom: 1px solid #333; padding-bottom: 10px;">معاينة لوحة التحكم (Live Preview)</h2>
+        
+        <!-- Reusing Board HTML Structure here dynamically or statically -->
+        <div class="complex-dashboard" style="margin-top: 20px;">
+            <!-- Header KPIs -->
+            <div class="dash-row">
+                <div class="dash-card kpi-box">
+                    <h3 data-en="ROI" data-ar="العائد على الاستثمار">ROI</h3>
+                    <div class="value" id="b-kpi-roi" style="color: #4caf50;">--</div>
+                    <div class="sub" data-en="vs last year" data-ar="مقارنة بالعام الماضي">vs last year</div>
+                </div>
+                <div class="dash-card kpi-box">
+                    <h3 data-en="Effectiveness" data-ar="الفعالية">Effectiveness</h3>
+                    <div class="value" id="b-kpi-eff" style="color: #FFC107;">--</div>
+                    <div class="sub" data-en="Operational" data-ar="تشغيلي">Operational</div>
+                </div>
+                <div class="dash-card kpi-box">
+                    <h3 data-en="Risks" data-ar="المخاطر">Risks</h3>
+                    <div class="value" id="b-kpi-risk" style="color: #f44336;">--</div>
+                    <div class="sub" data-en="Active Incidents" data-ar="حوادث نشطة">Active Incidents</div>
+                </div>
+            </div>
+
+            <!-- Western Region Violations -->
+            <div class="dash-row">
+                 <div class="dash-card" style="flex:1; border: 1px solid #f44336;">
+                    <h4 data-en="Western Region Violations" data-ar="مخالفات المنطقة الغربية" style="color: #f44336;">Western Region Violations</h4>
+                    <div id="b-western-violations" style="display: flex; justify-content: space-around; padding: 20px 0;">
+                        <!-- Dynamic Content -->
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Flower Charts & Breakdowns -->
+            <div class="dash-row">
+                <div class="dash-card" style="flex: 2;">
+                    <h4 data-en="Investment ROI" data-ar="العائد الاستثماري">Investment ROI</h4>
+                    <div class="flower-grid" id="b-flower-grid">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <h4 data-en="Development Trend" data-ar="التوجه الفعلي للتطوير">Development Trend</h4>
+                    <div style="display: flex; align-items: flex-end; height: 150px; gap: 5px; padding-top: 20px;">
+                        <div style="flex:1; background:#2d6cdf; height: 40%; border-radius: 4px 4px 0 0;"></div>
+                        <div style="flex:1; background:#2d6cdf; height: 55%; border-radius: 4px 4px 0 0;"></div>
+                        <div style="flex:1; background:#2d6cdf; height: 35%; border-radius: 4px 4px 0 0;"></div>
+                        <div style="flex:1; background:#2d6cdf; height: 70%; border-radius: 4px 4px 0 0;"></div>
+                        <div style="flex:1; background:#2d6cdf; height: 60%; border-radius: 4px 4px 0 0;"></div>
+                        <div style="flex:1; background:#2d6cdf; height: 85%; border-radius: 4px 4px 0 0;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gauges & Stars -->
+            <div class="dash-row">
+                <div class="dash-card">
+                    <h4 data-en="Operational Performance Analysis" data-ar="تحليل أداء التشغيل">Operational Performance Analysis</h4>
+                    <div class="gauge-grid" id="b-gauge-grid">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <h4 data-en="Dept Performance" data-ar="أداء الأقسام">Dept Performance</h4>
+                    <div class="star-grid" id="b-star-grid">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+  <section class="links-section" id="login-section" style="padding-top:60px;">
     <h2>دخول الأدمن</h2>
     <div class="data-card" style="max-width:480px;margin:0 auto;">
       <div style="display:grid;gap:10px;">

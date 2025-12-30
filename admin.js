@@ -2,7 +2,13 @@ function hash(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encod
 function setMsg(t){ const m=document.getElementById('msg'); if(m) m.textContent=t; const s=document.getElementById('admin-status'); if(s) s.textContent=t; }
 async function setup(){ const u=document.getElementById('username').value.trim(); const p=document.getElementById('pin').value.trim(); if(!u||!p){ setMsg('أدخل اسم ورقم'); return; } const h=await hash(u+':'+p); localStorage.setItem('admin_hash',h); setMsg('تم الحفظ'); }
 async function login(){ const u=document.getElementById('username').value.trim(); const p=document.getElementById('pin').value.trim(); const saved=localStorage.getItem('admin_hash'); if(!saved){ setMsg('عيّن البيانات أولاً'); return; } const h=await hash(u+':'+p); if(h===saved){ localStorage.setItem('is_admin','true'); localStorage.setItem('admin_user',u); setMsg('تم تسجيل الدخول'); } else { setMsg('بيانات غير صحيحة'); } }
-function logout(){ localStorage.removeItem('is_admin'); setMsg('تم تسجيل الخروج'); }
+function logout(){ 
+    localStorage.removeItem('is_admin'); 
+    setMsg('تم تسجيل الخروج'); 
+    document.getElementById('admin-content').style.display = 'none';
+    document.getElementById('login-section').style.display = 'block';
+}
+
 document.addEventListener('DOMContentLoaded',()=>{ 
     document.getElementById('login').onclick=login; 
     document.getElementById('setup').onclick=setup; 
@@ -15,10 +21,105 @@ function checkLogin() {
     const a=localStorage.getItem('is_admin')==='true'; 
     setMsg(a?'أنت مسجّل كأدمن':'غير مسجّل');
     if(a) {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'block';
         loadActivityLog();
         loadComplaints();
+        loadCMSData(); // Load data into inputs
+        fetchBoardData(); // Render the board
+    } else {
+        document.getElementById('login-section').style.display = 'block';
+        document.getElementById('admin-content').style.display = 'none';
     }
 }
+
+// CMS LOGIC
+function loadCMSData() {
+    // Attempt to load from localStorage or fall back to Board Data (which app.js handles)
+    // We wait for fetchBoardData to populate FALLBACK_BOARD or fetched data first?
+    // Actually, we can read what's in localStorage directly.
+    
+    const saved = localStorage.getItem('board_overrides');
+    const data = saved ? JSON.parse(saved) : {}; // Empty if nothing saved
+    
+    // If empty, we might want to populate inputs from the current live data? 
+    // But getting live data is async. 
+    // Let's rely on placeholders or leave empty if not overridden.
+    
+    if (data.header_kpis) {
+        if(data.header_kpis.roi) document.getElementById('cms-roi').value = data.header_kpis.roi.value;
+        if(data.header_kpis.effectiveness) document.getElementById('cms-eff').value = data.header_kpis.effectiveness.value;
+        if(data.header_kpis.risks) document.getElementById('cms-risk').value = data.header_kpis.risks.value;
+    }
+    
+    if (data.projects) {
+        document.getElementById('cms-proj-strength').value = data.projects[0]?.roi || '';
+        document.getElementById('cms-proj-weak').value = data.projects[1]?.roi || '';
+        document.getElementById('cms-proj-goal').value = data.projects[2]?.roi || '';
+    }
+    
+    if (data.gauges) {
+        document.getElementById('cms-reg-west').value = data.gauges[0]?.value || '';
+        document.getElementById('cms-reg-cen').value = data.gauges[1]?.value || '';
+        document.getElementById('cms-reg-east').value = data.gauges[2]?.value || '';
+    }
+    
+    if (data.stars) {
+        document.getElementById('cms-dept-it').value = data.stars[0]?.value || '';
+        document.getElementById('cms-dept-fin').value = data.stars[1]?.value || '';
+        document.getElementById('cms-dept-hr').value = data.stars[2]?.value || '';
+    }
+}
+
+function saveCMSData() {
+    // Construct the object structure matching board_data.json
+    // We only save what we want to override.
+    
+    // Helper to get value
+    const val = (id) => document.getElementById(id).value.trim();
+    
+    const overrides = {
+        header_kpis: {
+            roi: { value: val('cms-roi') || "37.8%", trend: "up", color: "#4caf50" },
+            effectiveness: { value: val('cms-eff') || "93.0%", trend: "flat", color: "#FFC107" },
+            risks: { value: val('cms-risk') || "12.0", trend: "down", color: "#f44336" }
+        },
+        projects: [
+            { name: { en: "Strengths", ar: "نقاط القوة" }, roi: val('cms-proj-strength') || "14.5%", color: "#4caf50", petals: [1, 0.8, 1.1, 0.9, 1.2] },
+            { name: { en: "Weaknesses", ar: "نقاط الضعف" }, roi: val('cms-proj-weak') || "11.2%", color: "#a0c4ff", petals: [0.9, 1.1, 0.8, 1.0, 0.9] },
+            { name: { en: "Goal", ar: "الهدف" }, roi: val('cms-proj-goal') || "18.1%", color: "#FFC107", petals: [1.2, 1.2, 1.1, 1.3, 1.2] }
+        ],
+        gauges: [
+            { label: { en: "Western", ar: "الغربية" }, value: val('cms-reg-west') || "67%", p: parseInt(val('cms-reg-west')) + "deg" },
+            { label: { en: "Central", ar: "الوسطى" }, value: val('cms-reg-cen') || "85%", p: parseInt(val('cms-reg-cen')) + "deg" },
+            { label: { en: "Eastern", ar: "الشرقية" }, value: val('cms-reg-east') || "92%", p: parseInt(val('cms-reg-east')) + "deg" }
+        ],
+        stars: [
+            { label: { en: "IT", ar: "التقنية" }, value: val('cms-dept-it') || "77%" },
+            { label: { en: "Finance", ar: "المالية" }, value: val('cms-dept-fin') || "83%" },
+            { label: { en: "HR", ar: "الموارد البشرية" }, value: val('cms-dept-hr') || "90%" }
+        ]
+    };
+    
+    localStorage.setItem('board_overrides', JSON.stringify(overrides));
+    
+    document.getElementById('save-msg').textContent = 'تم الحفظ بنجاح! جاري التحديث...';
+    
+    // Refresh the view
+    fetchBoardData();
+    
+    setTimeout(() => {
+        document.getElementById('save-msg').textContent = '';
+    }, 2000);
+}
+
+function resetCMSData() {
+    if(confirm('هل أنت متأكد من استعادة القيم الافتراضية؟')) {
+        localStorage.removeItem('board_overrides');
+        location.reload();
+    }
+}
+
 
 async function loadActivityLog() {
     const logDiv = document.getElementById('activity-log');
