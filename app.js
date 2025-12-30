@@ -1085,7 +1085,7 @@ function updateBoardDashboard(data) {
                 div.style.background = b.color;
                 div.innerHTML = `
                     <span>${b.score}</span>
-                    <small>${brand}</small>
+                    <div class="s-bar-label">${brand}</div>
                 `;
                 container.appendChild(div);
                 
