@@ -93,9 +93,9 @@ const FALLBACK_BOARD = {
   },
   "financials": {
     "revenue": [
-      { "sector": "Retail", "actual": "209.8m", "target": "204.9m", "var": "2.4%", "trend": "up" },
-      { "sector": "Corporate", "actual": "3,323m", "target": "2,266m", "var": "2.5%", "trend": "up" },
-      { "sector": "Online", "actual": "189.5m", "target": "186.6m", "var": "(1.6%)", "trend": "down" }
+      { "sector": { "en": "Burger King", "ar": "برجر كنج" }, "actual": "209.8m", "target": "204.9m", "var": "2.4%", "trend": "up" },
+      { "sector": { "en": "Texas Chicken", "ar": "تكساس تشيكن" }, "actual": "3,323m", "target": "2,266m", "var": "2.5%", "trend": "up" },
+      { "sector": { "en": "Buffalo Wild Wings", "ar": "بافلو وايلد وينجز" }, "actual": "189.5m", "target": "186.6m", "var": "(1.6%)", "trend": "down" }
     ],
     "expenses": [
       { "type": { "en": "Municipal", "ar": "البلدية" }, "actual": "2,156", "budget": "2,058", "var": "(4.8%)", "trend": "down" },
@@ -825,11 +825,13 @@ function updateBoardDashboard(data) {
         const tbody = document.querySelector('#b-table-revenue tbody');
         if (tbody) {
             tbody.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
             data.financials.revenue.forEach(item => {
                 const tr = document.createElement('tr');
+                const sector = (typeof item.sector === 'object') ? (item.sector[currentLang] || item.sector.en) : item.sector;
                 const trendIcon = item.trend === 'up' ? '▲' : '▼';
                 const valClass = item.trend === 'up' ? 'val-pos' : 'val-neg';
-                tr.innerHTML = `<td>${item.sector}</td><td>${item.actual}</td><td>${item.target}</td><td class="${valClass}">${item.var} ${trendIcon}</td>`;
+                tr.innerHTML = `<td>${sector}</td><td>${item.actual}</td><td>${item.target}</td><td class="${valClass}">${item.var} ${trendIcon}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -858,12 +860,13 @@ function updateBoardDashboard(data) {
         if (container) {
             container.innerHTML = '';
             const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
-            data.projects.forEach(proj => {
+            data.projects.forEach((proj, projIndex) => {
                 let petalsHtml = '';
                 if (proj.petals) {
                     proj.petals.forEach((scale, i) => {
                         const deg = i * 72;
-                        petalsHtml += `<div class="petal" style="transform: rotate(${deg}deg) scale(${scale});"></div>`;
+                        // Use CSS variables for rotation, scale, and index for staggered animation
+                        petalsHtml += `<div class="petal" style="--r: ${deg}deg; --s: ${scale}; --i: ${i};"></div>`;
                     });
                 }
                 
@@ -871,6 +874,9 @@ function updateBoardDashboard(data) {
                 
                 const div = document.createElement('div');
                 div.className = 'flower-chart';
+                // Stagger entrance of the whole chart
+                div.style.animationDelay = `${projIndex * 0.2}s`;
+                
                 div.innerHTML = `
                     <div class="flower-shape">
                         ${petalsHtml}
@@ -904,48 +910,160 @@ function updateBoardDashboard(data) {
         }
     }
 
-    // 6. Stars (Dept Performance)
+    // 6. Stars (Dept Performance) - Redesigned as HUD Radial Gauges
     if (data.stars) {
         const container = document.getElementById('b-star-grid');
         if (container) {
             container.innerHTML = '';
             const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
-            data.stars.forEach(s => {
+            
+            data.stars.forEach((s, index) => {
                 const label = s.label[currentLang] || s.label.en;
+                // Parse percentage
+                const valStr = s.value.replace('%', '');
+                const val = parseInt(valStr) || 0;
+                
+                // Determine color based on value
+                let color = '#f44336'; // Red < 50
+                if (val >= 80) color = '#00e676'; // Green
+                else if (val >= 60) color = '#29b6f6'; // Blue
+                else if (val >= 50) color = '#ffeb3b'; // Yellow
+
+                // SVG Parameters
+                const radius = 36;
+                const circumference = 2 * Math.PI * radius;
+                const offset = circumference - (val / 100) * circumference;
+
                 const div = document.createElement('div');
-                div.className = 'star-item';
+                div.className = 'star-item hud-card';
+                // Stagger entrance
+                div.style.animationDelay = `${index * 0.2}s`;
+
                 div.innerHTML = `
-                    <div class="star-shape">
-                        <span class="star-val">${s.value}</span>
+                    <div class="hud-gauge">
+                        <svg class="progress-ring" width="100" height="100">
+                            <defs>
+                                <linearGradient id="grad${index}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="${color}" stop-opacity="0.4" />
+                                    <stop offset="100%" stop-color="${color}" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)" stroke-width="6" fill="transparent" r="${radius}" cx="50" cy="50"/>
+                            <circle class="progress-ring__circle" 
+                                stroke="url(#grad${index})" 
+                                stroke-width="6" 
+                                fill="transparent" 
+                                r="${radius}" cx="50" cy="50"
+                                style="stroke-dasharray: ${circumference} ${circumference}; stroke-dashoffset: ${circumference}; --to-offset: ${offset};"
+                            />
+                        </svg>
+                        <div class="hud-value">
+                            <span class="count-up" data-target="${val}">${0}</span><small>%</small>
+                        </div>
                     </div>
-                    <div style="font-size:0.8rem; margin-top:5px;">${label}</div>
+                    <div class="hud-label">${label}</div>
+                    <div class="hud-glow" style="background: ${color};"></div>
                 `;
                 container.appendChild(div);
+
+                // Trigger animation after a slight delay to ensure DOM is ready
+                setTimeout(() => {
+                    const circle = div.querySelector('.progress-ring__circle');
+                    if (circle) circle.style.strokeDashoffset = offset;
+                    
+                    // Count up animation
+                    const counter = div.querySelector('.count-up');
+                    let start = 0;
+                    const duration = 1500;
+                    const startTime = performance.now();
+                    
+                    function update(currentTime) {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Ease out quart
+                        const ease = 1 - Math.pow(1 - progress, 4);
+                        
+                        const currentVal = Math.floor(ease * val);
+                        if (counter) counter.textContent = currentVal;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(update);
+                        } else {
+                            if(counter) counter.textContent = val;
+                        }
+                    }
+                    requestAnimationFrame(update);
+                }, 100 + (index * 200));
             });
         }
     }
 
-    // 7. Western Region Violations
-    if (data.western_violations && data.western_violations.summary) {
-        const container = document.getElementById('b-western-violations');
-        if (container) {
-            container.innerHTML = '';
-            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
-            data.western_violations.summary.forEach(item => {
-                const label = item.label[currentLang] || item.label.en;
-                const trendIcon = item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '▬';
-                const div = document.createElement('div');
-                div.style.textAlign = 'center';
-                div.innerHTML = `
-                    <div style="font-size: 0.9rem; color: #a0c4ff; margin-bottom: 5px;">${label}</div>
-                    <div style="font-size: 1.8rem; font-weight: bold; color: ${item.color || '#fff'};">
-                        ${item.value} <span style="font-size: 1rem;">${trendIcon}</span>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
+    // 7. Regional Violations (Tabbed)
+    if (data.violations) {
+        window.currentBoardData = data; // Store globally for switching
+        renderViolations('western'); // Default render
     }
+}
+
+// Global Function to Switch Regions
+window.switchRegion = function(region, btn) {
+    // Update Active Tab UI
+    const tabs = document.querySelectorAll('.r-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    // Render Data
+    renderViolations(region);
+};
+
+function renderViolations(region) {
+    const data = window.currentBoardData;
+    if (!data || !data.violations || !data.violations[region]) return;
+
+    const listContainer = document.getElementById('b-violations-list');
+    if (!listContainer) return;
+
+    listContainer.innerHTML = '';
+    const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+    const items = data.violations[region];
+
+    items.forEach((item, index) => {
+        const branch = item.branch[currentLang] || item.branch.en;
+        const type = item.type[currentLang] || item.type.en;
+        const level = item.level[currentLang] || item.level.en;
+        
+        // Dynamic Color Logic (Blue/Purple/Cyan Theme)
+        let color = item.color;
+        // Override Red/Legacy Colors with Theme Colors
+        if (item.level.en === 'High') color = '#d500f9'; // Neon Purple
+        else if (item.level.en === 'Med') color = '#00e5ff'; // Cyan
+        else if (item.level.en === 'Low') color = '#2979ff'; // Blue
+        
+        // Parse hex to rgb for background opacity
+        let r=0, g=0, b=0;
+        if(color.startsWith('#') && color.length === 7) {
+            r = parseInt(color.slice(1,3), 16);
+            g = parseInt(color.slice(3,5), 16);
+            b = parseInt(color.slice(5,7), 16);
+        }
+
+        const div = document.createElement('div');
+        div.className = 'radar-item';
+        // Stagger animation
+        div.style.animationDelay = `${index * 0.1}s`;
+        div.style.borderLeft = `3px solid ${color}`;
+        div.style.background = `linear-gradient(90deg, rgba(${r}, ${g}, ${b}, 0.15) 0%, rgba(255,255,255,0.02) 100%)`;
+        
+        div.innerHTML = `
+            <div>
+                <strong style="color: #fff;">${branch}</strong>
+                <small style="color: #b0bec5;">${type}</small>
+            </div>
+            <span class="severity-badge-glow" style="color:${color}; text-shadow: 0 0 10px ${color};">${level}</span>
+        `;
+        listContainer.appendChild(div);
+    });
 }
 
 // Global Init

@@ -379,39 +379,27 @@
                 </div>
             </div>
             
-            <!-- NEW ROW: Western Region Violations (Separate) -->
+            <!-- Regional Violations (Tabbed) -->
             <div class="dash-row">
-                 <div class="dash-card" style="flex:1; border: 1px solid #f44336;">
-                    <h4 data-en="Western Region Violations" data-ar="مخالفات المنطقة الغربية" style="color: #f44336;">Western Region Violations</h4>
-                    <div id="b-western-violations" class="radar-box">
+                 <div class="dash-card" style="flex:1; border: 1px solid rgba(79, 172, 254, 0.3); box-shadow: 0 0 15px rgba(79, 172, 254, 0.1);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                        <h4 data-en="Regional Violations Analysis" data-ar="تحليل مخالفات المناطق" style="color: #4facfe; margin:0;">Regional Violations Analysis</h4>
+                        <div class="region-tabs">
+                            <button class="r-tab active" onclick="switchRegion('western', this)" data-en="Western" data-ar="الغربية">Western</button>
+                            <button class="r-tab" onclick="switchRegion('central', this)" data-en="Central" data-ar="الوسطى">Central</button>
+                            <button class="r-tab" onclick="switchRegion('eastern', this)" data-en="Eastern" data-ar="الشرقية">Eastern</button>
+                        </div>
+                    </div>
+                    
+                    <div id="b-violations-container" class="radar-box">
                         <div class="radar">
                             <div class="sweep"></div>
                             <div class="blip blip-1"></div>
                             <div class="blip blip-2"></div>
                             <div class="blip blip-3"></div>
                         </div>
-                        <div class="radar-list">
-                            <div class="radar-item">
-                                <div>
-                                    <strong data-en="Jeddah Branch #4" data-ar="فرع جدة #4">Jeddah Branch #4</strong>
-                                    <small data-en="Critical Safety Violation" data-ar="مخالفة سلامة حرجة">Critical Safety Violation</small>
-                                </div>
-                                <span style="color:#f44336; font-weight:bold;" data-en="High" data-ar="عالي">High</span>
-                            </div>
-                            <div class="radar-item" style="border-left-color: #FFC107; background: rgba(255, 193, 7, 0.1);">
-                                <div>
-                                    <strong data-en="Makkah Branch #2" data-ar="فرع مكة #2">Makkah Branch #2</strong>
-                                    <small data-en="Hygiene Warning" data-ar="تنبيه نظافة">Hygiene Warning</small>
-                                </div>
-                                <span style="color:#FFC107; font-weight:bold;" data-en="Med" data-ar="متوسط">Med</span>
-                            </div>
-                            <div class="radar-item" style="border-left-color: #4caf50; background: rgba(76, 175, 80, 0.1);">
-                                <div>
-                                    <strong data-en="Taif Branch #1" data-ar="فرع الطائف #1">Taif Branch #1</strong>
-                                    <small data-en="License Renewal" data-ar="تجديد رخصة">License Renewal</small>
-                                </div>
-                                <span style="color:#4caf50; font-weight:bold;" data-en="Low" data-ar="منخفض">Low</span>
-                            </div>
+                        <div class="radar-list" id="b-violations-list">
+                            <!-- Dynamic Content -->
                         </div>
                     </div>
                  </div>
@@ -459,13 +447,13 @@
                 </div>
                 <div class="dash-card">
                     <h4 data-en="Monthly Trend" data-ar="الاتجاه الشهري">Monthly Trend</h4>
-                    <div style="display: flex; align-items: flex-end; height: 150px; gap: 5px; padding-top: 20px;">
-                        <div style="flex:1; background:#2d6cdf; height: 40%; border-radius: 4px 4px 0 0;"></div>
-                        <div style="flex:1; background:#2d6cdf; height: 55%; border-radius: 4px 4px 0 0;"></div>
-                        <div style="flex:1; background:#2d6cdf; height: 35%; border-radius: 4px 4px 0 0;"></div>
-                        <div style="flex:1; background:#2d6cdf; height: 70%; border-radius: 4px 4px 0 0;"></div>
-                        <div style="flex:1; background:#2d6cdf; height: 60%; border-radius: 4px 4px 0 0;"></div>
-                        <div style="flex:1; background:#2d6cdf; height: 85%; border-radius: 4px 4px 0 0;"></div>
+                    <div class="trend-bar-container">
+                        <div class="trend-bar-item" style="--h: 40%;" data-val="Jan: 40%"></div>
+                        <div class="trend-bar-item" style="--h: 55%;" data-val="Feb: 55%"></div>
+                        <div class="trend-bar-item" style="--h: 35%;" data-val="Mar: 35%"></div>
+                        <div class="trend-bar-item" style="--h: 70%;" data-val="Apr: 70%"></div>
+                        <div class="trend-bar-item" style="--h: 60%;" data-val="May: 60%"></div>
+                        <div class="trend-bar-item" style="--h: 85%;" data-val="Jun: 85%"></div>
                     </div>
                 </div>
             </div>
@@ -526,27 +514,27 @@
             <div class="metric-card">
                 <div class="metric-label" data-en="Overall Compliance" data-ar="الامتثال العام">Overall Compliance</div>
                 <div class="metric-value" style="color: #00d2be;">+95%</div>
-                <small style="color: #4caf50;">Licenses & Health Cards</small>
+                <small style="color: #4caf50;" data-en="Licenses & Health Cards" data-ar="الرخص والشهادات الصحية">Licenses & Health Cards</small>
             </div>
             <div class="metric-card">
                 <div class="metric-label" data-en="Critical Expiries" data-ar="حالات انتهاء حرجة">Critical Expiries</div>
                 <div class="metric-value" style="color: #4caf50;">Zero</div>
-                <small style="color: #fff;">Impacting Operations</small>
+                <small style="color: #fff;" data-en="Impacting Operations" data-ar="تؤثر على التشغيل">Impacting Operations</small>
             </div>
             <div class="metric-card">
                 <div class="metric-label" data-en="Coordination Entities" data-ar="الجهات التي تم التنسيق معها">Coordination Entities</div>
                 <div class="metric-value" style="color: #c5a059;">6+</div>
-                <small style="color: #a0a0a0;">Internal & External</small>
+                <small style="color: #a0a0a0;" data-en="Internal & External" data-ar="جهات داخلية وخارجية">Internal & External</small>
             </div>
             <div class="metric-card">
                 <div class="metric-label" data-en="Violations Under Review" data-ar="المخالفات تحت الدراسة">Violations Under Review</div>
                 <div class="metric-value" style="color: #FFC107;">15</div>
-                <small style="color: #fff;">Open Violations</small>
+                <small style="color: #fff;" data-en="Open Violations" data-ar="مخالفات مفتوحة">Open Violations</small>
             </div>
             <div class="metric-card">
                 <div class="metric-label" data-en="Est. Cancelled Violations" data-ar="تقدير المخالفات الملغاة">Est. Cancelled Violations</div>
                 <div class="metric-value" style="color: #f44336;">SAR 45k</div>
-                <small style="color: #a0a0a0;">Based on closed violations</small>
+                <small style="color: #a0a0a0;" data-en="Based on closed violations" data-ar="بناءً على المخالفات المغلقة">Based on closed violations</small>
             </div>
         </div>
 
@@ -643,15 +631,15 @@
                 <div class="simple-bar-chart">
                     <div class="s-bar" style="height: 85%; background: #E91E63;">
                         <span>85%</span>
-                        <div class="s-bar-label">BK</div>
+                        <div class="s-bar-label" data-en="BK" data-ar="برجر كنج">BK</div>
                     </div>
                     <div class="s-bar" style="height: 92%; background: #FF9800;">
                         <span>92%</span>
-                        <div class="s-bar-label">Texas</div>
+                        <div class="s-bar-label" data-en="Texas" data-ar="تكساس">Texas</div>
                     </div>
                     <div class="s-bar" style="height: 78%; background: #FFC107;">
                         <span>78%</span>
-                        <div class="s-bar-label">BWW</div>
+                        <div class="s-bar-label" data-en="BWW" data-ar="بافلو">BWW</div>
                     </div>
                 </div>
             </div>
@@ -660,28 +648,21 @@
             <div class="chart-box">
                 <h3 data-en="Violations Trend (Last 6 Months)" data-ar="اتجاه المخالفات (آخر 6 أشهر)">Violations Trend</h3>
                 <!-- Interactive Trend Chart -->
-                <div class="trend-chart">
-                    <div class="trend-bar" style="height: 80%; background: #f44336; opacity: 0.5;">
-                        <span class="trend-tooltip">80 Violations</span>
-                    </div>
-                    <div class="trend-bar" style="height: 70%; background: #f44336; opacity: 0.6;">
-                        <span class="trend-tooltip">70 Violations</span>
-                    </div>
-                    <div class="trend-bar" style="height: 60%; background: #f44336; opacity: 0.7;">
-                        <span class="trend-tooltip">60 Violations</span>
-                    </div>
-                    <div class="trend-bar" style="height: 45%; background: #4caf50; opacity: 0.8;">
-                        <span class="trend-tooltip">45 Violations</span>
-                    </div>
-                    <div class="trend-bar" style="height: 30%; background: #4caf50; opacity: 0.9;">
-                        <span class="trend-tooltip">30 Violations</span>
-                    </div>
-                    <div class="trend-bar" style="height: 25%; background: #4caf50;">
-                        <span class="trend-tooltip">25 Violations</span>
-                    </div>
+                <div class="trend-bar-container">
+                    <div class="trend-bar-item" style="--h: 80%; background: linear-gradient(to top, #d32f2f, #ef5350);" data-val="80"></div>
+                    <div class="trend-bar-item" style="--h: 70%; background: linear-gradient(to top, #d32f2f, #ef5350);" data-val="70"></div>
+                    <div class="trend-bar-item" style="--h: 60%; background: linear-gradient(to top, #d32f2f, #ef5350);" data-val="60"></div>
+                    <div class="trend-bar-item" style="--h: 45%; background: linear-gradient(to top, #388e3c, #66bb6a);" data-val="45"></div>
+                    <div class="trend-bar-item" style="--h: 30%; background: linear-gradient(to top, #388e3c, #66bb6a);" data-val="30"></div>
+                    <div class="trend-bar-item" style="--h: 25%; background: linear-gradient(to top, #388e3c, #66bb6a);" data-val="25"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 5px; color: #ccc; font-size: 0.7rem;">
-                    <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span>
+                    <span data-en="Aug" data-ar="أغسطس">Aug</span>
+                    <span data-en="Sep" data-ar="سبتمبر">Sep</span>
+                    <span data-en="Oct" data-ar="أكتوبر">Oct</span>
+                    <span data-en="Nov" data-ar="نوفمبر">Nov</span>
+                    <span data-en="Dec" data-ar="ديسمبر">Dec</span>
+                    <span data-en="Jan" data-ar="يناير">Jan</span>
                 </div>
             </div>
         </div>

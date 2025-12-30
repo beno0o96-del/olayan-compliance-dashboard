@@ -4,11 +4,28 @@
     "effectiveness": { "value": "93.0%", "trend": "flat", "color": "#FFC107" },
     "risks": { "value": "12.0", "trend": "down", "color": "#f44336" }
   },
+  "violations": {
+    "western": [
+        { "branch": { "en": "Jeddah Branch #4", "ar": "فرع جدة #4" }, "type": { "en": "Critical Safety Violation", "ar": "مخالفة سلامة حرجة" }, "level": { "en": "High", "ar": "عالي" }, "color": "#ff1744" },
+        { "branch": { "en": "Makkah Branch #2", "ar": "فرع مكة #2" }, "type": { "en": "Hygiene Warning", "ar": "تنبيه نظافة" }, "level": { "en": "Med", "ar": "متوسط" }, "color": "#FFC107" },
+        { "branch": { "en": "Taif Branch #1", "ar": "فرع الطائف #1" }, "type": { "en": "License Renewal", "ar": "تجديد رخصة" }, "level": { "en": "Low", "ar": "منخفض" }, "color": "#00e676" }
+    ],
+    "central": [
+        { "branch": { "en": "Riyadh Main", "ar": "الرياض الرئيسي" }, "type": { "en": "Staff Uniform", "ar": "زي الموظفين" }, "level": { "en": "Low", "ar": "منخفض" }, "color": "#00e676" },
+        { "branch": { "en": "Qassim Branch", "ar": "فرع القصيم" }, "type": { "en": "Storage Temp", "ar": "درجة حرارة التخزين" }, "level": { "en": "High", "ar": "عالي" }, "color": "#ff1744" },
+        { "branch": { "en": "Kharj Branch", "ar": "فرع الخرج" }, "type": { "en": "Documentation", "ar": "نقص وثائق" }, "level": { "en": "Med", "ar": "متوسط" }, "color": "#FFC107" }
+    ],
+    "eastern": [
+        { "branch": { "en": "Dammam HQ", "ar": "مقر الدمام" }, "type": { "en": "Fire Safety", "ar": "سلامة الحريق" }, "level": { "en": "High", "ar": "عالي" }, "color": "#ff1744" },
+        { "branch": { "en": "Khobar Branch", "ar": "فرع الخبر" }, "type": { "en": "Signage", "ar": "اللوحات الإرشادية" }, "level": { "en": "Low", "ar": "منخفض" }, "color": "#00e676" },
+        { "branch": { "en": "Jubail Branch", "ar": "فرع الجبيل" }, "type": { "en": "Cleaning Log", "ar": "سجل النظافة" }, "level": { "en": "Med", "ar": "متوسط" }, "color": "#FFC107" }
+    ]
+  },
   "financials": {
     "revenue": [
-      { "sector": "Retail", "actual": "209.8m", "target": "204.9m", "var": "2.4%", "trend": "up" },
-      { "sector": "Corporate", "actual": "3,323m", "target": "2,266m", "var": "2.5%", "trend": "up" },
-      { "sector": "Online", "actual": "189.5m", "target": "186.6m", "var": "(1.6%)", "trend": "down" }
+      { "sector": { "en": "Burger King", "ar": "برجر كنج" }, "actual": "209.8m", "target": "204.9m", "var": "2.4%", "trend": "up" },
+      { "sector": { "en": "Texas Chicken", "ar": "تكساس تشيكن" }, "actual": "3,323m", "target": "2,266m", "var": "2.5%", "trend": "up" },
+      { "sector": { "en": "Buffalo Wild Wings", "ar": "بافلو وايلد وينجز" }, "actual": "189.5m", "target": "186.6m", "var": "(1.6%)", "trend": "down" }
     ],
     "expenses": [
       { "type": { "en": "Municipal", "ar": "البلدية" }, "actual": "2,156", "budget": "2,058", "var": "(4.8%)", "trend": "down" },
