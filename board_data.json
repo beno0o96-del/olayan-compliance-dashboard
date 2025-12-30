@@ -17,22 +17,10 @@
     ]
   },
   "projects": [
-    { "name": "Project A", "roi": "14.5%", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
-    { "name": "Project B", "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
-    { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
+    { "name": { "en": "Strengths", "ar": "نقاط القوة" }, "roi": "14.5%", "growth": "High" },
+    { "name": { "en": "Weaknesses", "ar": "نقاط الضعف" }, "roi": "11.2%", "growth": "Medium" },
+    { "name": { "en": "Goal", "ar": "الهدف" }, "roi": "18.1%", "growth": "Very High" }
   ],
-  "western_violations": {
-    "summary": [
-      { "label": { "en": "Total Violations", "ar": "إجمالي المخالفات" }, "value": "73", "trend": "up", "color": "#f44336" },
-      { "label": { "en": "Total Amount", "ar": "إجمالي المبالغ" }, "value": "170,750", "trend": "down", "color": "#FFC107" },
-      { "label": { "en": "Resolution Rate", "ar": "نسبة المعالجة" }, "value": "88%", "trend": "up", "color": "#4caf50" }
-    ],
-    "top_issues": [
-      { "issue": { "en": "License Expired", "ar": "انتهاء الرخصة" }, "count": 12 },
-      { "issue": { "en": "Hygiene", "ar": "النظافة العامة" }, "count": 8 },
-      { "issue": { "en": "Uniform", "ar": "الزي الموحد" }, "count": 5 }
-    ]
-  },
   "gauges": [
     { "label": { "en": "Western", "ar": "الغربية" }, "value": "67%", "p": "67deg" },
     { "label": { "en": "Central", "ar": "الوسطى" }, "value": "85%", "p": "85deg" },

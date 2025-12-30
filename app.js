@@ -104,9 +104,9 @@ const FALLBACK_BOARD = {
     ]
   },
   "projects": [
-    { "name": "Project A", "roi": "14.5%", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
-    { "name": "Project B", "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
-    { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
+    { "name": { "en": "Strengths", "ar": "نقاط القوة" }, "roi": "14.5%", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
+    { "name": { "en": "Weaknesses", "ar": "نقاط الضعف" }, "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
+    { "name": { "en": "Goal", "ar": "الهدف" }, "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
   ],
   "western_violations": {
     "summary": [
@@ -836,6 +836,7 @@ function updateBoardDashboard(data) {
         const container = document.getElementById('b-flower-grid');
         if (container) {
             container.innerHTML = '';
+            const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
             data.projects.forEach(proj => {
                 let petalsHtml = '';
                 if (proj.petals) {
@@ -845,13 +846,15 @@ function updateBoardDashboard(data) {
                     });
                 }
                 
+                const name = (typeof proj.name === 'object') ? (proj.name[currentLang] || proj.name.en) : proj.name;
+                
                 const div = document.createElement('div');
                 div.className = 'flower-chart';
                 div.innerHTML = `
                     <div class="flower-shape">
                         ${petalsHtml}
                     </div>
-                    <span>${proj.name}</span>
+                    <span>${name}</span>
                     <small style="color:${proj.color || '#fff'};">${proj.roi}</small>
                 `;
                 container.appendChild(div);
