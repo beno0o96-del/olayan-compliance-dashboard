@@ -20,5 +20,15 @@
     { "name": "Project A", "roi": "14.5%", "color": "#4caf50", "petals": [1, 0.8, 1.1, 0.9, 1.2] },
     { "name": "Project B", "roi": "11.2%", "color": "#a0c4ff", "petals": [0.9, 1.1, 0.8, 1.0, 0.9] },
     { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
+  ],
+  "gauges": [
+    { "label": { "en": "Western", "ar": "الغربية" }, "value": "67%", "p": "67deg" },
+    { "label": { "en": "Central", "ar": "الوسطى" }, "value": "85%", "p": "85deg" },
+    { "label": { "en": "Eastern", "ar": "الشرقية" }, "value": "92%", "p": "92deg" }
+  ],
+  "stars": [
+    { "label": { "en": "IT", "ar": "التقنية" }, "value": "77%" },
+    { "label": { "en": "Finance", "ar": "المالية" }, "value": "83%" },
+    { "label": { "en": "HR", "ar": "الموارد البشرية" }, "value": "90%" }
   ]
 }

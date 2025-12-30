@@ -109,14 +109,14 @@ const FALLBACK_BOARD = {
     { "name": "Project C", "roi": "18.1%", "color": "#FFC107", "petals": [1.2, 1.2, 1.1, 1.3, 1.2] }
   ],
   "gauges": [
-    { "label": { "en": "Ops", "ar": "العمليات" }, "value": "67%", "p": "67deg" },
-    { "label": { "en": "HR", "ar": "الموارد البشرية" }, "value": "85%", "p": "85deg" },
-    { "label": { "en": "IT", "ar": "التقنية" }, "value": "92%", "p": "92deg" }
+    { "label": { "en": "Western", "ar": "الغربية" }, "value": "67%", "p": "67deg" },
+    { "label": { "en": "Central", "ar": "الوسطى" }, "value": "85%", "p": "85deg" },
+    { "label": { "en": "Eastern", "ar": "الشرقية" }, "value": "92%", "p": "92deg" }
   ],
   "stars": [
-    { "label": { "en": "Sales", "ar": "المبيعات" }, "value": "77%" },
-    { "label": { "en": "Audit", "ar": "التدقيق" }, "value": "83%" },
-    { "label": { "en": "Admin", "ar": "الإدارة" }, "value": "90%" }
+    { "label": { "en": "IT", "ar": "التقنية" }, "value": "77%" },
+    { "label": { "en": "Finance", "ar": "المالية" }, "value": "83%" },
+    { "label": { "en": "HR", "ar": "الموارد البشرية" }, "value": "90%" }
   ]
 };
 
@@ -1237,3 +1237,77 @@ function initAICustomerService() {
         addMsg("تم استلام شكواك وسيتم مراجعتها من قبل الإدارة.");
     };
 }
+
+// ==========================================
+// Global Error Handler & Admin Access Control
+// ==========================================
+
+// Global Error Handler
+window.onerror = function(message, source, lineno, colno, error) {
+    console.error("Global Error Caught:", message);
+    
+    // Avoid showing it multiple times
+    if (document.getElementById('maintenance-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'maintenance-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = '#0b0e2b';
+    overlay.style.color = '#fff';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '999999';
+    overlay.style.fontFamily = 'Arial, sans-serif';
+    overlay.style.textAlign = 'center';
+    
+    // Add content
+    overlay.innerHTML = `
+        <div style="font-size: 4rem; margin-bottom: 20px;">🤖</div>
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px;" dir="rtl">سنعود قريباً</h1>
+        <h2 style="font-size: 1.2rem; color: #a0c4ff; font-weight: normal;">We Will Be Back Soon</h2>
+        <p style="margin-top: 20px; color: #666; font-size: 0.8rem;">Technical Issue Detected</p>
+    `;
+    
+    document.body.appendChild(overlay);
+    return true; 
+};
+
+// Admin Access Control
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if user is admin (simple localStorage check)
+    const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('is_admin') === 'true';
+    
+    // Elements restricted to admin
+    const restrictedSelectors = [
+        'a[onclick*="toggleServicesDashboard"]', // Services Dashboard Link
+        '.services-modal' // The modal itself
+    ];
+    
+    restrictedSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            if (!isAdmin) {
+                // Hide it
+                el.style.display = 'none';
+                el.onclick = null; // Remove interaction
+            }
+        });
+    });
+    
+    // If we are on admin.html and not admin, show access denied
+    if (window.location.pathname.includes('admin.html') && !isAdmin) {
+         document.body.innerHTML = `
+            <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#0b0e2b;color:white;flex-direction:column;font-family:Arial;">
+                <h1>Access Denied / تم رفض الوصول</h1>
+                <p>Admins Only / للمشرفين فقط</p>
+                <a href="index.html" style="color:#a0c4ff;margin-top:20px;">Go Home</a>
+            </div>
+        `;
+    }
+});
