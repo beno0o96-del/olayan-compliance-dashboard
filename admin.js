@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     checkLogin();
     applyAdminLang();
     renderMergeModeUI();
+    renderUpdateSourceIndicator();
 });
 
 function checkLogin() {
@@ -210,6 +211,7 @@ function applyAdminLang(){
     if(descReplace) descReplace.textContent = lang==='ar' ? 'استبدال كامل: يستبدل القائمة بالكامل بالمصدر القادم.' : 'Replace All: Replaces the entire list with the incoming source.';
     if(descSources) descSources.textContent = lang==='ar' ? 'مصادر التحديث: Excel، JSON من GitHub، JSON محلي، تعديل يدوي عبر اللوحة.' : 'Update sources: Excel, GitHub JSON, local JSON, manual edits via the admin panel.';
     renderMergeModeUI();
+    renderUpdateSourceIndicator();
 }
 
 // --- EMPLOYEES LOGIC ---
@@ -253,6 +255,7 @@ async function loadEmployeesFromCSV() {
             localStorage.setItem('admin_employees', JSON.stringify(employees));
             extractBranchesFromData(employees);
             loadEmployees();
+            setLastUpdateSource('csv');
             console.log(`Loaded ${employees.length} employees from CSV`);
         }
     } catch (err) {
@@ -503,6 +506,30 @@ function renderMergeModeUI(){
     }
 }
 
+function setLastUpdateSource(src){
+    localStorage.setItem('employees_last_source', src);
+    localStorage.setItem('employees_last_source_time', new Date().toISOString());
+    renderUpdateSourceIndicator();
+}
+
+function renderUpdateSourceIndicator(){
+    const src = localStorage.getItem('employees_last_source') || 'csv';
+    const lang = localStorage.getItem('admin_lang') || 'ar';
+    const badge = document.getElementById('update-source-indicator');
+    if(!badge) return;
+    const title = lang==='ar' ? 'آخر تحديث:' : 'Last Update:';
+    const map = {
+        csv: { ar:'Excel', en:'Excel', color:'#4facfe', emoji:'📊' },
+        github_json: { ar:'GitHub JSON', en:'GitHub JSON', color:'#6f42c1', emoji:'☁️' },
+        local_json: { ar:'JSON محلي', en:'Local JSON', color:'#a78bfa', emoji:'💾' },
+        manual: { ar:'تعديل يدوي', en:'Manual', color:'#10b981', emoji:'✏️' }
+    };
+    const m = map[src] || map.csv;
+    const text = lang==='ar' ? m.ar : m.en;
+    badge.textContent = `${title} ${m.emoji} ${text}`;
+    badge.style.color = m.color;
+    badge.style.border = `1px solid ${m.color}`;
+}
 function mergeEmployees(existingArr, incomingArr){
     const existing = Array.isArray(existingArr) ? existingArr : [];
     const incoming = Array.isArray(incomingArr) ? incomingArr : [];
@@ -550,6 +577,7 @@ function autoImportEmployeesFromGitHub(){
                 const { merged } = mergeEmployees(existing, incoming);
                 localStorage.setItem('admin_employees', JSON.stringify(merged));
             }
+            setLastUpdateSource('github_json');
             loadEmployees();
         }
     }).catch(()=>{});
@@ -597,6 +625,7 @@ function saveEmployeeChanges(){
     const modal = document.getElementById('employee-modal');
     if(modal) modal.style.display='none';
     loadEmployees();
+    setLastUpdateSource('manual');
     alert('تم حفظ بيانات الموظف');
 }
 
@@ -624,6 +653,7 @@ function importEmployeesFromJSON(){
                 stats = res.stats;
             }
             loadEmployees();
+            setLastUpdateSource('github_json');
             alert(`تم الدمج من GitHub: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
         } else {
             alert('لم يتم العثور على ملف employees_data.json في المستودع');
@@ -676,6 +706,7 @@ function importEmployeesFromLocalJSON(){
                 stats = res.stats;
             }
             loadEmployees();
+            setLastUpdateSource('local_json');
             alert(`تم الدمج من الملف المحلي: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
         } catch {
             alert('ملف JSON غير صالح');
