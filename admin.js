@@ -519,6 +519,37 @@ function publishEmployeesJSON(){
         });
     }).then(r=>r.json()).then(()=>alert('تم نشر ملف الموظفين إلى GitHub JSON بنجاح')).catch(()=>alert('فشل النشر إلى GitHub'));
 }
+
+function importEmployeesFromLocalJSON(){
+    const input = document.getElementById('emp-json-file');
+    if(!input || !input.files || input.files.length===0){ alert('اختر ملف JSON أولاً'); return; }
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const employees = JSON.parse(reader.result);
+            localStorage.setItem('admin_employees', JSON.stringify(employees));
+            loadEmployees();
+            alert('تم استيراد الموظفين من ملف JSON المحلي بنجاح');
+        } catch {
+            alert('ملف JSON غير صالح');
+        }
+    };
+    reader.readAsText(file, 'utf-8');
+}
+
+function downloadEmployeesJSON(){
+    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const blob = new Blob([JSON.stringify(employees, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'employees_data_download.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 // USER MANAGEMENT
 function loadUsers() {
     const tbody = document.getElementById('users-table-body');
