@@ -64,12 +64,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     const loginBtn = document.getElementById('login');
     const setupBtn = document.getElementById('setup');
     const logoutBtn = document.getElementById('logout');
+    const langArBtn = document.getElementById('btn-lang-ar');
+    const langEnBtn = document.getElementById('btn-lang-en');
 
     if(loginBtn) loginBtn.onclick=login; 
     if(setupBtn) setupBtn.onclick=setup; 
     if(logoutBtn) logoutBtn.onclick=logout; 
+    if(langArBtn) langArBtn.onclick=()=>setAdminLang('ar');
+    if(langEnBtn) langEnBtn.onclick=()=>setAdminLang('en');
     
     checkLogin();
+    applyAdminLang();
 });
 
 function checkLogin() {
@@ -135,6 +140,45 @@ function showSection(sectionId) {
         'email': 'ايميل'
     };
     document.getElementById('page-title').textContent = titles[sectionId];
+}
+
+function setAdminLang(lang){
+    localStorage.setItem('admin_lang', lang);
+    applyAdminLang();
+}
+
+function applyAdminLang(){
+    const lang = localStorage.getItem('admin_lang') || 'ar';
+    document.body.classList.toggle('ar', lang==='ar');
+    document.dir = lang==='ar' ? 'rtl' : 'ltr';
+    const t = {
+        ar: {
+            pageTitles: { dashboard:'الرئيسية', users:'الأعضاء', employees:'الموظفين', cms:'إعدادات البيانات (CMS)', services:'الشكاوى والطلبات', media:'وسائط', pages:'صفحات', comments:'تعليقات', appearance:'مظهر', plugins:'إضافات', tools:'أدوات', settings:'الإعدادات', email:'ايميل' },
+            th: { emp:'الموظف', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', health:'الشهادة الصحية', training:'حالة التدريب', view:'عرض' },
+            labels: { name:'الاسم', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', health:'انتهاء الصحية', train1:'تدريب 1', train2:'تدريب 2', email:'البريد الإلكتروني' },
+            buttons: { save:'حفظ', cancel:'إلغاء' }
+        },
+        en: {
+            pageTitles: { dashboard:'Dashboard', users:'Users', employees:'Employees', cms:'Data Settings (CMS)', services:'Complaints', media:'Media', pages:'Pages', comments:'Comments', appearance:'Appearance', plugins:'Plugins', tools:'Tools', settings:'Settings', email:'Email' },
+            th: { emp:'Employee', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Card', training:'Training', view:'View' },
+            labels: { name:'Name', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Expiry', train1:'Training 1', train2:'Training 2', email:'Email' },
+            buttons: { save:'Save', cancel:'Cancel' }
+        }
+    }[lang];
+    const mapTh = { emp:'th-emp', iqama:'th-iqama', brand:'th-brand', branch:'th-branch', region:'th-region', health:'th-health', training:'th-training', view:'th-view' };
+    Object.keys(mapTh).forEach(k=>{
+        const el = document.getElementById(mapTh[k]);
+        if(el) el.textContent = t.th[k];
+    });
+    const mapLbl = { name:'lbl-name', iqama:'lbl-iqama', brand:'lbl-brand', branch:'lbl-branch', region:'lbl-region', health:'lbl-health', train1:'lbl-train1', train2:'lbl-train2', email:'lbl-email' };
+    Object.keys(mapLbl).forEach(k=>{
+        const el = document.getElementById(mapLbl[k]);
+        if(el) el.textContent = t.labels[k];
+    });
+    const btnSave = document.getElementById('btn-save-emp');
+    const btnCancel = document.getElementById('btn-close-emp');
+    if(btnSave) btnSave.textContent = t.buttons.save;
+    if(btnCancel) btnCancel.textContent = t.buttons.cancel;
 }
 
 // --- EMPLOYEES LOGIC ---
@@ -317,8 +361,33 @@ function loadEmployees(filterText = "") {
 }
 
 function viewEmployee(iqama) {
-    alert('سيتم عرض تفاصيل الموظف: ' + iqama);
-    // Future: Open modal with full details
+    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const emp = employees.find(e=>e.iqama===iqama);
+    if(!emp) return;
+    const initials = (emp.name||'').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const color = getEmpColor(emp);
+    const banner = document.getElementById('emp-banner');
+    const avatar = document.getElementById('emp-avatar');
+    const nameD = document.getElementById('emp-name-display');
+    const roleD = document.getElementById('emp-role-display');
+    const idD = document.getElementById('emp-id-display');
+    const m = document.getElementById('employee-modal');
+    if(banner) banner.style.background = `linear-gradient(135deg, ${color}, #0b0e2b)`;
+    if(avatar){ avatar.textContent = initials; avatar.style.background = color; }
+    if(nameD) nameD.textContent = emp.name||'';
+    if(roleD) roleD.textContent = emp.brand||'';
+    if(idD) idD.textContent = `ID: ${emp.id||'-'}`;
+    const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val||''; };
+    set('emp-name', emp.name);
+    set('emp-iqama', emp.iqama);
+    set('emp-brand', emp.brand);
+    set('emp-branch', emp.branch);
+    set('emp-region', emp.region);
+    set('emp-health', emp.health_expiry);
+    set('emp-train1', emp.train_status_1);
+    set('emp-train2', emp.train_status_2);
+    set('emp-email', emp.email);
+    if(m) m.style.display = 'flex';
 }
 
 function filterEmployees(text) {
@@ -355,6 +424,48 @@ function exportEmployees() {
     document.body.removeChild(link);
 }
 
+function getEmpColor(emp){
+    const brand = (emp.brand||'').toUpperCase();
+    const region = emp.region||'';
+    if(brand==='BK') return '#f5c518';
+    if(brand==='TC') return '#e11d48';
+    if(brand==='BWW') return '#f59e0b';
+    if(region.includes('الوسطى')||region.toLowerCase().includes('central')) return '#60a5fa';
+    if(region.includes('الغربية')||region.toLowerCase().includes('west')) return '#10b981';
+    if(region.includes('الشرقية')||region.toLowerCase().includes('east')) return '#a78bfa';
+    return '#4facfe';
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+    const closeBtn = document.getElementById('btn-close-emp');
+    const saveBtn = document.getElementById('btn-save-emp');
+    const modal = document.getElementById('employee-modal');
+    if(closeBtn) closeBtn.onclick = ()=>{ if(modal) modal.style.display='none'; };
+    if(saveBtn) saveBtn.onclick = saveEmployeeChanges;
+});
+
+function saveEmployeeChanges(){
+    const iqama = document.getElementById('emp-iqama').value.trim();
+    let employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const idx = employees.findIndex(e=>e.iqama===iqama);
+    if(idx===-1) return;
+    employees[idx] = {
+        ...employees[idx],
+        name: document.getElementById('emp-name').value.trim(),
+        brand: document.getElementById('emp-brand').value.trim(),
+        branch: document.getElementById('emp-branch').value.trim(),
+        region: document.getElementById('emp-region').value.trim(),
+        health_expiry: document.getElementById('emp-health').value.trim(),
+        train_status_1: document.getElementById('emp-train1').value.trim(),
+        train_status_2: document.getElementById('emp-train2').value.trim(),
+        email: document.getElementById('emp-email').value.trim()
+    };
+    localStorage.setItem('admin_employees', JSON.stringify(employees));
+    const modal = document.getElementById('employee-modal');
+    if(modal) modal.style.display='none';
+    loadEmployees();
+    alert('تم حفظ بيانات الموظف');
+}
 // USER MANAGEMENT
 function loadUsers() {
     const tbody = document.getElementById('users-table-body');

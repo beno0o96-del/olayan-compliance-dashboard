@@ -104,6 +104,10 @@
             <header class="admin-header">
                 <div class="header-title" id="page-title">ملخص النظام</div>
                 <div class="header-actions">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button class="btn btn-secondary" id="btn-lang-ar">العربية</button>
+                        <button class="btn btn-secondary" id="btn-lang-en">English</button>
+                    </div>
                     <div class="user-profile">
                         <div class="text-right">
                             <div style="font-weight: bold; font-size: 0.9rem;" id="admin-user-name">Admin</div>
@@ -273,14 +277,14 @@
                             <table class="data-table" style="width: 100%; min-width: 1000px;">
                                 <thead>
                                     <tr style="background: #0f172a;">
-                                        <th>الموظف</th>
-                                        <th>رقم الهوية/الإقامة</th>
-                                        <th>العلامة التجارية</th>
-                                        <th>الفرع</th>
-                                        <th>المنطقة</th>
-                                        <th>الشهادة الصحية</th>
-                                        <th>حالة التدريب</th>
-                                        <th>عرض</th>
+                                        <th id="th-emp">الموظف</th>
+                                        <th id="th-iqama">رقم الهوية/الإقامة</th>
+                                        <th id="th-brand">العلامة التجارية</th>
+                                        <th id="th-branch">الفرع</th>
+                                        <th id="th-region">المنطقة</th>
+                                        <th id="th-health">الشهادة الصحية</th>
+                                        <th id="th-training">حالة التدريب</th>
+                                        <th id="th-view">عرض</th>
                                     </tr>
                                 </thead>
                                 <tbody id="employees-table-body">
@@ -410,8 +414,63 @@
         </main>
     </div>
 
-    <!-- Modals -->
-    <!-- Add User Modal (Hidden by default, simple prompt used for now or custom modal) -->
+    <div id="employee-modal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:9999;">
+        <div style="background:#fff; color:#000; width:90%; max-width:800px; border-radius:12px; overflow:hidden;">
+            <div id="emp-banner" style="height:120px; background:#0b0e2b;"></div>
+            <div style="padding:20px;">
+                <div style="display:flex; align-items:center; gap:15px; margin-top:-60px;">
+                    <div id="emp-avatar" style="width:80px; height:80px; border-radius:50%; background:#4facfe; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.4rem;">A</div>
+                    <div>
+                        <div id="emp-name-display" style="font-size:1.4rem; font-weight:700;"></div>
+                        <div id="emp-role-display" style="color:#4facfe; font-size:0.95rem;"></div>
+                        <div id="emp-id-display" style="color:#64748b; font-size:0.85rem;"></div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;">
+                    <div>
+                        <label id="lbl-name" style="display:block; color:#666; font-size:0.85rem;">الاسم</label>
+                        <input id="emp-name" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-iqama" style="display:block; color:#666; font-size:0.85rem;">رقم الهوية/الإقامة</label>
+                        <input id="emp-iqama" class="form-control" type="text" disabled>
+                    </div>
+                    <div>
+                        <label id="lbl-brand" style="display:block; color:#666; font-size:0.85rem;">العلامة التجارية</label>
+                        <input id="emp-brand" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-branch" style="display:block; color:#666; font-size:0.85rem;">الفرع</label>
+                        <input id="emp-branch" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-region" style="display:block; color:#666; font-size:0.85rem;">المنطقة</label>
+                        <input id="emp-region" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-health" style="display:block; color:#666; font-size:0.85rem;">انتهاء الصحية</label>
+                        <input id="emp-health" class="form-control" type="date">
+                    </div>
+                    <div>
+                        <label id="lbl-train1" style="display:block; color:#666; font-size:0.85rem;">تدريب 1</label>
+                        <input id="emp-train1" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-train2" style="display:block; color:#666; font-size:0.85rem;">تدريب 2</label>
+                        <input id="emp-train2" class="form-control" type="text">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label id="lbl-email" style="display:block; color:#666; font-size:0.85rem;">البريد الإلكتروني</label>
+                        <input id="emp-email" class="form-control" type="email">
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button class="btn btn-secondary" id="btn-close-emp">إلغاء</button>
+                    <button class="btn btn-primary" id="btn-save-emp">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
