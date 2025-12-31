@@ -1709,6 +1709,8 @@ window.onerror = function(message, source, lineno, colno, error) {
 document.addEventListener('DOMContentLoaded', () => {
     // Check if user is admin (simple localStorage check)
     const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('is_admin') === 'true';
+    const adminLink = document.getElementById('admin-link');
+    if (adminLink) adminLink.style.display = isAdmin ? '' : 'none';
     
     // Elements restricted to admin
     const restrictedSelectors = [
