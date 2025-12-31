@@ -277,8 +277,9 @@ const FALLBACK_SERVICES = {
 
 // Language Switching Logic
 function setLang(lang) {
-    // Update Body Class
-    document.body.className = lang;
+    // Update Body Class - Preserve other classes
+    document.body.classList.remove('en', 'ar');
+    document.body.classList.add(lang);
     
     // Update Text Content
     const elements = document.querySelectorAll('[data-en], [data-ar]');
@@ -296,6 +297,20 @@ function setLang(lang) {
     
     // Update direction
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+    // Re-render Dynamic Content for specific pages
+    if (document.querySelector('.complex-dashboard')) {
+        fetchBoardData();
+    }
+    if (document.getElementById('violations-list')) {
+        fetchViolationsData();
+    }
+    if (document.getElementById('kpi-cards')) {
+        fetchData();
+    }
+    if (document.getElementById('servicesTable')) {
+        fetchServicesData();
+    }
 }
 
 // Translation Dictionary for Dynamic Content
