@@ -178,15 +178,6 @@ const FALLBACK_BOARD = {
         "count": 2,
         "color": "#FFC107"
       }
-    ],
-    "southern": [
-       { 
-        "branch": { "en": "BK Abha", "ar": "برجر كنج أبها" },
-        "type": { "en": "Improper storage", "ar": "سواء تخزين المواد الغذائية" },
-        "level": { "en": "Med", "ar": "متوسطة" },
-        "count": 3,
-        "color": "#FFC107"
-      }
     ]
   },
   "metrics_row": [
