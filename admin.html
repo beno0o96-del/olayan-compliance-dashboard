@@ -48,24 +48,48 @@
             </div>
             <nav class="sidebar-nav">
                 <a href="#" onclick="showSection('dashboard')" class="nav-item active" id="nav-dashboard">
-                    <i>📊</i> ملخص النظام
-                </a>
-                <a href="#" onclick="showSection('users')" class="nav-item" id="nav-users">
-                    <i>👥</i> إدارة المستخدمين
+                    <i>🏠</i> الرئيسية
                 </a>
                 <a href="#" onclick="showSection('employees')" class="nav-item" id="nav-employees">
-                    <i>👔</i> شؤون الموظفين
+                    <i>👥</i> الموظفين
                 </a>
-                <a href="#" onclick="showSection('cms')" class="nav-item" id="nav-cms">
-                    <i>⚙️</i> إعدادات البيانات (CMS)
+                <a href="#" onclick="showSection('media')" class="nav-item" id="nav-media">
+                    <i>🖼️</i> وسائط
+                </a>
+                <a href="#" onclick="showSection('pages')" class="nav-item" id="nav-pages">
+                    <i>📄</i> صفحات
+                </a>
+                <a href="#" onclick="showSection('comments')" class="nav-item" id="nav-comments">
+                    <i>💬</i> تعليقات
+                </a>
+                <a href="#" onclick="showSection('appearance')" class="nav-item" id="nav-appearance">
+                    <i>🎨</i> مظهر
+                </a>
+                <a href="#" onclick="showSection('plugins')" class="nav-item" id="nav-plugins">
+                    <i>🧩</i> إضافات
+                </a>
+                <a href="#" onclick="showSection('users')" class="nav-item" id="nav-users">
+                    <i>👤</i> أعضاء
+                </a>
+                <a href="#" onclick="showSection('tools')" class="nav-item" id="nav-tools">
+                    <i>🛠️</i> أدوات
+                </a>
+                <a href="#" onclick="showSection('settings')" class="nav-item" id="nav-settings">
+                    <i>⚙️</i> الإعدادات
+                </a>
+                <a href="#" onclick="showSection('email')" class="nav-item" id="nav-email">
+                    <i>✉️</i> ايميل
+                </a>
+                <a href="branches.html" target="_blank" class="nav-item" id="nav-branches">
+                    <i>🏬</i> فروع
+                </a>
+                <a href="tasks.html" target="_blank" class="nav-item" id="nav-tasks">
+                    <i>✅</i> مهام
                 </a>
                 <a href="#" onclick="showSection('services')" class="nav-item" id="nav-services">
                     <i>📩</i> الشكاوى والطلبات
                 </a>
                 <div style="border-top: 1px solid #eee; margin: 10px 20px;"></div>
-                <a href="tasks.html" target="_blank" class="nav-item">
-                    <i>✅</i> إدارة المهام
-                </a>
                 <a href="board.html" target="_blank" class="nav-item">
                     <i>🔗</i> الذهاب للموقع
                 </a>
@@ -128,11 +152,93 @@
                     </div>
                 </div>
 
+                <!-- SECTION: MEDIA -->
+                <div id="section-media" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">وسائط</span>
+                        </div>
+                        <p style="color:#555;">إدارة الصور والملفات هنا.</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: PAGES -->
+                <div id="section-pages" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">صفحات</span>
+                            <button class="btn btn-primary">صفحة جديدة +</button>
+                        </div>
+                        <p style="color:#555;">قائمة الصفحات وإدارتها.</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: COMMENTS -->
+                <div id="section-comments" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">تعليقات</span>
+                        </div>
+                        <p style="color:#555;">إدارة التعليقات والمراجعات.</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: APPEARANCE -->
+                <div id="section-appearance" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">مظهر</span>
+                        </div>
+                        <p style="color:#555;">إعدادات المظهر والتنسيق.</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: PLUGINS -->
+                <div id="section-plugins" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">إضافات</span>
+                            <button class="btn btn-primary">إضافة جديدة +</button>
+                        </div>
+                        <p style="color:#555;">إدارة الإضافات.</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: TOOLS -->
+                <div id="section-tools" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">أدوات</span>
+                        </div>
+                        <p style="color:#555;">أدوات النظام والصيانة.</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: SETTINGS -->
+                <div id="section-settings" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">الإعدادات</span>
+                        </div>
+                        <p style="color:#555;">إعدادات عامة للنظام.</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: EMAIL -->
+                <div id="section-email" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">ايميل</span>
+                        </div>
+                        <p style="color:#555;">إرسال بريد وإعداداته.</p>
+                    </div>
+                </div>
+
                 <!-- SECTION: USERS -->
                 <div id="section-users" class="d-none">
                     <div class="card-section">
                         <div class="section-header">
-                            <span class="section-title">قائمة المستخدمين</span>
+                            <span class="section-title">الأعضاء</span>
                             <button onclick="openAddUserModal()" class="btn btn-primary">إضافة مستخدم +</button>
                         </div>
                         <table class="data-table">

@@ -120,11 +120,19 @@ function showSection(sectionId) {
 
     // Update Header Title
     const titles = {
-        'dashboard': 'ملخص النظام',
-        'users': 'إدارة المستخدمين',
-        'employees': 'شؤون الموظفين',
+        'dashboard': 'الرئيسية',
+        'users': 'الأعضاء',
+        'employees': 'الموظفين',
         'cms': 'إعدادات البيانات (CMS)',
-        'services': 'الشكاوى والطلبات'
+        'services': 'الشكاوى والطلبات',
+        'media': 'وسائط',
+        'pages': 'صفحات',
+        'comments': 'تعليقات',
+        'appearance': 'مظهر',
+        'plugins': 'إضافات',
+        'tools': 'أدوات',
+        'settings': 'الإعدادات',
+        'email': 'ايميل'
     };
     document.getElementById('page-title').textContent = titles[sectionId];
 }
