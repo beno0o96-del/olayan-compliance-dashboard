@@ -209,6 +209,7 @@ function applyAdminLang(){
     if(descUpdate) descUpdate.textContent = lang==='ar' ? 'تحديث فقط: دمج ذكي يحافظ على الموجود ويحدّث القيم ويضيف الجديد.' : 'Update Only: Smart merge that keeps existing, updates fields, and adds new.';
     if(descReplace) descReplace.textContent = lang==='ar' ? 'استبدال كامل: يستبدل القائمة بالكامل بالمصدر القادم.' : 'Replace All: Replaces the entire list with the incoming source.';
     if(descSources) descSources.textContent = lang==='ar' ? 'مصادر التحديث: Excel، JSON من GitHub، JSON محلي، تعديل يدوي عبر اللوحة.' : 'Update sources: Excel, GitHub JSON, local JSON, manual edits via the admin panel.';
+    renderMergeModeUI();
 }
 
 // --- EMPLOYEES LOGIC ---
@@ -474,6 +475,7 @@ function renderMergeModeUI(){
     const btnReplace = document.getElementById('btn-mode-replace');
     const btnMergeCms = document.getElementById('btn-mode-merge-cms');
     const btnReplaceCms = document.getElementById('btn-mode-replace-cms');
+    const badge = document.getElementById('merge-mode-indicator');
     if(btnMerge) {
         btnMerge.style.opacity = mode==='merge' ? '1' : '0.6';
         btnMerge.style.border = mode==='merge' ? '2px solid #4facfe' : '';
@@ -489,6 +491,15 @@ function renderMergeModeUI(){
     if(btnReplaceCms) {
         btnReplaceCms.style.opacity = mode==='replace' ? '1' : '0.6';
         btnReplaceCms.style.border = mode==='replace' ? '2px solid #e11d48' : '';
+    }
+    if(badge){
+        const lang = localStorage.getItem('admin_lang') || 'ar';
+        const title = lang==='ar' ? 'وضع الدمج:' : 'Merge Mode:';
+        const text = lang==='ar' ? (mode==='merge' ? 'تحديث فقط' : 'استبدال كامل') : (mode==='merge' ? 'Update Only' : 'Replace All');
+        badge.textContent = `${title} ${text}`;
+        const color = mode==='merge' ? '#4facfe' : '#e11d48';
+        badge.style.color = color;
+        badge.style.border = `1px solid ${color}`;
     }
 }
 
