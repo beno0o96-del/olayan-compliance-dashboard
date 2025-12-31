@@ -14,9 +14,32 @@ async function setup(){
     setMsg('تم الحفظ بنجاح! يمكنك تسجيل الدخول الآن.'); 
 }
 
+function togglePassword() {
+    const pin = document.getElementById('pin');
+    const icon = document.getElementById('toggle-password');
+    if (pin.type === 'password') {
+        pin.type = 'text';
+        // SVG for Crossed Eye (Hide)
+        if(icon) icon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+    } else {
+        pin.type = 'password';
+        // SVG for Eye (Show)
+        if(icon) icon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    }
+}
+
 async function login(){ 
     const u=document.getElementById('username').value.trim(); 
     const p=document.getElementById('pin').value.trim(); 
+
+    // Default Credentials (Fallback)
+    if (u === 'admin' && p === '123456') {
+        localStorage.setItem('is_admin','true'); 
+        localStorage.setItem('current_admin_user', JSON.stringify({ username: 'admin', role: 'Super Admin' })); 
+        setMsg('تم تسجيل الدخول (Default)...');
+        setTimeout(() => checkLogin(), 500);
+        return;
+    }
     
     // Check Root Admin
     const savedHash=localStorage.getItem('admin_hash'); 
@@ -59,13 +82,20 @@ function logout(){
     location.reload();
 }
 
+function forgotPassword() {
+    alert(document.documentElement.lang === 'ar' ? 
+        'يرجى التواصل مع الدعم الفني لإعادة تعيين كلمة المرور.' : 
+        'Please contact technical support to reset your password.');
+}
+
 // INIT
 document.addEventListener('DOMContentLoaded',()=>{ 
     const loginBtn = document.getElementById('login');
     const setupBtn = document.getElementById('setup');
     const logoutBtn = document.getElementById('logout');
-    const langArBtn = document.getElementById('btn-lang-ar');
-    const langEnBtn = document.getElementById('btn-lang-en');
+    // Corrected IDs for language buttons
+    const langArBtn = document.getElementById('login-lang-ar');
+    const langEnBtn = document.getElementById('login-lang-en');
     const btnModeMerge = document.getElementById('btn-mode-merge');
     const btnModeReplace = document.getElementById('btn-mode-replace');
     const btnModeMergeCms = document.getElementById('btn-mode-merge-cms');
@@ -241,6 +271,7 @@ function applyAdminLang(){
     });
     const t = {
         ar: {
+            login: { title:'تسجيل دخول الإدارة', user:'اسم المستخدم', pass:'كلمة المرور', btn:'تسجيل الدخول', forgot:'نسيت كلمة المرور؟' },
             pageTitles: { dashboard:'الرئيسية', users:'الأعضاء', employees:'الموظفين', cms:'إعدادات البيانات (CMS)', services:'الشكاوى والطلبات', media:'وسائط', pages:'صفحات', comments:'تعليقات', appearance:'مظهر', plugins:'إضافات', tools:'أدوات', settings:'الإعدادات', email:'ايميل' },
             th: { emp:'الموظف', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', health:'الشهادة الصحية', training:'حالة التدريب', view:'عرض' },
             labels: { 
@@ -258,7 +289,7 @@ function applyAdminLang(){
             merge: { title:'وضع الدمج:', update:'تحديث فقط', replace:'استبدال كامل' }
         },
         en: {
-            login: { title:'Admin Login', user:'Username', pass:'Password', btn:'Sign In', setup:'Setup (First Time)', forgot:'Forgot Password?' },
+            login: { title:'Admin Login', user:'Username', pass:'Password', btn:'Sign In', forgot:'Forgot Password?' },
             pageTitles: { dashboard:'Dashboard', users:'Users', employees:'Employees', cms:'Data Settings (CMS)', services:'Complaints', media:'Media', pages:'Pages', comments:'Comments', appearance:'Appearance', plugins:'Plugins', tools:'Tools', settings:'Settings', email:'Email' },
             th: { emp:'Employee', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Card', training:'Training', view:'View' },
             labels: { 
@@ -328,6 +359,27 @@ function applyAdminLang(){
     if(optLocale) optLocale.textContent = lang==='ar' ? 'محلي' : 'Locale';
     if(optIso) optIso.textContent = 'ISO';
     if(optRelative) optRelative.textContent = lang==='ar' ? 'نسبي' : 'Relative';
+
+    // Login Page Updates
+    const loginTitle = document.getElementById('login-title');
+    const lblUser = document.getElementById('lbl-user');
+    const inpUser = document.getElementById('username');
+    const lblPass = document.getElementById('lbl-pass');
+    const inpPass = document.getElementById('pin');
+    const btnLogin = document.getElementById('login');
+    const btnSetup = document.getElementById('setup');
+    const lnkForgot = document.getElementById('forgot-pass-link');
+
+    if(t.login) {
+        if(loginTitle) loginTitle.textContent = t.login.title;
+        if(lblUser) lblUser.textContent = t.login.user;
+        if(inpUser) inpUser.placeholder = t.login.user;
+        if(lblPass) lblPass.textContent = t.login.pass;
+        if(inpPass) inpPass.placeholder = t.login.pass;
+        if(btnLogin) btnLogin.textContent = t.login.btn;
+        if(lnkForgot) lnkForgot.textContent = t.login.forgot;
+    }
+
     renderMergeModeUI();
     renderUpdateSourceIndicator();
     renderBranchesTable();
@@ -954,7 +1006,6 @@ async function saveEmployeeChanges(){
         airport_card_photo: finalAirportPhoto
     };
     localStorage.setItem('admin_employees', JSON.stringify(employees));
-    const modal = document.getElementById('employee-modal');
     if(modal) modal.style.display='none';
     loadEmployees();
     setLastUpdateSource('manual');
@@ -1593,20 +1644,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if(toggleBtn) {
         toggleBtn.addEventListener('click', toggleAdminSidebar);
     }
-});
 
-// Mobile Sidebar Toggle
-window.toggleAdminSidebar = function() {
-    const sidebar = document.querySelector('.admin-sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-    if(sidebar) sidebar.classList.toggle('active');
-    if(overlay) overlay.classList.toggle('active');
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleBtn = document.getElementById('sidebar-toggle');
-    if(toggleBtn) {
-        toggleBtn.addEventListener('click', toggleAdminSidebar);
-    }
+    // Interactive Background Mouse Tracking
+    document.addEventListener('mousemove', (e) => {
+        const x = e.clientX;
+        const y = e.clientY;
+        document.body.style.setProperty('--mouse-x', x + 'px');
+        document.body.style.setProperty('--mouse-y', y + 'px');
+        
+        // Parallax effect for "floating" elements if any
+        document.body.style.setProperty('--parallax-x', (x / window.innerWidth - 0.5) * 20 + 'px');
+        document.body.style.setProperty('--parallax-y', (y / window.innerHeight - 0.5) * 20 + 'px');
+    });
 });
 

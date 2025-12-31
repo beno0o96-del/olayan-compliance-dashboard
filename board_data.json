@@ -13,9 +13,9 @@
   ],
   "violations": {
     "western": [
-        { "branch": { "en": "Jeddah Branch #4", "ar": "فرع جدة #4" }, "type": { "en": "Critical Safety Violation", "ar": "مخالفة سلامة حرجة" }, "level": { "en": "High", "ar": "عالي" }, "color": "#ff1744" },
-        { "branch": { "en": "Makkah Branch #2", "ar": "فرع مكة #2" }, "type": { "en": "Hygiene Warning", "ar": "تنبيه نظافة" }, "level": { "en": "Med", "ar": "متوسط" }, "color": "#FFC107" },
-        { "branch": { "en": "Taif Branch #1", "ar": "فرع الطائف #1" }, "type": { "en": "License Renewal", "ar": "تجديد رخصة" }, "level": { "en": "Low", "ar": "منخفض" }, "color": "#00e676" }
+        { "branch": { "en": "Jeddah Branch", "ar": "فرع جدة" }, "type": { "en": "Critical Safety Violation", "ar": "مخالفة سلامة حرجة" }, "level": { "en": "High", "ar": "عالي" }, "color": "#ff1744" },
+        { "branch": { "en": "Makkah Branch", "ar": "فرع مكة" }, "type": { "en": "Hygiene Warning", "ar": "تنبيه نظافة" }, "level": { "en": "Med", "ar": "متوسط" }, "color": "#FFC107" },
+        { "branch": { "en": "Taif Branch", "ar": "فرع الطائف" }, "type": { "en": "License Renewal", "ar": "تجديد رخصة" }, "level": { "en": "Low", "ar": "منخفض" }, "color": "#00e676" }
     ],
     "central": [
         { "branch": { "en": "Riyadh Main", "ar": "الرياض الرئيسي" }, "type": { "en": "Staff Uniform", "ar": "زي الموظفين" }, "level": { "en": "Low", "ar": "منخفض" }, "color": "#00e676" },

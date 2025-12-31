@@ -169,20 +169,43 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: flowerFloat 6s ease-in-out infinite !important;
 }
 
 .petal {
     position: absolute;
     width: 30px;
     height: 30px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border: 1px solid rgba(255,255,255,0.2);
+    background: linear-gradient(135deg, var(--flower-color, #4facfe), rgba(255,255,255,0.2)) !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
     border-radius: 50% 50% 0 50%;
     transform-origin: 100% 100%; /* Pivot from center */
     transform: rotate(var(--r)) scale(var(--s));
     top: 50%; left: 50%;
     margin-top: -15px; margin-left: -15px;
-    transition: all 0.5s ease;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3) !important;
+    opacity: 0.8;
+    animation: petalPulse 4s ease-in-out infinite !important;
+    animation-delay: calc(var(--i) * 0.5s);
+    mix-blend-mode: screen;
+}
+
+@keyframes flowerFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-5px) rotate(5deg); }
+}
+
+@keyframes petalPulse {
+    0%, 100% { 
+        transform: rotate(var(--r)) scale(var(--s)); 
+        opacity: 0.8;
+        box-shadow: 0 0 5px var(--flower-color);
+    }
+    50% { 
+        transform: rotate(var(--r)) scale(calc(var(--s) * 1.2)); 
+        opacity: 1;
+        box-shadow: 0 0 20px var(--flower-color);
+    }
 }
 
 /* Gauge Grid */
@@ -403,4 +426,133 @@ body {
     top: 20px;
     left: 20px;
     pointer-events: none;
+}
+
+/* Operational Roadmap (New) */
+.ops-roadmap-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px 0;
+    padding-inline-start: 30px; /* Space for line */
+    overflow: hidden; /* For scanner */
+    min-height: 200px;
+}
+
+.ops-line {
+    position: absolute;
+    inset-inline-start: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ops-scanner {
+    position: absolute;
+    inset-inline-start: 10px;
+    top: 0;
+    width: 2px;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, #00d2be, transparent);
+    animation: scanLine 3s linear infinite;
+    z-index: 1;
+}
+
+@keyframes scanLine {
+    0% { top: -100px; }
+    100% { top: 100%; }
+}
+
+.ops-item {
+    position: relative;
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.ops-item.active {
+    opacity: 1;
+}
+
+.ops-marker {
+    position: absolute;
+    inset-inline-start: -24px;
+    top: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 2px solid #64748b;
+    z-index: 2;
+    transition: all 0.3s;
+}
+
+.ops-item.active .ops-marker {
+    background: #00d2be;
+    border-color: #00d2be;
+    box-shadow: 0 0 10px rgba(0, 210, 190, 0.5);
+}
+
+.ops-item.pulsing .ops-marker {
+    animation: pulseMarker 1.5s infinite;
+}
+
+@keyframes pulseMarker {
+    0% { box-shadow: 0 0 0 0 rgba(0, 210, 190, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 210, 190, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 210, 190, 0); }
+}
+
+.ops-content {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s, background 0.2s;
+    cursor: default;
+}
+
+.ops-item:hover .ops-content {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+}
+
+.ops-content h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.95rem;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+}
+
+.ops-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.ops-bar div {
+    height: 100%;
+    background: #00d2be;
+    border-radius: 3px;
+}
+
+.loading-bar {
+    background: linear-gradient(45deg, #00d2be 25%, #00e676 50%, #00d2be 75%);
+    background-size: 200% 100%;
+    animation: loadBar 2s linear infinite;
+}
+
+@keyframes loadBar {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+.ops-status {
+    font-size: 0.75rem;
+    color: #00d2be;
+    font-weight: 600;
 }

@@ -179,7 +179,7 @@
       .brand-logo-circle {
           width: 36px;
           height: 36px;
-          background: #fff;
+          background: transparent; /* Changed from #fff to transparent */
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -187,14 +187,16 @@
           font-weight: 900;
           color: #d62300;
           font-size: 1rem;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          /* Removed box-shadow so it blends */
           flex-shrink: 0;
+          overflow: hidden; 
       }
       .brand-logo-img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain; 
           border-radius: 50%;
+          padding: 0; /* Removed padding */
       }
       .opening-brand {
           margin-bottom: 0 !important;
@@ -203,7 +205,7 @@
   </style>
 
   <!-- JS -->
-  <script src="app.js?v=3" defer></script>
+  <script src="app.js?v=6" defer></script>
   <script src="od_config.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.37.0/dist/msal-browser.min.js" defer></script>
   <script src="onedrive_activity.js" defer></script>
@@ -376,7 +378,7 @@
             <span class="opening-status status-opening-soon" data-en="Opening Soon" data-ar="قريباً">قريباً</span>
             <div class="opening-content">
                 <div class="opening-brand-row">
-                    <div class="brand-logo-circle">BK</div>
+                    <div class="brand-logo-circle"><img src="bk-logo.png" class="brand-logo-img" alt="BK"></div>
                     <div class="opening-brand">Burger King</div>
                 </div>
                 <div class="opening-location" data-en="Najran Region" data-ar="منطقة نجران">منطقة نجران</div>
@@ -404,7 +406,7 @@
             <span class="opening-status status-opening-soon" data-en="Opening Soon" data-ar="قريباً">قريباً</span>
             <div class="opening-content">
                 <div class="opening-brand-row">
-                    <div class="brand-logo-circle">BK</div>
+                    <div class="brand-logo-circle"><img src="bk-logo.png" class="brand-logo-img" alt="BK"></div>
                     <div class="opening-brand">Burger King</div>
                 </div>
                 <div class="opening-location" data-en="Tabuk Airport" data-ar="مطار تبوك">مطار تبوك</div>
@@ -432,7 +434,7 @@
             <span class="opening-status status-opening-soon" data-en="Opening Soon" data-ar="قريباً">قريباً</span>
             <div class="opening-content">
                 <div class="opening-brand-row">
-                    <div class="brand-logo-circle">BK</div>
+                    <div class="brand-logo-circle"><img src="bk-logo.png" class="brand-logo-img" alt="BK"></div>
                     <div class="opening-brand">Burger King</div>
                 </div>
                 <div class="opening-location" data-en="Taif Airport" data-ar="مطار الطايف">مطار الطايف</div>
@@ -460,7 +462,7 @@
             <span class="opening-status status-opening-soon" data-en="Opening Soon" data-ar="قريباً">قريباً</span>
             <div class="opening-content">
                 <div class="opening-brand-row">
-                    <div class="brand-logo-circle">BK</div>
+                    <div class="brand-logo-circle"><img src="bk-logo.png" class="brand-logo-img" alt="BK"></div>
                     <div class="opening-brand">Burger King</div>
                 </div>
                 <div class="opening-location" data-en="Jazan Airport" data-ar="مطار جازان">مطار جازان</div>

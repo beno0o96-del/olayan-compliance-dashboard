@@ -976,7 +976,7 @@ function updateBoardDashboard(data) {
                 div.style.animationDelay = `${projIndex * 0.2}s`;
                 
                 div.innerHTML = `
-                    <div class="flower-shape">
+                    <div class="flower-shape" style="--flower-color: ${proj.color || '#4facfe'};">
                         ${petalsHtml}
                     </div>
                     <span>${name}</span>
@@ -995,10 +995,18 @@ function updateBoardDashboard(data) {
             const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
             data.gauges.forEach(g => {
                 const label = g.label[currentLang] || g.label.en;
+                
+                // Determine color based on value
+                const val = parseFloat((g.value || "0").replace('%', ''));
+                let color = '#f44336'; // Default Red < 60
+                if (val >= 90) color = '#4caf50';      // Green
+                else if (val >= 75) color = '#00d2be'; // Cyan/Teal
+                else if (val >= 60) color = '#FFC107'; // Amber
+
                 const div = document.createElement('div');
                 div.className = 'gauge-item';
                 div.innerHTML = `
-                    <div class="gauge-circle" style="--p: ${g.p};">
+                    <div class="gauge-circle" style="--p: ${g.p}; --c: ${color};">
                         <div class="gauge-inner">${g.value}</div>
                     </div>
                     <span style="font-size:0.8rem;">${label}</span>
@@ -1217,7 +1225,10 @@ function updateBoardDashboard(data) {
                     div.setAttribute('data-val', val);
                     if (item.color) div.style.background = item.color; // Optional override
                     
-                    div.innerHTML = `<span>${label}</span>`;
+                    div.innerHTML = `
+                        <span class="t-label">${label}</span>
+                        <div class="t-val">${item.val}</div>
+                    `;
                     container.appendChild(div);
                     
                     setTimeout(() => {
@@ -1731,7 +1742,8 @@ window.onerror = function(message, source, lineno, colno, error) {
         <div style="font-size: 4rem; margin-bottom: 20px;">🤖</div>
         <h1 style="font-size: 2.5rem; margin-bottom: 10px;" dir="rtl">سنعود قريباً</h1>
         <h2 style="font-size: 1.2rem; color: #a0c4ff; font-weight: normal;">We Will Be Back Soon</h2>
-        <p style="margin-top: 20px; color: #666; font-size: 0.8rem;">Technical Issue Detected</p>
+        <p style="margin-top: 20px; color: #ff6b6b; font-size: 0.9rem; direction: ltr; font-family: monospace; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">Error: ${message}<br><small>${source}:${lineno}</small></p>
+        <button onclick="document.getElementById('maintenance-overlay').remove()" style="margin-top:20px;padding:10px 20px;cursor:pointer;background:#4facfe;border:none;border-radius:5px;color:white;">Dismiss / إغلاق</button>
     `;
     
     document.body.appendChild(overlay);
@@ -1739,11 +1751,16 @@ window.onerror = function(message, source, lineno, colno, error) {
 };
 
 // Admin Access Control
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if user is admin (simple localStorage check)
-    const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('is_admin') === 'true';
-    const adminLink = document.getElementById('admin-link');
-    // if (adminLink) adminLink.style.display = isAdmin ? '' : 'none'; // Commented out to allow access to login page
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check if user is admin (simple localStorage check)
+        const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('is_admin') === 'true';
+        
+        const adminLink = document.getElementById('admin-link');
+        if (adminLink) {
+             // Always show for now to ensure access logic works, or rely on HTML visibility
+             adminLink.style.display = ''; 
+        }
+
     
     // Elements restricted to admin
     const restrictedSelectors = [
@@ -1763,16 +1780,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // If we are on admin.html and not admin, show access denied
-    /* 
-    // DISABLED: admin.html handles its own login view. This block was preventing the login screen from showing.
     if (window.location.pathname.includes('admin.html') && !isAdmin) {
-         document.body.innerHTML = `
-            <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#0b0e2b;color:white;flex-direction:column;font-family:Arial;">
-                <h1>Access Denied / تم رفض الوصول</h1>
-                <p>Admins Only / للمشرفين فقط</p>
-                <a href="index.html" style="color:#a0c4ff;margin-top:20px;">Go Home</a>
-            </div>
-        `;
+         // Check if it's the login screen, we should allow access
+         if(document.getElementById('login-section') && document.getElementById('login-section').style.display !== 'none') {
+             // Allow
+         } else {
+             // It might be trying to show dashboard content
+             // But admin.html handles its own display logic (login vs dashboard)
+             // So this block in app.js is actually REDUNDANT and HARMFUL if it runs before admin.js sets things up.
+             // We should remove this block or make it smarter.
+             // Given admin.html has a login form, we should NOT block access to the file itself.
+             // admin.js handles showing the login form if not authenticated.
+         }
     }
-    */
 });

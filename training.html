@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="olayan-logo.png">
     <link rel="mask-icon" href="olayan-mark.svg" color="#2d6cdf">
     <meta name="theme-color" content="#0b0e2b">
-    <script src="app.js?v=4" defer></script>
+    <script src="app.js?v=6" defer></script>
     <script src="od_config.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.37.0/dist/msal-browser.min.js" defer></script>
     <script src="onedrive_activity.js" defer></script>
@@ -309,6 +309,127 @@
                 width: 100%;
             }
         }
+        /* ECG / Heartbeat Chart */
+        .ecg-section {
+            display: grid;
+            grid-template-columns: 1fr 250px;
+            gap: 0;
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 200px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .ecg-monitor {
+            position: relative;
+            background: linear-gradient(rgba(11, 14, 43, 0.8), rgba(11, 14, 43, 0.95));
+            overflow: hidden;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Grid Effect */
+        .ecg-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 210, 190, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 190, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .ecg-line-svg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 4px rgba(0, 210, 190, 0.8));
+        }
+
+        .ecg-path {
+            fill: none;
+            stroke: #00d2be;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: ecgDash 3s linear infinite;
+        }
+        
+        .ecg-path.secondary {
+            stroke: #7c4dff;
+            animation-delay: 1.5s;
+            opacity: 0.6;
+        }
+
+        @keyframes ecgDash {
+            0% { stroke-dashoffset: 1000; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .ecg-scanner {
+            position: absolute;
+            top: 0; right: 0;
+            width: 50px; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(11, 14, 43, 1));
+            z-index: 2;
+        }
+
+        .ecg-stats {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .live-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+        }
+
+        .live-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+            box-shadow: 0 0 8px #4caf50;
+            animation: blink 1s infinite;
+        }
+
+        .live-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+        }
+
+        .live-trend {
+            font-size: 0.7rem;
+            color: #4caf50;
+        }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        @media (max-width: 768px) {
+            .ecg-section { grid-template-columns: 1fr; height: auto; }
+            .ecg-monitor { height: 150px; }
+        }
     </style>
 </head>
 <body class="en">
@@ -567,6 +688,41 @@
                 </div>
             </div>
 
+            <!-- New ECG / Heartbeat Section -->
+            <div class="ecg-section">
+                <div class="ecg-monitor">
+                    <div class="ecg-grid"></div>
+                    <svg class="ecg-line-svg" viewBox="0 0 500 100" preserveAspectRatio="none">
+                        <!-- Simulated Heartbeat Path -->
+                        <path class="ecg-path" d="M0,50 L50,50 L60,20 L70,80 L80,50 L120,50 L130,10 L140,90 L150,50 L200,50 L210,30 L220,70 L230,50 L300,50 L310,15 L320,85 L330,50 L400,50 L410,25 L420,75 L430,50 L500,50" />
+                        <!-- Secondary Path (Ghost) -->
+                        <path class="ecg-path secondary" d="M0,50 L40,50 L50,30 L60,70 L70,50 L150,50 L160,20 L170,80 L180,50 L250,50 L260,40 L270,60 L280,50 L350,50 L360,10 L370,90 L380,50 L500,50" />
+                    </svg>
+                    <div class="ecg-scanner"></div>
+                </div>
+                <div class="ecg-stats">
+                    <div class="live-stat-item">
+                        <div class="live-label">
+                            <span class="live-dot"></span>
+                            <span data-en="Health Card" data-ar="الكرت الصحي">Health Card</span>
+                        </div>
+                        <div class="live-value" id="live-health-val">98.5%</div>
+                        <span class="live-trend">▲</span>
+                    </div>
+                    <div class="live-stat-item">
+                        <div class="live-label">
+                            <span class="live-dot" style="background:#7c4dff; box-shadow:0 0 8px #7c4dff;"></span>
+                            <span data-en="Health Training" data-ar="التدريب الصحي">Health Training</span>
+                        </div>
+                        <div class="live-value" id="live-train-val">92.3%</div>
+                        <span class="live-trend">▲</span>
+                    </div>
+                    <div style="font-size:0.7rem; color:#64748b; text-align:center;">
+                        <span data-en="Real-time System Monitoring" data-ar="مراقبة النظام الفورية">Real-time System Monitoring</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -775,6 +931,19 @@
             document.getElementById('kpi-exp-health').textContent = data.health_cards.counts['Expired'];
             document.getElementById('kpi-valid-train').textContent = data.training.counts['Valid'];
             document.getElementById('kpi-valid-health').textContent = data.health_cards.counts['Valid'];
+
+            // Simulate Live ECG Data
+            setInterval(() => {
+                const baseTrain = 98.5;
+                const baseHealth = 92.3;
+                const variance = (Math.random() * 0.4) - 0.2; // +/- 0.2
+                
+                // Swapped IDs in HTML, so we swap logic here to match labels
+                // live-health-val is now for Health Card (was baseTrain)
+                // live-train-val is now for Health Training (was baseHealth)
+                document.getElementById('live-health-val').textContent = (baseTrain + variance).toFixed(1) + '%';
+                document.getElementById('live-train-val').textContent = (baseHealth + (variance * 0.8)).toFixed(1) + '%';
+            }, 2000);
         }
     </script>
 </body>

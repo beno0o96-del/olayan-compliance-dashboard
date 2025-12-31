@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دخول الموظفين | Olayan Employee Login</title>
-    <link rel="stylesheet" href="style-admin.css">
+    <link rel="stylesheet" href="style-admin.css?v=3">
     <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
     <style>
         /* Reusing style-admin.css for consistency but overriding specific parts if needed */
+        /* body background handled by admin-body class in style-admin.css */
         body {
-            background-color: #0f172a;
+            /* background-color: #0f172a; Removed to allow fluid gradient */
             color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -22,55 +23,12 @@
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 400px;
-            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .login-box {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 20px;
-            text-align: right;
-        }
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 1rem;
-            box-sizing: border-box; /* Ensure padding doesn't affect width */
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #4facfe;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
-        }
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            font-size: 1rem;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: #fff;
-            width: 100%;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
-        }
+        /* Removing .login-box, .form-control, .btn styles to inherit from style-admin.css for consistency */
+        
         .back-link {
             display: block;
             margin-top: 20px;
@@ -83,7 +41,7 @@
         }
     </style>
 </head>
-<body>
+<body class="admin-body">
 
     <div class="login-wrapper">
         <div class="login-box">
@@ -97,7 +55,15 @@
             </div>
             <div class="form-group">
                 <label style="display:block; margin-bottom:8px; color:#cbd5e1;" data-en="Password" data-ar="كلمة المرور">كلمة المرور</label>
-                <input type="password" id="emp-pass" class="form-control" placeholder="••••••••">
+                <div style="position: relative;">
+                    <input type="password" id="emp-pass" class="form-control" placeholder="••••••••" style="padding-right: 40px;">
+                    <span id="toggle-password" class="eye-icon" onclick="togglePassword()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+                </div>
             </div>
             
             <button onclick="handleLogin()" class="btn btn-primary" data-en="Login" data-ar="تسجيل الدخول">تسجيل الدخول</button>
@@ -137,6 +103,18 @@
             }
         }
 
+        function togglePassword() {
+            const passInput = document.getElementById('emp-pass');
+            const icon = document.getElementById('toggle-password');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+            } else {
+                passInput.type = 'password';
+                icon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+            }
+        }
+
         function handleLogin() {
             const id = document.getElementById('emp-id').value;
             const pass = document.getElementById('emp-pass').value;
@@ -147,9 +125,21 @@
             }
 
             // Simple mock login for now
-            alert(document.documentElement.lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Login Successful!');
-            // Redirect to Employees page or Home
-            window.location.href = 'employees.html';
+            // Allow any login with "EMP" prefix or the specific test user
+            if (id === 'EMP001' && pass === '123456') {
+                localStorage.setItem('current_employee', JSON.stringify({ id: 'EMP001', name: 'Test Employee' }));
+                alert(document.documentElement.lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Login Successful!');
+                window.location.href = 'employees.html';
+                return;
+            }
+
+            // Generic check
+            if (id.length > 2 && pass.length > 3) {
+                 localStorage.setItem('current_employee', JSON.stringify({ id: id, name: 'Employee' }));
+                 window.location.href = 'employees.html';
+            } else {
+                 alert(document.documentElement.lang === 'ar' ? 'بيانات الدخول غير صحيحة (جرب EMP001 / 123456)' : 'Invalid credentials (Try EMP001 / 123456)');
+            }
         }
 
         // Set initial lang based on previous preference or default
