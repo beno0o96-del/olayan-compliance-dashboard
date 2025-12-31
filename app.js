@@ -1109,9 +1109,12 @@ function updateBoardDashboard(data) {
                 
                 const div = document.createElement('div');
                 div.className = 'metric-card';
+                // Set CSS variable for dynamic styling
+                div.style.setProperty('--metric-color', m.color || '#fff');
+                
                 div.innerHTML = `
                     <div class="metric-label">${label}</div>
-                    <div class="metric-value" style="color: ${m.color}">${m.value}</div>
+                    <div class="metric-value">${m.value}</div>
                     <div class="metric-subtext">
                         <span class="sub-dot" style="background-color: ${m.subcolor}"></span>
                         ${subtext}

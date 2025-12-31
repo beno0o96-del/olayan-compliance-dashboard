@@ -593,12 +593,116 @@ function deleteComplaint(id) {
 
 // GITHUB PUBLISH
 function saveTokenAndPublish() {
-    const token = document.getElementById('gh-token').value.trim();
-    if(!token && !localStorage.getItem('gh_token')) {
+    const tokenInput = document.getElementById('gh-token').value.trim();
+    const token = tokenInput || localStorage.getItem('gh_token');
+    if(!token){
         alert('يرجى إدخال Token!');
         return;
     }
-    if(token) localStorage.setItem('gh_token', token);
-    
-    alert('سيتم تنفيذ النشر... (محاكاة)');
+    localStorage.setItem('gh_token', token);
+    const msgEl = document.getElementById('save-msg');
+    const setMsg = (t) => { if (msgEl) { msgEl.textContent = t; } };
+    setMsg('جاري تجهيز البيانات للنشر...');
+
+    try {
+        const val = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : '';
+        };
+
+        const header_kpis = {
+            roi: { value: val('cms-roi') || "37.8%", trend: "up", color: "#4caf50" },
+            effectiveness: { value: val('cms-eff') || "93.0%", trend: "flat", color: "#FFC107" },
+            risks: { value: val('cms-risk') || "12.0", trend: "down", color: "#f44336" }
+        };
+
+        const gauges = [
+            { label: { en: "Western", ar: "الغربية" }, value: val('cms-reg-west') || "67%", p: (parseInt(val('cms-reg-west')) || 67) + "deg" },
+            { label: { en: "Central", ar: "الوسطى" }, value: val('cms-reg-cen') || "85%", p: (parseInt(val('cms-reg-cen')) || 85) + "deg" },
+            { label: { en: "Eastern", ar: "الشرقية" }, value: val('cms-reg-east') || "92%", p: (parseInt(val('cms-reg-east')) || 92) + "deg" }
+        ];
+
+        const projects = [
+            { name: { en: "Strengths", ar: "نقاط القوة" }, roi: val('cms-proj-strength') || "14.5%", color: "#4caf50", petals: [1, 0.8, 1.1, 0.9, 1.2] },
+            { name: { en: "Weaknesses", ar: "نقاط الضعف" }, roi: val('cms-proj-weak') || "11.2%", color: "#a0c4ff", petals: [0.9, 1.1, 0.8, 1.0, 0.9] },
+            { name: { en: "Goal", ar: "الهدف" }, roi: val('cms-proj-goal') || "18.1%", color: "#FFC107", petals: [1.2, 1.2, 1.1, 1.3, 1.2] }
+        ];
+
+        const stars = [
+            { label: { en: "IT", ar: "التقنية" }, value: val('cms-dept-it') || "77%" },
+            { label: { en: "Finance", ar: "المالية" }, value: val('cms-dept-fin') || "83%" },
+            { label: { en: "Maintenance", ar: "الصيانة" }, value: val('cms-dept-maint') || "90%" }
+        ];
+
+        const financials = {
+            revenue: [
+                { sector: { en: "Burger King", ar: "برجر كنج" }, actual: "209.8m", target: "204.9m", var: "2.4%", trend: "up" },
+                { sector: { en: "Texas Chicken", ar: "تكساس تشيكن" }, actual: "3,323m", target: "2,266m", var: "2.5%", trend: "up" },
+                { sector: { en: "Buffalo Wild Wings", ar: "بافلو وايلد وينجز" }, actual: "189.5m", target: "186.6m", var: "(1.6%)", trend: "down" }
+            ],
+            expenses: [
+                { type: { en: "Municipal", ar: "البلدية" }, actual: "2,156", budget: "2,058", var: "(4.8%)", trend: "down" },
+                { type: { en: "Labor Office", ar: "مكتب العمل" }, actual: "410.5", budget: "393.2", var: "4.4%", trend: "up" },
+                { type: { en: "Civil Defense", ar: "الدفاع المدني" }, actual: "264.3", budget: "255.9", var: "3.3%", trend: "up" }
+            ]
+        };
+
+        const boardData = {
+            header_kpis,
+            financials,
+            projects,
+            gauges,
+            stars
+        };
+
+        const owner = 'beno0o96-del';
+        const repo = 'olayan-compliance-dashboard';
+        const path = 'board_data.json';
+        const commitMsg = `Data Sync via Admin: ${new Date().toISOString()}`;
+
+        const encodeBase64 = (obj) => {
+            const jsonStr = JSON.stringify(obj, null, 2);
+            return btoa(unescape(encodeURIComponent(jsonStr)));
+        };
+
+        const contentB64 = encodeBase64(boardData);
+
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json'
+        };
+
+        const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+        fetch(getUrl, { headers })
+            .then(r => r.json())
+            .then(meta => {
+                const sha = meta && meta.sha ? meta.sha : undefined;
+                const body = {
+                    message: commitMsg,
+                    content: contentB64,
+                    sha
+                };
+                return fetch(getUrl, {
+                    method: 'PUT',
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            })
+            .then(resp => {
+                if (!resp.ok) throw new Error('GitHub publish failed');
+                return resp.json();
+            })
+            .then(() => {
+                setMsg('✅ تم تحديث البيانات في المستودع (board_data.json)');
+                setTimeout(() => setMsg(''), 4000);
+            })
+            .catch(err => {
+                console.error(err);
+                setMsg('❌ فشل النشر إلى GitHub. تحقق من الـ Token أو الصلاحيات.');
+            });
+    } catch (e) {
+        console.error(e);
+        setMsg('❌ حدث خطأ أثناء تجهيز البيانات للنشر.');
+    }
 }

@@ -32,6 +32,7 @@ body {
     border-radius: 12px;
     padding: 20px;
     border: 1px solid var(--glass-border);
+    border-top: 3px solid var(--metric-color, var(--glass-border)); /* Top border with metric color */
     position: relative;
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -39,8 +40,8 @@ body {
 
 .metric-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-    border-color: rgba(0, 210, 190, 0.3);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 15px var(--metric-color, rgba(0, 210, 190, 0.2)); /* Glow effect */
+    border-color: var(--metric-color, rgba(0, 210, 190, 0.3));
 }
 
 .metric-label {
@@ -55,9 +56,8 @@ body {
     font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 10px;
-    background: linear-gradient(to right, #fff, #cbd5e1);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--metric-color, #fff); /* Use the dynamic color */
+    text-shadow: 0 0 10px var(--metric-color); /* Glow effect for text */
 }
 
 .metric-subtext {
@@ -124,11 +124,14 @@ body {
 
 .modern-table tbody tr {
     background: rgba(255, 255, 255, 0.02);
-    transition: background 0.2s;
+    transition: all 0.2s ease;
+    border-left: 2px solid transparent;
 }
 
 .modern-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    transform: translateX(5px);
+    border-left: 2px solid var(--accent-cyan);
 }
 
 .modern-table td {
