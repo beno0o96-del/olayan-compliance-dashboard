@@ -66,15 +66,20 @@ document.addEventListener('DOMContentLoaded',()=>{
     const logoutBtn = document.getElementById('logout');
     const langArBtn = document.getElementById('btn-lang-ar');
     const langEnBtn = document.getElementById('btn-lang-en');
+    const btnModeMerge = document.getElementById('btn-mode-merge');
+    const btnModeReplace = document.getElementById('btn-mode-replace');
 
     if(loginBtn) loginBtn.onclick=login; 
     if(setupBtn) setupBtn.onclick=setup; 
     if(logoutBtn) logoutBtn.onclick=logout; 
     if(langArBtn) langArBtn.onclick=()=>setAdminLang('ar');
     if(langEnBtn) langEnBtn.onclick=()=>setAdminLang('en');
+    if(btnModeMerge) btnModeMerge.onclick=()=>setMergeMode('merge');
+    if(btnModeReplace) btnModeReplace.onclick=()=>setMergeMode('replace');
     
     checkLogin();
     applyAdminLang();
+    renderMergeModeUI();
 });
 
 function checkLogin() {
@@ -430,6 +435,29 @@ function exportEmployees() {
     document.body.removeChild(link);
 }
 
+function setMergeMode(mode){
+    localStorage.setItem('employees_merge_mode', mode);
+    renderMergeModeUI();
+}
+
+function getMergeMode(){
+    return localStorage.getItem('employees_merge_mode') || 'merge';
+}
+
+function renderMergeModeUI(){
+    const mode = getMergeMode();
+    const btnMerge = document.getElementById('btn-mode-merge');
+    const btnReplace = document.getElementById('btn-mode-replace');
+    if(btnMerge) {
+        btnMerge.style.opacity = mode==='merge' ? '1' : '0.6';
+        btnMerge.style.border = mode==='merge' ? '2px solid #4facfe' : '';
+    }
+    if(btnReplace) {
+        btnReplace.style.opacity = mode==='replace' ? '1' : '0.6';
+        btnReplace.style.border = mode==='replace' ? '2px solid #e11d48' : '';
+    }
+}
+
 function mergeEmployees(existingArr, incomingArr){
     const existing = Array.isArray(existingArr) ? existingArr : [];
     const incoming = Array.isArray(incomingArr) ? incomingArr : [];
@@ -469,9 +497,14 @@ function autoImportEmployeesFromGitHub(){
         if(json && json.content){
             const decoded = decodeURIComponent(escape(atob(json.content)));
             const incoming = JSON.parse(decoded);
-            const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-            const { merged } = mergeEmployees(existing, incoming);
-            localStorage.setItem('admin_employees', JSON.stringify(merged));
+            const mode = getMergeMode();
+            if(mode==='replace'){
+                localStorage.setItem('admin_employees', JSON.stringify(incoming));
+            } else {
+                const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+                const { merged } = mergeEmployees(existing, incoming);
+                localStorage.setItem('admin_employees', JSON.stringify(merged));
+            }
             loadEmployees();
         }
     }).catch(()=>{});
@@ -534,9 +567,17 @@ function importEmployeesFromJSON(){
         if(json && json.content){
             const decoded = decodeURIComponent(escape(atob(json.content)));
             const incoming = JSON.parse(decoded);
-            const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-            const { merged, stats } = mergeEmployees(existing, incoming);
-            localStorage.setItem('admin_employees', JSON.stringify(merged));
+            const mode = getMergeMode();
+            let stats = { added:0, updated:0, total:0 };
+            if(mode==='replace'){
+                localStorage.setItem('admin_employees', JSON.stringify(incoming));
+                stats.total = incoming.length;
+            } else {
+                const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+                const res = mergeEmployees(existing, incoming);
+                localStorage.setItem('admin_employees', JSON.stringify(res.merged));
+                stats = res.stats;
+            }
             loadEmployees();
             alert(`تم الدمج من GitHub: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
         } else {
@@ -578,9 +619,17 @@ function importEmployeesFromLocalJSON(){
     reader.onload = () => {
         try {
             const incoming = JSON.parse(reader.result);
-            const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-            const { merged, stats } = mergeEmployees(existing, incoming);
-            localStorage.setItem('admin_employees', JSON.stringify(merged));
+            const mode = getMergeMode();
+            let stats = { added:0, updated:0, total:0 };
+            if(mode==='replace'){
+                localStorage.setItem('admin_employees', JSON.stringify(incoming));
+                stats.total = incoming.length;
+            } else {
+                const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+                const res = mergeEmployees(existing, incoming);
+                localStorage.setItem('admin_employees', JSON.stringify(res.merged));
+                stats = res.stats;
+            }
             loadEmployees();
             alert(`تم الدمج من الملف المحلي: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
         } catch {
