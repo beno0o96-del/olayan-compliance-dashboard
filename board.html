@@ -216,7 +216,7 @@
         <button class="nav-btn" onclick="location.href='training.html'" data-en="Training" data-ar="التدريب">Training</button> 
         <button class="nav-btn" onclick="location.href='branches.html'" data-en="Branches" data-ar="الفروع">Branches</button> 
         <button class="nav-btn active" onclick="location.href='board.html'" data-en="Board Report" data-ar="تقرير الإدارة">Board Report</button>
-        <button class="nav-btn" onclick="location.href='login.html'" data-en="Login" data-ar="دخول">Login</button>
+        <button class="nav-btn" onclick="location.href='admin.html'" data-en="Login" data-ar="دخول">Login</button>
         <button class="nav-btn" onclick="location.href='admin.html'" id="nav-admin-link" style="display:none;" data-en="Admin" data-ar="إدارة">Admin</button>
       </nav> 
       <div class="lang-switch">
@@ -244,6 +244,11 @@
             <a href="training.html" class="side-link"><i>🎓</i> <span data-en="Training" data-ar="التدريب">Training</span></a>
             <a href="branches.html" class="side-link"><i>🏬</i> <span data-en="Branches" data-ar="الفروع">Branches</span></a>
             <a href="board.html" class="side-link active"><i>📊</i> <span data-en="Management Report" data-ar="تقرير الإدارة">Management Report</span></a>
+            
+            <a href="#" class="side-link" onclick="toggleAIChat(); return false;">
+                <i>🤖</i> <span data-en="Customer Service" data-ar="خدمة العملاء">Customer Service</span>
+            </a>
+
             <a href="login.html" class="side-link"><i>🔐</i> <span data-en="Login" data-ar="تسجيل الدخول">Login</span></a>
             <!-- Admin link moved to header for better accessibility -->
         </nav>

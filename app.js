@@ -1497,67 +1497,122 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAICustomerService() {
-    // Check if widget already exists
-    if (document.getElementById('ai-widget-btn')) return;
+    // Check if chat window already exists
+    if (document.getElementById('ai-chat-window')) return;
 
-    // Create Floating Button
-    const btn = document.createElement('button');
-    btn.id = 'ai-widget-btn';
-    btn.innerHTML = '🤖 خدمة العملاء';
-    Object.assign(btn.style, {
-        position: 'fixed', bottom: '20px', right: '20px',
-        zIndex: '1001', padding: '12px 20px', borderRadius: '30px',
-        border: 'none', background: '#2d6cdf', color: '#fff',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.3)', cursor: 'pointer',
-        fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
-    });
-    document.body.appendChild(btn);
-
-    // Create Chat Window
+    // Create Chat Window (Hidden by default)
     const chatWindow = document.createElement('div');
     chatWindow.id = 'ai-chat-window';
+    
+    // Better Mobile & Web Responsive Styles
     Object.assign(chatWindow.style, {
-        position: 'fixed', bottom: '80px', right: '20px',
-        width: '350px', height: '500px', maxHeight: '80vh',
-        background: '#16213e', borderRadius: '15px',
-        boxShadow: '0 5px 25px rgba(0,0,0,0.5)', zIndex: '1001',
-        display: 'none', flexDirection: 'column', overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.1)'
+        position: 'fixed', 
+        bottom: '0', 
+        right: '0',
+        width: '100%', 
+        maxWidth: '400px', // Max width for desktop
+        height: '100%', // Full height on mobile default
+        maxHeight: '600px', // Max height on desktop
+        background: '#16213e', 
+        zIndex: '2001', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        boxShadow: '-5px 0 25px rgba(0,0,0,0.5)',
+        borderTopLeftRadius: '20px',
+        borderTopRightRadius: '20px',
+        transform: 'translateY(110%)',
+        transition: 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
+        visibility: 'hidden'
     });
+    
+    // Adjust for Desktop
+    if (window.innerWidth > 768) {
+        chatWindow.style.right = '20px';
+        chatWindow.style.bottom = '20px';
+        chatWindow.style.height = '600px';
+        chatWindow.style.borderRadius = '20px';
+    }
+
+    // Bilingual Content
+    const lang = localStorage.getItem('preferred-lang') || 'en';
+    const isAr = lang === 'ar';
+    const txt = {
+        title: isAr ? 'خدمة العملاء الذكية' : 'Smart Customer Service',
+        welcome: isAr ? 'مرحباً بك في شركة العليان الغذائية. كيف يمكنني مساعدتك اليوم؟' : 'Welcome to Olayan Food Services. How can I help you today?',
+        placeholder: isAr ? 'اكتب استفسارك...' : 'Type your inquiry...',
+        complaintBtn: isAr ? 'رفع شكوى للإدارة' : 'File a Complaint',
+        complaintTitle: isAr ? 'رفع شكوى' : 'File Complaint',
+        namePlace: isAr ? 'الاسم' : 'Name',
+        contactPlace: isAr ? 'رقم التواصل / البريد' : 'Contact Number / Email',
+        detailsPlace: isAr ? 'تفاصيل الشكوى...' : 'Complaint Details...',
+        send: isAr ? 'إرسال' : 'Send',
+        cancel: isAr ? 'إلغاء' : 'Cancel',
+        alertFill: isAr ? 'يرجى تعبئة الاسم وتفاصيل الشكوى' : 'Please fill in Name and Details',
+        alertSent: isAr ? 'تم إرسال الشكوى بنجاح للإدارة' : 'Complaint sent successfully to administration',
+        msgSent: isAr ? 'تم استلام شكواك وسيتم مراجعتها من قبل الإدارة.' : 'Your complaint has been received and will be reviewed by administration.',
+        autoReply: isAr ? 'شكراً لاستفسارك. سيتم الرد عليك قريباً.' : 'Thank you for your inquiry. We will respond shortly.',
+        autoReplyVio: isAr ? "يمكنك الاطلاع على تفاصيل المخالفات في صفحة 'المخالفات'." : "You can check violations details on the 'Violations' page.",
+        autoReplyTime: isAr ? "ساعات العمل الرسمية من 8 صباحاً حتى 6 مساءً." : "Official working hours are 8 AM to 6 PM.",
+        autoReplyComp: isAr ? "لرفع شكوى، يرجى الضغط على زر 'رفع شكوى للإدارة'." : "To file a complaint, please click the 'File a Complaint' button."
+    };
 
     chatWindow.innerHTML = `
-        <div style="background:#0b0e2b; padding:15px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:bold; color:#fff;">خدمة العملاء الذكية</span>
-            <button id="close-chat" style="background:none; border:none; color:#a0c4ff; cursor:pointer; font-size:1.2rem;">&times;</button>
-        </div>
-        <div id="chat-messages" style="flex:1; padding:15px; overflow-y:auto; display:flex; flexDirection:column; gap:10px;">
-            <div style="background:#2d6cdf; color:#fff; padding:8px 12px; borderRadius:10px 10px 0 10px; align-self:flex-end; max-width:80%;">مرحباً بك في شركة العليان الغذائية. كيف يمكنني مساعدتك اليوم؟</div>
-        </div>
-        <div style="padding:10px; background:#0b0e2b; display:grid; gap:5px;">
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="chat-input" placeholder="اكتب استفسارك..." style="flex:1; padding:10px; borderRadius:5px; border:none; background:#1a264e; color:#fff;">
-                <button id="send-btn" style="padding:0 15px; background:#00d2be; border:none; borderRadius:5px; cursor:pointer;">➤</button>
+        <div style="background:#0b0e2b; padding:15px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; border-radius: 20px 20px 0 0;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.5rem;">🤖</span>
+                <span style="font-weight:bold; color:#fff;">${txt.title}</span>
             </div>
-            <button id="complaint-btn" style="width:100%; padding:8px; background:#c62828; color:#fff; border:none; borderRadius:5px; cursor:pointer; margin-top:5px;">رفع شكوى للإدارة</button>
+            <button id="close-chat" style="background:none; border:none; color:#a0c4ff; cursor:pointer; font-size:1.5rem; padding:0 10px;">×</button>
+        </div>
+        <div id="chat-messages" style="flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; scroll-behavior: smooth;">
+            <div style="background:#2d6cdf; color:#fff; padding:10px 15px; border-radius:15px 15px 0 15px; align-self:flex-end; max-width:85%; line-height:1.4;">${txt.welcome}</div>
+        </div>
+        <div style="padding:15px; background:#0b0e2b; display:grid; gap:10px; border-top:1px solid rgba(255,255,255,0.05); border-radius: 0 0 20px 20px;">
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="chat-input" placeholder="${txt.placeholder}" style="flex:1; padding:12px; border-radius:12px; border:1px solid #334155; background:#1e293b; color:#fff;">
+                <button id="send-btn" style="padding:0 20px; background:#00d2be; border:none; border-radius:12px; cursor:pointer; font-size:1.2rem; transition:transform 0.1s;">➤</button>
+            </div>
+            <button id="complaint-btn" style="width:100%; padding:10px; background:rgba(239, 68, 68, 0.15); color:#ef4444; border:1px solid #ef4444; border-radius:12px; cursor:pointer; font-weight:bold; font-size:0.9rem; transition:all 0.2s;">${txt.complaintBtn}</button>
         </div>
         
         <!-- Complaint Form Overlay -->
-        <div id="complaint-form" style="position:absolute; top:0; left:0; width:100%; height:100%; background:#16213e; padding:20px; display:none; flex-direction:column; gap:10px; z-index:10;">
-            <h3 style="color:#fff; margin-bottom:10px;">رفع شكوى</h3>
-            <input id="comp-name" placeholder="الاسم" style="padding:10px; background:#0b0e2b; border:1px solid #333; color:#fff; borderRadius:5px;">
-            <input id="comp-contact" placeholder="رقم التواصل / البريد" style="padding:10px; background:#0b0e2b; border:1px solid #333; color:#fff; borderRadius:5px;">
-            <textarea id="comp-text" placeholder="تفاصيل الشكوى..." style="flex:1; padding:10px; background:#0b0e2b; border:1px solid #333; color:#fff; borderRadius:5px; resize:none;"></textarea>
+        <div id="complaint-form" style="position:absolute; top:0; left:0; width:100%; height:100%; background:#16213e; padding:20px; display:none; flex-direction:column; gap:15px; z-index:10; border-radius:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="color:#fff; margin:0;">${txt.complaintTitle}</h3>
+                <button id="cancel-comp-x" style="background:none; border:none; color:#64748b; font-size:1.5rem; cursor:pointer;">×</button>
+            </div>
+            <input id="comp-name" placeholder="${txt.namePlace}" style="padding:12px; background:#0f172a; border:1px solid #334155; color:#fff; border-radius:8px;">
+            <input id="comp-contact" placeholder="${txt.contactPlace}" style="padding:12px; background:#0f172a; border:1px solid #334155; color:#fff; border-radius:8px;">
+            <textarea id="comp-text" placeholder="${txt.detailsPlace}" style="flex:1; padding:12px; background:#0f172a; border:1px solid #334155; color:#fff; border-radius:8px; resize:none;"></textarea>
             <div style="display:flex; gap:10px;">
-                <button id="submit-comp" style="flex:1; padding:10px; background:#c62828; color:#fff; border:none; borderRadius:5px; cursor:pointer;">إرسال</button>
-                <button id="cancel-comp" style="flex:1; padding:10px; background:#333; color:#fff; border:none; borderRadius:5px; cursor:pointer;">إلغاء</button>
+                <button id="submit-comp" style="flex:2; padding:12px; background:#ef4444; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">${txt.send}</button>
+                <button id="cancel-comp" style="flex:1; padding:12px; background:#334155; color:#fff; border:none; border-radius:8px; cursor:pointer;">${txt.cancel}</button>
             </div>
         </div>
     `;
     document.body.appendChild(chatWindow);
 
+    // Toggle Function
+    window.toggleAIChat = function() {
+        const isHidden = chatWindow.style.visibility === 'hidden' || chatWindow.style.visibility === '';
+        
+        if (isHidden) {
+            chatWindow.style.visibility = 'visible';
+            chatWindow.style.transform = 'translateY(0)';
+        } else {
+            chatWindow.style.transform = 'translateY(110%)';
+            setTimeout(() => chatWindow.style.visibility = 'hidden', 300);
+        }
+
+        // Close Sidebar if open
+        const sideMenu = document.getElementById('sideMenu');
+        if (sideMenu && sideMenu.classList.contains('active')) {
+            if (typeof toggleMenu === 'function') toggleMenu();
+        }
+    };
+
     // Event Listeners
-    btn.onclick = () => chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
-    document.getElementById('close-chat').onclick = () => chatWindow.style.display = 'none';
+    document.getElementById('close-chat').onclick = () => window.toggleAIChat();
     
     const sendBtn = document.getElementById('send-btn');
     const input = document.getElementById('chat-input');
@@ -1566,28 +1621,30 @@ function initAICustomerService() {
     function addMsg(text, isUser = false) {
         const div = document.createElement('div');
         div.textContent = text;
-        div.style.padding = '8px 12px';
-        div.style.maxWidth = '80%';
-        div.style.borderRadius = isUser ? '10px 10px 0 10px' : '10px 10px 10px 0';
+        div.style.padding = '10px 15px';
+        div.style.maxWidth = '85%';
+        div.style.borderRadius = isUser ? '15px 15px 0 15px' : '15px 15px 15px 0';
         div.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
-        div.style.background = isUser ? '#2d6cdf' : '#333';
+        div.style.background = isUser ? '#2d6cdf' : '#334155';
         div.style.color = '#fff';
+        div.style.lineHeight = '1.4';
+        div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
         msgs.appendChild(div);
         msgs.scrollTop = msgs.scrollHeight;
     }
 
     function handleSend() {
-        const txt = input.value.trim();
-        if (!txt) return;
-        addMsg(txt, true);
+        const txtInput = input.value.trim();
+        if (!txtInput) return;
+        addMsg(txtInput, true);
         input.value = '';
         
         // Simple AI Logic
         setTimeout(() => {
-            let response = "شكراً لاستفسارك. سيتم الرد عليك قريباً.";
-            if (txt.includes('مخالفة') || txt.includes('غرامة')) response = "يمكنك الاطلاع على تفاصيل المخالفات في صفحة 'المخالفات'. إذا كنت تعتقد أن هناك خطأ، يمكنك رفع شكوى.";
-            else if (txt.includes('دوام') || txt.includes('وقت')) response = "ساعات العمل الرسمية من 8 صباحاً حتى 6 مساءً.";
-            else if (txt.includes('شكوى')) response = "لرفع شكوى، يرجى الضغط على زر 'رفع شكوى للإدارة' أسفل المحادثة.";
+            let response = txt.autoReply;
+            if (txtInput.includes('مخالفة') || txtInput.includes('غرامة') || txtInput.toLowerCase().includes('violation')) response = txt.autoReplyVio;
+            else if (txtInput.includes('دوام') || txtInput.includes('وقت') || txtInput.toLowerCase().includes('time')) response = txt.autoReplyTime;
+            else if (txtInput.includes('شكوى') || txtInput.toLowerCase().includes('complaint')) response = txt.autoReplyComp;
             
             addMsg(response);
         }, 1000);
@@ -1601,9 +1658,12 @@ function initAICustomerService() {
     const compForm = document.getElementById('complaint-form');
     const submitComp = document.getElementById('submit-comp');
     const cancelComp = document.getElementById('cancel-comp');
+    const cancelCompX = document.getElementById('cancel-comp-x');
 
     compBtn.onclick = () => compForm.style.display = 'flex';
-    cancelComp.onclick = () => compForm.style.display = 'none';
+    const closeComp = () => compForm.style.display = 'none';
+    cancelComp.onclick = closeComp;
+    cancelCompX.onclick = closeComp;
 
     submitComp.onclick = () => {
         const name = document.getElementById('comp-name').value;
@@ -1611,7 +1671,7 @@ function initAICustomerService() {
         const text = document.getElementById('comp-text').value;
         
         if (!name || !text) {
-            alert('يرجى تعبئة الاسم وتفاصيل الشكوى');
+            alert(txt.alertFill);
             return;
         }
 
@@ -1628,13 +1688,13 @@ function initAICustomerService() {
         existing.push(complaint);
         localStorage.setItem('complaints', JSON.stringify(existing));
 
-        alert('تم إرسال الشكوى بنجاح للإدارة');
-        compForm.style.display = 'none';
+        alert(txt.alertSent);
+        closeComp();
         document.getElementById('comp-name').value = '';
         document.getElementById('comp-contact').value = '';
         document.getElementById('comp-text').value = '';
         
-        addMsg("تم استلام شكواك وسيتم مراجعتها من قبل الإدارة.");
+        addMsg(txt.msgSent);
     };
 }
 

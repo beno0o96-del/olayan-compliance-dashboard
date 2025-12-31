@@ -82,10 +82,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     const controlMenu = document.getElementById('control-menu');
     const btnChangePhoto = document.getElementById('btn-change-photo');
     const empPhotoInput = document.getElementById('emp-photo');
+    const forgotBtn = document.getElementById('forgot-pass-link');
+    const toggleBtn = document.getElementById('toggle-password');
 
     if(loginBtn) loginBtn.onclick=login; 
     if(setupBtn) setupBtn.onclick=setup; 
     if(logoutBtn) logoutBtn.onclick=logout; 
+    if(forgotBtn) forgotBtn.onclick=forgotPassword;
+    if(toggleBtn) toggleBtn.onclick=togglePassword;
     if(langArBtn) langArBtn.onclick=()=>setAdminLang('ar');
     if(langEnBtn) langEnBtn.onclick=()=>setAdminLang('en');
     if(btnModeMerge) btnModeMerge.onclick=()=>setMergeMode('merge');
