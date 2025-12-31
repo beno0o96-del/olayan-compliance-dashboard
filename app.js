@@ -1483,34 +1483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const heroOverlay = document.querySelector('.hero-overlay');
     const isAdmin = localStorage.getItem('is_admin') === 'true';
     if (heroOverlay && isAdmin) {
-        const s = document.createElement('div');
-        s.className = 'slide';
-        const u = localStorage.getItem('admin_user') || 'Admin';
-        const odLink = "https://olayanfinancingcompany-my.sharepoint.com/:x:/g/personal/b1_ahmed_olayanfood_com/IQATTkGdfgOoRJuk2xYJnVIEAeoAQnH8uAZX__W3thNLLaM?email=beno0o96%40gmail.com&e=UZAecn";
-        
-        window.toggleLiteMode = function() {
-            const curr = document.body.classList.contains('lite');
-            if (curr) {
-                document.body.classList.remove('lite');
-                localStorage.setItem('prefers-lite','false');
-            } else {
-                document.body.classList.add('lite');
-                localStorage.setItem('prefers-lite','true');
-            }
-        };
-
-        s.innerHTML = `
-            <div class="hero-badge" style="background:#c62828;">أدمن</div>
-            <h2>لوحة التحكم</h2>
-            <p class="hero-sub-text">مرحباً ${u}، لديك الصلاحيات الكاملة</p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:400px; margin:20px auto;">
-                <button onclick="window.open('${odLink}', '_blank')" class="nav-btn" style="background:#0078d4; color:white; font-size:0.9rem;">📂 ملف ون درايف</button>
-                <button onclick="location.href='admin.html'" class="nav-btn" style="background:#16213e; border:1px solid #fff; color:white; font-size:0.9rem;">⚙️ إدارة الصلاحيات</button>
-                <button onclick="location.href='validator.html'" class="nav-btn" style="background:#00d2be; color:black; font-size:0.9rem;">🧪 فحص JSON</button>
-                <button onclick="toggleLiteMode()" class="nav-btn" style="background:#f5f5f5; color:#333; font-size:0.9rem;">☀️/🌑 وضع العرض</button>
-            </div>
-        `;
-        heroOverlay.appendChild(s);
+       // Admin overlay removed as per user request
     }
     initSlideshow();
     window.USE_JSON = true;

@@ -291,24 +291,86 @@ body:not(.ar) .admin-main {
     margin-bottom: 10px;
 }
 
-/* Login Screen Override */
+/* Enhanced Login Screen (Dark Theme) */
 .login-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background: #0b0e2b; /* Deep Blue */
+    font-family: 'Segoe UI', sans-serif;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    background: #f4f6f9;
+    z-index: 9999;
 }
 
 .login-box {
-    background: white;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-radius: 16px;
     width: 100%;
     max-width: 400px;
     text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.login-box h2 {
+    color: #fff;
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+.login-box label {
+    display: block;
+    margin-bottom: 8px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-align: inherit; /* Inherit from body/container dir */
+}
+
+.login-box .form-control {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.login-box .form-control:focus {
+    outline: none;
+    border-color: #4facfe;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+}
+
+.login-box .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+.login-box .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #94a3b8;
+    transition: all 0.3s;
+}
+
+.login-box .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 /* Utilities */

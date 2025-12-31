@@ -254,6 +254,7 @@ function applyAdminLang(){
             merge: { title:'وضع الدمج:', update:'تحديث فقط', replace:'استبدال كامل' }
         },
         en: {
+            login: { title:'Admin Login', user:'Username', pass:'Password', btn:'Sign In', setup:'Setup (First Time)', forgot:'Forgot Password?' },
             pageTitles: { dashboard:'Dashboard', users:'Users', employees:'Employees', cms:'Data Settings (CMS)', services:'Complaints', media:'Media', pages:'Pages', comments:'Comments', appearance:'Appearance', plugins:'Plugins', tools:'Tools', settings:'Settings', email:'Email' },
             th: { emp:'Employee', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Card', training:'Training', view:'View' },
             labels: { 
@@ -1574,6 +1575,21 @@ function importBranchesFromText(){
         ta.value='';
     }
 }
+
+// Mobile Sidebar Toggle
+window.toggleAdminSidebar = function() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if(sidebar) sidebar.classList.toggle('active');
+    if(overlay) overlay.classList.toggle('active');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    if(toggleBtn) {
+        toggleBtn.addEventListener('click', toggleAdminSidebar);
+    }
+});
 
 // Mobile Sidebar Toggle
 window.toggleAdminSidebar = function() {
