@@ -155,13 +155,13 @@ function applyAdminLang(){
         ar: {
             pageTitles: { dashboard:'الرئيسية', users:'الأعضاء', employees:'الموظفين', cms:'إعدادات البيانات (CMS)', services:'الشكاوى والطلبات', media:'وسائط', pages:'صفحات', comments:'تعليقات', appearance:'مظهر', plugins:'إضافات', tools:'أدوات', settings:'الإعدادات', email:'ايميل' },
             th: { emp:'الموظف', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', health:'الشهادة الصحية', training:'حالة التدريب', view:'عرض' },
-            labels: { name:'الاسم', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', health:'انتهاء الصحية', train1:'تدريب 1', train2:'تدريب 2', email:'البريد الإلكتروني' },
+            labels: { name:'الاسم', position:'الوظيفة', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', status:'الحالة', health:'انتهاء الصحية', train1:'تدريب 1', train2:'تدريب 2', email:'البريد الإلكتروني' },
             buttons: { save:'حفظ', cancel:'إلغاء' }
         },
         en: {
             pageTitles: { dashboard:'Dashboard', users:'Users', employees:'Employees', cms:'Data Settings (CMS)', services:'Complaints', media:'Media', pages:'Pages', comments:'Comments', appearance:'Appearance', plugins:'Plugins', tools:'Tools', settings:'Settings', email:'Email' },
             th: { emp:'Employee', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Card', training:'Training', view:'View' },
-            labels: { name:'Name', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Expiry', train1:'Training 1', train2:'Training 2', email:'Email' },
+            labels: { name:'Name', position:'Position', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', status:'Status', health:'Health Expiry', train1:'Training 1', train2:'Training 2', email:'Email' },
             buttons: { save:'Save', cancel:'Cancel' }
         }
     }[lang];
@@ -170,7 +170,7 @@ function applyAdminLang(){
         const el = document.getElementById(mapTh[k]);
         if(el) el.textContent = t.th[k];
     });
-    const mapLbl = { name:'lbl-name', iqama:'lbl-iqama', brand:'lbl-brand', branch:'lbl-branch', region:'lbl-region', health:'lbl-health', train1:'lbl-train1', train2:'lbl-train2', email:'lbl-email' };
+    const mapLbl = { name:'lbl-name', position:'lbl-position', iqama:'lbl-iqama', brand:'lbl-brand', branch:'lbl-branch', region:'lbl-region', status:'lbl-status', health:'lbl-health', train1:'lbl-train1', train2:'lbl-train2', email:'lbl-email' };
     Object.keys(mapLbl).forEach(k=>{
         const el = document.getElementById(mapLbl[k]);
         if(el) el.textContent = t.labels[k];
@@ -271,6 +271,7 @@ function generateRandomEmployees() {
     const positions = ["مدير فرع", "كاشير", "مشرف صالة", "طباخ", "محاسب", "أمن وسلامة", "خدمة عملاء"];
     const regions = ["الوسطى", "الغربية", "الشرقية", "الجنوبية", "الشمالية"];
     const brands = ["BK", "TC", "BWW"];
+    const statuses = ["نشط", "إجازة", "موقوف"];
 
     const employees = [];
     
@@ -287,8 +288,10 @@ function generateRandomEmployees() {
             name: names[Math.floor(Math.random() * names.length)],
             iqama: "2" + Math.floor(Math.random() * 1000000000),
             brand: brands[Math.floor(Math.random() * brands.length)],
+            position: positions[Math.floor(Math.random() * positions.length)],
             branch: branches[Math.floor(Math.random() * branches.length)],
             region: regions[Math.floor(Math.random() * regions.length)],
+            status: statuses[Math.floor(Math.random() * statuses.length)],
             health_expiry: healthExp,
             train_status_1: train1Status,
             train_status_2: train2Status
@@ -379,10 +382,12 @@ function viewEmployee(iqama) {
     if(idD) idD.textContent = `ID: ${emp.id||'-'}`;
     const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val||''; };
     set('emp-name', emp.name);
+    set('emp-position', emp.position);
     set('emp-iqama', emp.iqama);
     set('emp-brand', emp.brand);
     set('emp-branch', emp.branch);
     set('emp-region', emp.region);
+    set('emp-status', emp.status);
     set('emp-health', emp.health_expiry);
     set('emp-train1', emp.train_status_1);
     set('emp-train2', emp.train_status_2);
@@ -452,9 +457,11 @@ function saveEmployeeChanges(){
     employees[idx] = {
         ...employees[idx],
         name: document.getElementById('emp-name').value.trim(),
+        position: document.getElementById('emp-position').value.trim(),
         brand: document.getElementById('emp-brand').value.trim(),
         branch: document.getElementById('emp-branch').value.trim(),
         region: document.getElementById('emp-region').value.trim(),
+        status: document.getElementById('emp-status').value.trim(),
         health_expiry: document.getElementById('emp-health').value.trim(),
         train_status_1: document.getElementById('emp-train1').value.trim(),
         train_status_2: document.getElementById('emp-train2').value.trim(),
@@ -465,6 +472,52 @@ function saveEmployeeChanges(){
     if(modal) modal.style.display='none';
     loadEmployees();
     alert('تم حفظ بيانات الموظف');
+}
+
+function importEmployeesFromJSON(){
+    const owner = 'beno0o96-del';
+    const repo = 'olayan-compliance-dashboard';
+    const path = 'employees_data.json';
+    const token = localStorage.getItem('gh_token') || '';
+    if(!token){ alert('يرجى إدخال GitHub Token في لوحة CMS أولاً.'); return; }
+    fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+    }).then(r=>r.json()).then(json=>{
+        if(json && json.content){
+            const decoded = decodeURIComponent(escape(atob(json.content)));
+            const employees = JSON.parse(decoded);
+            localStorage.setItem('admin_employees', JSON.stringify(employees));
+            loadEmployees();
+            alert('تم استيراد الموظفين من JSON خارجي بنجاح');
+        } else {
+            alert('لم يتم العثور على ملف employees_data.json في المستودع');
+        }
+    }).catch(()=>alert('فشل الاستيراد من GitHub'));
+}
+
+function publishEmployeesJSON(){
+    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const owner = 'beno0o96-del';
+    const repo = 'olayan-compliance-dashboard';
+    const path = 'employees_data.json';
+    const token = localStorage.getItem('gh_token') || '';
+    if(!token){ alert('يرجى إدخال GitHub Token في لوحة CMS أولاً.'); return; }
+    const contentB64 = btoa(unescape(encodeURIComponent(JSON.stringify(employees, null, 2))));
+    // Get current SHA if file exists
+    fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+    }).then(r=>r.ok ? r.json() : Promise.resolve({})).then(meta=>{
+        const body = {
+            message: `Employees Sync: ${new Date().toISOString()}`,
+            content: contentB64
+        };
+        if(meta.sha) body.sha = meta.sha;
+        return fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
+            body: JSON.stringify(body)
+        });
+    }).then(r=>r.json()).then(()=>alert('تم نشر ملف الموظفين إلى GitHub JSON بنجاح')).catch(()=>alert('فشل النشر إلى GitHub'));
 }
 // USER MANAGEMENT
 function loadUsers() {

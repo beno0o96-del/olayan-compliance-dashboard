@@ -432,6 +432,10 @@
                         <input id="emp-name" class="form-control" type="text">
                     </div>
                     <div>
+                        <label id="lbl-position" style="display:block; color:#666; font-size:0.85rem;">الوظيفة</label>
+                        <input id="emp-position" class="form-control" type="text">
+                    </div>
+                    <div>
                         <label id="lbl-iqama" style="display:block; color:#666; font-size:0.85rem;">رقم الهوية/الإقامة</label>
                         <input id="emp-iqama" class="form-control" type="text" disabled>
                     </div>
@@ -446,6 +450,10 @@
                     <div>
                         <label id="lbl-region" style="display:block; color:#666; font-size:0.85rem;">المنطقة</label>
                         <input id="emp-region" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-status" style="display:block; color:#666; font-size:0.85rem;">الحالة</label>
+                        <input id="emp-status" class="form-control" type="text">
                     </div>
                     <div>
                         <label id="lbl-health" style="display:block; color:#666; font-size:0.85rem;">انتهاء الصحية</label>
@@ -470,6 +478,10 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div style="position:fixed; bottom:20px; right:20px; display:flex; gap:10px; z-index:9999;">
+        <button class="btn btn-secondary" onclick="importEmployeesFromJSON()">استيراد الموظفين (JSON خارجي)</button>
+        <button class="btn btn-primary" onclick="publishEmployeesJSON()">حفظ الموظفين (JSON خارجي)</button>
     </div>
 
 </body>
