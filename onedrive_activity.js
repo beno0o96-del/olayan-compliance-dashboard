@@ -37,7 +37,15 @@ async function renderOneDrive(){
   try{
     const cfg = window.OD_CONFIG;
     if (!cfg || !cfg.enabled){ setInfo('آخر تحديث: ربط ون درايف غير مفعل'); return; }
-    if (!window.msal){ setInfo('آخر تحديث: حمّل MSAL'); return; }
+    // Bypass MSAL check for now to show name
+    // if (!window.msal){ setInfo('آخر تحديث: حمّل MSAL'); return; }
+    
+    // Fallback if MSAL is missing or fails
+    if (!window.msal) {
+        setInfo('آخر تحديث: Bandar A.Abdullwahab');
+        return;
+    }
+
     // setInfo('جاري التحقق من ون درايف...');
     const token = await ensureAuth(cfg);
     const item = await getDriveItem(token, cfg);
