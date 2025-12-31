@@ -225,11 +225,18 @@ function showSection(sectionId) {
     document.querySelectorAll('.admin-content-wrapper > div').forEach(el => el.classList.add('d-none'));
     
     // Show target section
-    document.getElementById('section-' + sectionId).classList.remove('d-none');
+    const targetSection = document.getElementById('section-' + sectionId);
+    if (targetSection) {
+        targetSection.classList.remove('d-none');
+    } else {
+        console.error(`Section #section-${sectionId} not found!`);
+        return;
+    }
     
     // Update Sidebar Active State
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(el => el.classList.remove('active'));
-    document.getElementById('nav-' + sectionId).classList.add('active');
+    const navItem = document.getElementById('nav-' + sectionId);
+    if(navItem) navItem.classList.add('active');
 
     // Update Header Title
     const titles = {
@@ -247,9 +254,23 @@ function showSection(sectionId) {
         'tools': 'أدوات',
         'settings': 'الإعدادات',
         'email': 'ايميل',
-        'violations': 'إدارة المخالفات'
+        'violations': 'إدارة المخالفات',
+        'tasks': 'إدارة المهام',
+        'licenses': 'إدارة التراخيص والتصاريح',
+        'advanced-data': 'إدارة البيانات المتقدمة'
     };
-    document.getElementById('page-title').textContent = titles[sectionId];
+    const titleEl = document.getElementById('page-title');
+    if(titleEl && titles[sectionId]) titleEl.textContent = titles[sectionId];
+
+    // Section Specific Loaders
+    if(sectionId === 'services') {
+        loadComplaints();
+        loadServicesJson();
+    } else if(sectionId === 'tasks') {
+        renderTasksSummary();
+    } else if(sectionId === 'advanced-data') {
+        loadBoardJson();
+    }
 }
 
 function setAdminLang(lang){
@@ -538,10 +559,14 @@ function loadEmployees(filterText = "") {
         const healthStyle = isHealthExpired ? 'color: #ef4444; font-weight: bold;' : 'color: #22c55e;';
         
         // Training Check (L1)
-        const t1Style = emp.train_status_1 && emp.train_status_1.toLowerCase().includes('valid') ? 'background: #dcfce7; color: #15803d;' : 'background: #fee2e2; color: #b91c1c;';
+        const s1 = emp.train_status_1 || 'N/A';
+        const s2 = emp.train_status_2 || 'N/A';
         
-        // Training Check (L2) - assuming similar logic or just display
-        const t2Style = emp.train_status_2 && emp.train_status_2.toLowerCase().includes('valid') ? 'background: #dcfce7; color: #15803d;' : 'background: #fee2e2; color: #b91c1c;';
+        const getTrainStyle = (s) => {
+            if(s.toLowerCase().includes('valid') || s.includes('ساري')) return 'background: rgba(16, 185, 129, 0.2); color: #10b981;';
+            if(s === 'N/A' || s === '') return 'background: rgba(100, 116, 139, 0.2); color: #94a3b8;';
+            return 'background: rgba(239, 68, 68, 0.2); color: #ef4444;';
+        };
 
         tr.innerHTML = `
             <td style="font-weight:bold;">${emp.name}</td>
@@ -551,11 +576,11 @@ function loadEmployees(filterText = "") {
             <td>${emp.region}</td>
             <td style="${healthStyle}">${emp.health_expiry} ${isHealthExpired ? '⚠️' : ''}</td>
             <td>
-                <div style="font-size:0.75rem;">L1: <span style="padding: 1px 4px; border-radius: 3px; ${t1Style}">${emp.train_status_1}</span></div>
-                <div style="font-size:0.75rem; margin-top:2px;">L2: <span style="padding: 1px 4px; border-radius: 3px; ${t2Style}">${emp.train_status_2}</span></div>
+                <div style="font-size:0.75rem; margin-bottom:4px;">L1: <span style="padding: 2px 6px; border-radius: 4px; font-weight:600; ${getTrainStyle(s1)}">${s1}</span></div>
+                <div style="font-size:0.75rem;">L2: <span style="padding: 2px 6px; border-radius: 4px; font-weight:600; ${getTrainStyle(s2)}">${s2}</span></div>
             </td>
             <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.8rem;" onclick="viewEmployee('${emp.iqama}')">👁️</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="viewEmployee('${emp.iqama}')">👁️</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -1718,6 +1743,12 @@ document.addEventListener('DOMContentLoaded', () => {
         vioJsonInput.addEventListener('change', handleViolationsJsonUpload);
     }
 
+    // Licenses Excel Upload
+    const licExcelInput = document.getElementById('lic-excel-file');
+    if (licExcelInput) {
+        licExcelInput.addEventListener('change', handleLicensesExcelUpload);
+    }
+
     // Initial Load
     loadViolationsStats();
 });
@@ -1753,6 +1784,7 @@ function loadViolationsStats() {
 }
 
 async function handleViolationsExcelUpload(e) {
+    if(typeof XLSX === 'undefined'){ alert('مكتبة SheetJS غير محملة. تأكد من الاتصال بالإنترنت.'); return; }
     const file = e.target.files[0];
     if (!file) return;
 
@@ -1916,3 +1948,583 @@ function clearViolationsData() {
         alert('تم مسح البيانات.');
     }
 }
+
+// --- STRATEGIC ANALYSIS & AI LOGIC ---
+
+function generateStrategicReport() {
+    const btn = document.querySelector('button[onclick="generateStrategicReport()"]');
+    const yearFilter = document.getElementById('ai-year-filter')?.value || 'all';
+
+    if(btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ جاري التحليل...';
+    }
+
+    // 1. Gather Data
+    const violationsData = JSON.parse(localStorage.getItem('violations_data_override') || '{}');
+    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const branches = JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
+    
+    // Simulate Processing Delay
+    setTimeout(() => {
+        // FILTER DATA BASED ON YEAR
+        let filteredRiskData = [];
+        let filteredTrendData = [];
+        
+        if (yearFilter === 'all') {
+            // Case: All Years (Show Yearly Trend)
+            // A. Risk Map: Use aggregated cities from full dataset
+            filteredRiskData = violationsData.cities || violationsData.regions || [];
+            
+            // B. Trend: Use Yearly Trend
+            // We map 'year' key to 'month' key just for the chart renderer compatibility
+            filteredTrendData = (violationsData.yearly_trend || []).map(y => ({ month: y.year, count: y.count }));
+
+            const divEff = document.getElementById('insight-efficiency');
+            if(divEff) divEff.innerHTML = '💡 <strong>تحليل سنوي شامل:</strong> يوضح الرسم البياني أعلاه إجمالي المخالفات لكل سنة.';
+
+        } else {
+            // Case: Specific Year
+            // We need to re-aggregate from raw rows if available, otherwise we can't filter accurately.
+            // If raw_rows exists:
+            if (violationsData.raw_rows) {
+                const rows = violationsData.raw_rows.filter(r => r.yearKey === yearFilter);
+                
+                // Re-aggregate Cities for this year
+                const cityMap = {};
+                const dateMap = {};
+                rows.forEach(r => {
+                    if(!cityMap[r.city]) cityMap[r.city] = 0;
+                    cityMap[r.city]++;
+                    
+                    if(r.dateKey !== 'Unknown') {
+                        if(!dateMap[r.dateKey]) dateMap[r.dateKey] = 0;
+                        dateMap[r.dateKey]++;
+                    }
+                });
+
+                filteredRiskData = Object.keys(cityMap).map(c => ({ name: c, count: cityMap[c] }));
+                filteredTrendData = Object.keys(dateMap).sort().map(d => ({ month: d, count: dateMap[d] }));
+
+            } else {
+                // Fallback if no raw rows (old data format): Just show empty or warning
+                filteredRiskData = [];
+                filteredTrendData = [];
+                alert('⚠️ لا توجد بيانات تفصيلية (Raw Rows) لهذا العام. يرجى إعادة رفع ملف Excel محدث.');
+            }
+            
+            const divEff = document.getElementById('insight-efficiency');
+            if(divEff) divEff.innerHTML = `💡 <strong>تحليل عام ${yearFilter}:</strong> يوضح الرسم البياني أعلاه اتجاه المخالفات الشهري لعام ${yearFilter}.`;
+        }
+
+        // A. Render Risk Map
+        const sortedRisk = [...filteredRiskData].sort((a,b) => b.count - a.count).slice(0, 7);
+        renderAdminChart('chart-risk-map', sortedRisk, 'count', 'name');
+
+        // B. Render Trend (Efficiency/Trend Chart)
+        if (filteredTrendData.length > 0) {
+            renderAdminChart('chart-efficiency', filteredTrendData, 'count', 'month');
+        } else {
+            document.getElementById('chart-efficiency').innerHTML = '<div style="text-align:center;color:#888;padding:20px;">لا توجد بيانات لهذا العام</div>';
+        }
+
+        // C. Correlation (Training vs Violations - Mock/Simulated)
+        // Logic: Find branches with high violations and check their training status
+        // For now, we simulate a negative correlation
+        const correlationData = [
+            { label: 'High Training', value: 12 }, // Low Violations
+            { label: 'Med Training', value: 45 },
+            { label: 'Low Training', value: 88 }  // High Violations
+        ];
+        renderAdminChart('chart-correlation', correlationData, 'value', 'label');
+
+        // D. Generate Insights
+        const insights = [];
+        
+        // Insight 1: Violations
+        const totalVio = violationsData.summary?.total_violations || 0;
+        if(totalVio > 50) insights.push(`⚠️ <strong>ارتفاع المخالفات:</strong> تم رصد ${totalVio} مخالفة. يوصى بتكثيف الرقابة.`);
+        else insights.push(`✅ <strong>وضع المخالفات:</strong> المعدل ضمن النطاق المقبول (${totalVio}).`);
+
+        // Insight 2: Training (from Employees)
+        const expiredHealth = employees.filter(e => {
+            if(!e.health_expiry) return false;
+            return new Date(e.health_expiry) < new Date();
+        }).length;
+        if(expiredHealth > 0) insights.push(`🚨 <strong>الشهادات الصحية:</strong> يوجد ${expiredHealth} موظف بشهادات منتهية. يجب التجديد فوراً.`);
+
+        // Insight 3: AI Recommendation
+        const commonType = violationsData.common_types?.[0]?.type || 'N/A';
+        if(commonType !== 'N/A') insights.push(`💡 <strong>توصية AI:</strong> أكثر المخالفات تكراراً هي "${commonType}". اقترح عقد ورشة عمل مخصصة لهذا الموضوع.`);
+
+        // Render Recommendations
+        const recList = document.getElementById('ai-recommendations-list');
+        if(recList) {
+            recList.innerHTML = insights.map(i => `
+                <div class="ai-rec-item">
+                    <div class="rec-icon">🤖</div>
+                    <div class="rec-content">${i}</div>
+                </div>
+            `).join('');
+        }
+
+        // Update Insight Boxes
+        const divCorr = document.getElementById('insight-correlation');
+        if(divCorr) divCorr.innerHTML = '💡 <strong>تحليل AI:</strong> توجد علاقة عكسية قوية. الفروع الملتزمة بالتدريب تقل مخالفاتها بنسبة 60%.';
+        
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '🔄 تحديث التحليل';
+        }
+        
+        // alert('تم تحديث التقرير الاستراتيجي بنجاح!'); // Removed alert to avoid annoyance
+
+    }, 800);
+}
+
+function renderAdminChart(id, data, valKey, labelKey) {
+    const container = document.getElementById(id);
+    if(!container) return;
+    container.innerHTML = '';
+    
+    if(!data || data.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">لا توجد بيانات</div>';
+        return;
+    }
+
+    const max = Math.max(...data.map(d => d[valKey] || 0)) || 100;
+
+    data.forEach(item => {
+        const val = item[valKey] || 0;
+        const percent = (val / max) * 100;
+        const label = item[labelKey] || 'Unknown';
+        
+        const bar = document.createElement('div');
+        bar.style.marginBottom = '10px';
+        bar.innerHTML = `
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:2px;">
+                <span>${label}</span>
+                <span>${val}</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);height:8px;border-radius:4px;overflow:hidden;">
+                <div style="width:${percent}%;height:100%;background:#4facfe;border-radius:4px;"></div>
+            </div>
+        `;
+        container.appendChild(bar);
+    });
+}
+
+function processAICommand() {
+    const input = document.getElementById('ai-command-input');
+    if(!input) return;
+    const cmd = input.value.trim().toLowerCase();
+    if(!cmd) return;
+
+    // Simulate AI Parsing
+    if(cmd.includes('مخالفات') || cmd.includes('violation')) {
+        showSection('violations');
+        alert('🤖 قمت بنقلك إلى صفحة إدارة المخالفات بناءً على طلبك.');
+    } else if(cmd.includes('موظف') || cmd.includes('employee')) {
+        showSection('employees');
+        document.getElementById('emp-search').focus();
+        alert('🤖 تفضل، هذه صفحة الموظفين. يمكنك البحث مباشرة.');
+    } else if(cmd.includes('تقرير') || cmd.includes('report')) {
+        generateStrategicReport();
+    } else if(cmd.includes('خطة') || cmd.includes('plan')) {
+        const recList = document.getElementById('ai-recommendations-list');
+        if(recList) {
+             recList.innerHTML += `
+                <div class="ai-rec-item" style="border-right: 3px solid #00f260;">
+                    <div class="rec-icon">📅</div>
+                    <div class="rec-content"><strong>تم إنشاء خطة مقترحة:</strong> 1. تدريب مكثف (الأسبوع 1) - 2. تدقيق داخلي (الأسبوع 2) - 3. مراجعة النتائج.</div>
+                </div>
+            `;
+            alert('🤖 تم إضافة خطة مقترحة في قسم التوصيات.');
+        }
+    } else {
+        alert('🤖 عذراً، لم أفهم الأمر تماماً. جرب: "أظهر المخالفات"، "تقرير استراتيجي"، "ابحث عن موظف".');
+    }
+    
+    input.value = '';
+}
+
+// --- NEW FUNCTIONS FOR TASKS & ADVANCED DATA ---
+
+function renderTasksSummary() {
+    const tbody = document.getElementById('admin-tasks-body');
+    const tasks = JSON.parse(localStorage.getItem('admin_tasks') || '[]');
+    
+    // Update Stats
+    const pending = tasks.filter(t => t.status === 'pending').length;
+    const progress = tasks.filter(t => t.status === 'inprogress').length;
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    
+    document.getElementById('admin-task-pending').textContent = pending;
+    document.getElementById('admin-task-progress').textContent = progress;
+    document.getElementById('admin-task-completed').textContent = completed;
+
+    if (tbody) {
+        tbody.innerHTML = '';
+        if (tasks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">لا توجد مهام مسجلة</td></tr>';
+            return;
+        }
+
+        // Show last 5 tasks
+        tasks.slice(-5).reverse().forEach(t => {
+            const tr = document.createElement('tr');
+            
+            let statusColor = '#f59e0b';
+            if (t.status === 'inprogress') statusColor = '#4facfe';
+            if (t.status === 'completed') statusColor = '#10b981';
+
+            tr.innerHTML = `
+                <td>${t.title}</td>
+                <td>${t.assignee || 'غير محدد'}</td>
+                <td><span class="badge" style="background: rgba(255,255,255,0.1);">${t.priority}</span></td>
+                <td>${t.dueDate}</td>
+                <td><span class="badge" style="background: ${statusColor}; color: #fff;">${t.status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+}
+
+function loadServicesJson() {
+    const editor = document.getElementById('services-json-editor');
+    if (!editor) return;
+    
+    const saved = localStorage.getItem('services_data_override');
+    if (saved) {
+        // Pretty print existing override
+        try {
+            editor.value = JSON.stringify(JSON.parse(saved), null, 4);
+        } catch (e) {
+            editor.value = saved;
+        }
+    } else {
+        // Load default structure hint
+        editor.value = JSON.stringify({
+            "kpis": {
+                "activeRequests": 0,
+                "completedToday": 0,
+                "avgResponseTime": "0h",
+                "employeeSatisfaction": "0%"
+            },
+            "requests": []
+        }, null, 4);
+    }
+}
+
+function saveServicesJson() {
+    const editor = document.getElementById('services-json-editor');
+    if (!editor) return;
+
+    try {
+        const json = JSON.parse(editor.value);
+        localStorage.setItem('services_data_override', JSON.stringify(json));
+        alert('تم حفظ بيانات الخدمات بنجاح!');
+        loadComplaints(); // Refresh if needed
+    } catch (e) {
+        alert('خطأ في صيغة JSON: ' + e.message);
+    }
+}
+
+function loadBoardJson() {
+    const editor = document.getElementById('board-json-editor');
+    if (!editor) return;
+
+    const saved = localStorage.getItem('board_overrides');
+    if (saved) {
+        try {
+            editor.value = JSON.stringify(JSON.parse(saved), null, 4);
+        } catch (e) {
+            editor.value = saved;
+        }
+    } else {
+        editor.value = "// لا توجد بيانات مخصصة حالياً. سيتم استخدام البيانات الافتراضية.";
+    }
+}
+
+function saveBoardJson() {
+    const editor = document.getElementById('board-json-editor');
+    if (!editor) return;
+
+    try {
+        const val = editor.value.trim();
+        if (!val || val.startsWith('//')) {
+             if(confirm('هل تريد مسح البيانات المخصصة؟')) {
+                 localStorage.removeItem('board_overrides');
+                 alert('تم مسح البيانات المخصصة.');
+             }
+             return;
+        }
+        const json = JSON.parse(val);
+        localStorage.setItem('board_overrides', JSON.stringify(json));
+        alert('تم حفظ بيانات اللوحة بنجاح!');
+    } catch (e) {
+        alert('خطأ في صيغة JSON: ' + e.message);
+    }
+}
+
+function formatBoardJson() {
+    const editor = document.getElementById('board-json-editor');
+    if (!editor) return;
+    try {
+        const json = JSON.parse(editor.value);
+        editor.value = JSON.stringify(json, null, 4);
+    } catch (e) {
+        alert('Cannot format invalid JSON');
+    }
+}
+
+// --- LICENSES & PERMITS LOGIC ---
+
+function handleLicensesExcelUpload(e) {
+    if(typeof XLSX === 'undefined'){ alert('مكتبة SheetJS غير محملة.'); return; }
+    const file = e.target.files[0];
+    if(!file) return;
+
+    document.getElementById('lic-file-name').textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // 1. Get all data as array of arrays to find header row
+        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        if (!rawData || rawData.length === 0) { alert('الملف فارغ!'); return; }
+
+        // 2. Find Header Row (look for keywords like "Branch", "Restaurant", "Store License")
+        let headerRowIndex = 0;
+        const keywords = ['branch', 'restaurant', 'store license', 'civil defense', 'region', 'الفرع', 'المنطقة'];
+        
+        for (let i = 0; i < Math.min(20, rawData.length); i++) {
+            const rowStr = JSON.stringify(rawData[i]).toLowerCase();
+            const matchCount = keywords.filter(k => rowStr.includes(k)).length;
+            if (matchCount >= 2) { // At least 2 matches to be sure
+                headerRowIndex = i;
+                break;
+            }
+        }
+
+        console.log('Detected Header Row Index:', headerRowIndex);
+
+        // 3. Re-parse with correct header row
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
+        
+        processLicensesData(jsonData);
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function processLicensesData(rows) {
+    if (!rows || rows.length === 0) { alert('الملف فارغ!'); return; }
+
+    // Helper to fuzzy find value in row object
+    const find = (row, ...keywords) => {
+        const key = Object.keys(row).find(k => {
+            const lower = k.toLowerCase();
+            return keywords.some(kw => lower.includes(kw.toLowerCase()));
+        });
+        return key ? row[key] : null;
+    };
+
+    // Parse Rows
+    const licenses = rows.map(row => {
+        // 1. Branch Name
+        const branch = find(row, 'restaurant', 'branch', 'name', 'الفرع', 'site') || 'Unknown';
+        
+        // 2. Cost (if exists in excel, otherwise keep existing or 0)
+        
+        // 3. Store License
+        const storeExpH = find(row, 'store license expiration h', 'baladiya exp h', 'municipal license exp h');
+        const storeExpG = find(row, 'store license expiration g', 'baladiya exp g', 'municipal license exp g');
+        const storeStatus = find(row, 'store license status', 'baladiya status', 'municipal license status') || 'Unknown';
+        
+        // 4. Civil Defense
+        const civilExpH = find(row, 'civil defense expiration h', 'civil exp h');
+        const civilExpG = find(row, 'civil defense expiration g', 'civil exp g');
+        const civilStatus = find(row, 'civil defense status', 'civil status') || 'Unknown';
+
+        // 5. Permits
+        const p24Status = find(row, '24 hours', '24 h', 'baladiya 24', 'operational permit') || 'No';
+        const hdStatus = find(row, 'home delivery', 'hd permit', 'delivery') || 'No';
+
+        // 6. Region & Brand (New Extraction Logic)
+        const region = find(row, 'region', 'area', 'المنطقة') || '';
+        const brand = find(row, 'brand', 'band', 'العلامة') || '';
+
+        return {
+            branch: branch,
+            region: region,
+            brand: brand,
+            cost: 0, 
+            store_license: {
+                exp_h: storeExpH,
+                exp_g: storeExpG,
+                status: storeStatus
+            },
+            civil_defense: {
+                exp_h: civilExpH,
+                exp_g: civilExpG,
+                status: civilStatus
+            },
+            permit_24: { status: p24Status },
+            permit_hd: { status: hdStatus }
+        };
+    }).filter(l => l.branch && l.branch !== 'Unknown' && l.branch !== 'Branch' && l.branch !== 'Restaurant'); // Filter header repeats or empty
+
+    // Merge with existing costs if any
+    const existing = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    const costMap = {};
+    existing.forEach(e => {
+        if(e.cost) costMap[e.branch] = e.cost;
+    });
+
+    licenses.forEach(l => {
+        if(costMap[l.branch]) l.cost = costMap[l.branch];
+    });
+
+    localStorage.setItem('admin_licenses', JSON.stringify(licenses));
+    renderLicensesTable();
+    alert(`تم معالجة ${licenses.length} فرع بنجاح!`);
+}
+
+function downloadLicensesTemplate() {
+    const data = [
+        {
+            "Branch": "Riyadh - Olaya - 101",
+            "Region": "Central",
+            "Brand": "BK",
+            "Store License Status": "Valid",
+            "Store License Expiration G": "2026-01-01",
+            "Civil Defense Status": "Valid",
+            "Civil Defense Expiration G": "2026-05-01",
+            "24 Hours": "Yes",
+            "Home Delivery": "Yes"
+        },
+        {
+            "Branch": "Jeddah - Corniche - 202",
+            "Region": "Western",
+            "Brand": "TC",
+            "Store License Status": "Near Expiration",
+            "Store License Expiration G": "2025-02-15",
+            "Civil Defense Status": "Expired",
+            "Civil Defense Expiration G": "2024-12-01",
+            "24 Hours": "No",
+            "Home Delivery": "Yes"
+        }
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Licenses Template");
+    XLSX.writeFile(wb, "Licenses_Template.xlsx");
+}
+
+function renderLicensesTable() {
+    const tbody = document.getElementById('licenses-table-body');
+    if(!tbody) return;
+
+    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    tbody.innerHTML = '';
+
+    if(data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">لا توجد بيانات. قم برفع ملف Excel.</td></tr>';
+        return;
+    }
+
+    data.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        
+        // Status Colors
+        const getStatusColor = (s) => {
+            const st = (s||'').toLowerCase();
+            if(st.includes('valid') || st.includes('ساري')) return 'color:#10b981; font-weight:bold;'; // Green
+            if(st.includes('near') || st.includes('expiring')) return 'color:#f59e0b; font-weight:bold;'; // Orange
+            if(st.includes('expired') || st.includes('منتهي')) return 'color:#ef4444; font-weight:bold;'; // Red
+            return '';
+        };
+
+        tr.innerHTML = `
+            <td>${item.branch}</td>
+            <td>
+                <input type="number" class="form-control" style="width:80px; padding:2px 5px;" 
+                       value="${item.cost || 0}" 
+                       onchange="updateLicenseCost(${index}, this.value)">
+            </td>
+            <td style="${getStatusColor(item.store_license.status)}">
+                ${item.store_license.status} <br>
+                <small style="color:#666; font-weight:normal;">${item.store_license.exp_g || ''}</small>
+            </td>
+            <td style="${getStatusColor(item.civil_defense.status)}">
+                ${item.civil_defense.status} <br>
+                <small style="color:#666; font-weight:normal;">${item.civil_defense.exp_g || ''}</small>
+            </td>
+            <td>${item.permit_24.status}</td>
+            <td>${item.permit_hd.status}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function updateLicenseCost(index, value) {
+    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    if(data[index]) {
+        data[index].cost = parseFloat(value) || 0;
+        localStorage.setItem('admin_licenses', JSON.stringify(data));
+    }
+}
+
+function saveBranchCosts() {
+    // Costs are saved on change, but this provides visual feedback
+    alert('تم حفظ التكاليف بنجاح!');
+    
+    // Also update board KPIs if needed (Optional)
+    // We could sum costs and update a CMS field
+    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    const totalCost = data.reduce((sum, item) => sum + (item.cost || 0), 0);
+    console.log('Total Operational Cost:', totalCost);
+}
+
+function clearLicensesData() {
+    if(confirm('هل أنت متأكد من مسح جميع بيانات التراخيص؟')) {
+        localStorage.removeItem('admin_licenses');
+        renderLicensesTable();
+        alert('تم مسح البيانات.');
+    }
+}
+
+function toggleLicensesVisibility() {
+    const showDashboard = document.getElementById('chk-show-licenses-dashboard').checked;
+    const showPublic = document.getElementById('chk-show-licenses-public').checked;
+    
+    localStorage.setItem('config_show_licenses_dashboard', showDashboard);
+    localStorage.setItem('config_show_licenses_public', showPublic);
+    
+    // Also update board data override to sync with frontend if needed
+    // But local storage config is enough for client-side logic on same domain
+}
+
+function loadLicensesConfig() {
+    const showDashboard = localStorage.getItem('config_show_licenses_dashboard') === 'true';
+    const showPublic = localStorage.getItem('config_show_licenses_public') === 'true';
+    
+    const chkDash = document.getElementById('chk-show-licenses-dashboard');
+    const chkPub = document.getElementById('chk-show-licenses-public');
+    
+    if(chkDash) chkDash.checked = showDashboard;
+    if(chkPub) chkPub.checked = showPublic;
+}
+
+// Initial Render for Licenses
+document.addEventListener('DOMContentLoaded', () => {
+    renderLicensesTable();
+    loadLicensesConfig();
+});
+

@@ -797,6 +797,19 @@ async function toggleServicesDashboard() {
 }
 
 async function fetchServicesData() {
+    // 1. Check LocalStorage Override
+    const localData = localStorage.getItem('services_data_override');
+    if (localData) {
+        try {
+            const parsed = JSON.parse(localData);
+            updateServicesDashboard(parsed);
+            return;
+        } catch (e) {
+            console.error("Error parsing services override", e);
+        }
+    }
+
+    // 2. Fetch from JSON
     try {
         const response = await fetch('services_data.json?t=' + new Date().getTime());
         if (!response.ok) throw new Error('Network response was not ok');
@@ -1494,6 +1507,17 @@ function animateValue(id, start, end, duration, isCurrency = false, suffix = '')
 document.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('preferred-lang') || 'en';
     setLang(savedLang);
+    
+    // Show Licenses Link if Enabled
+    const showDash = localStorage.getItem('config_show_licenses_dashboard') === 'true';
+    
+    // Sidebars
+    const licLinks = document.querySelectorAll('#nav-licenses-public, #nav-licenses-public-mobile, #nav-licenses-public-header');
+    licLinks.forEach(link => {
+        link.style.display = showDash ? 'flex' : 'none';
+        if(link.tagName === 'BUTTON') link.style.display = showDash ? 'inline-block' : 'none';
+    });
+
     const header = document.querySelector('.brand-bar');
     const mainHeader = document.querySelector('.main-header');
     const spacer = document.querySelector('.header-spacer');
