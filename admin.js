@@ -162,13 +162,15 @@ function applyAdminLang(){
             pageTitles: { dashboard:'الرئيسية', users:'الأعضاء', employees:'الموظفين', cms:'إعدادات البيانات (CMS)', services:'الشكاوى والطلبات', media:'وسائط', pages:'صفحات', comments:'تعليقات', appearance:'مظهر', plugins:'إضافات', tools:'أدوات', settings:'الإعدادات', email:'ايميل' },
             th: { emp:'الموظف', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', health:'الشهادة الصحية', training:'حالة التدريب', view:'عرض' },
             labels: { name:'الاسم', position:'الوظيفة', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', status:'الحالة', health:'انتهاء الصحية', train1:'تدريب 1', train2:'تدريب 2', email:'البريد الإلكتروني' },
-            buttons: { save:'حفظ', cancel:'إلغاء' }
+            buttons: { save:'حفظ', cancel:'إلغاء' },
+            merge: { title:'وضع الدمج:', update:'تحديث فقط', replace:'استبدال كامل' }
         },
         en: {
             pageTitles: { dashboard:'Dashboard', users:'Users', employees:'Employees', cms:'Data Settings (CMS)', services:'Complaints', media:'Media', pages:'Pages', comments:'Comments', appearance:'Appearance', plugins:'Plugins', tools:'Tools', settings:'Settings', email:'Email' },
             th: { emp:'Employee', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Card', training:'Training', view:'View' },
             labels: { name:'Name', position:'Position', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', status:'Status', health:'Health Expiry', train1:'Training 1', train2:'Training 2', email:'Email' },
-            buttons: { save:'Save', cancel:'Cancel' }
+            buttons: { save:'Save', cancel:'Cancel' },
+            merge: { title:'Merge Mode:', update:'Update Only', replace:'Replace All' }
         }
     }[lang];
     const mapTh = { emp:'th-emp', iqama:'th-iqama', brand:'th-brand', branch:'th-branch', region:'th-region', health:'th-health', training:'th-training', view:'th-view' };
@@ -185,6 +187,12 @@ function applyAdminLang(){
     const btnCancel = document.getElementById('btn-close-emp');
     if(btnSave) btnSave.textContent = t.buttons.save;
     if(btnCancel) btnCancel.textContent = t.buttons.cancel;
+    const lblMerge = document.getElementById('lbl-merge-mode');
+    const btnMerge = document.getElementById('btn-mode-merge');
+    const btnReplace = document.getElementById('btn-mode-replace');
+    if(lblMerge) lblMerge.textContent = t.merge.title;
+    if(btnMerge) btnMerge.textContent = t.merge.update;
+    if(btnReplace) btnReplace.textContent = t.merge.replace;
 }
 
 // --- EMPLOYEES LOGIC ---
