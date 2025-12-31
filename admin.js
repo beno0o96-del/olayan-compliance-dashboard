@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     const btnBranchImportText = document.getElementById('btn-branch-import-text');
     const btnControlMenu = document.getElementById('btn-control-menu');
     const controlMenu = document.getElementById('control-menu');
+    const btnChangePhoto = document.getElementById('btn-change-photo');
+    const empPhotoInput = document.getElementById('emp-photo');
 
     if(loginBtn) loginBtn.onclick=login; 
     if(setupBtn) setupBtn.onclick=setup; 
@@ -124,6 +126,22 @@ document.addEventListener('DOMContentLoaded',()=>{
                 controlMenu.style.height = controlMenu.scrollHeight + 'px';
             }
         });
+    }
+    if(btnChangePhoto && empPhotoInput){
+        btnChangePhoto.onclick = ()=>empPhotoInput.click();
+        empPhotoInput.onchange = ()=>{
+            const file = empPhotoInput.files?.[0];
+            if(!file) return;
+            const r=new FileReader();
+            r.onload = ()=>{
+                const avatar = document.getElementById('emp-avatar');
+                if(avatar){
+                    avatar.innerHTML = `<img src="${r.result}" alt="" style="width:100%;height:100%;">`;
+                    avatar.style.background = 'transparent';
+                }
+            };
+            r.readAsDataURL(file);
+        };
     }
     
     checkLogin();
@@ -228,7 +246,8 @@ function applyAdminLang(){
                 train1:'تدريب 1', train2:'تدريب 2',
                 ops1:'التشغيل OPS1', ref:'الرقم المرجعي',
                 days_train:'المتبقي انتهاء التدريب الصحي', days_health:'المتبقي انتهاء الكرت الصحي',
-                email:'البريد الإلكتروني', photo:'صورة الموظف'
+                email:'البريد الإلكتروني', photo:'صورة الموظف',
+                band:'Band', cost:'مركز التكلفة', tede:'T. E. D.E', remarks:'ملاحظات'
             },
             buttons: { save:'حفظ', cancel:'إلغاء' },
             merge: { title:'وضع الدمج:', update:'تحديث فقط', replace:'استبدال كامل' }
@@ -243,7 +262,8 @@ function applyAdminLang(){
                 train1:'Training 1', train2:'Training 2',
                 ops1:'OPS1', ref:'REF',
                 days_train:'Days Left (Training)', days_health:'Days Left (Health card)',
-                email:'Email', photo:'Employee Photo'
+                email:'Email', photo:'Employee Photo',
+                band:'Band', cost:'Cost center', tede:'T. E. D.E', remarks:'Remarks'
             },
             buttons: { save:'Save', cancel:'Cancel' },
             merge: { title:'Merge Mode:', update:'Update Only', replace:'Replace All' }
@@ -261,7 +281,8 @@ function applyAdminLang(){
         train1:'lbl-train1', train2:'lbl-train2',
         ops1:'lbl-ops1', ref:'lbl-ref',
         days_train:'lbl-days-train', days_health:'lbl-days-health',
-        email:'lbl-email', photo:'lbl-photo'
+        email:'lbl-email', photo:'lbl-photo',
+        band:'lbl-band', cost:'lbl-cost', tede:'lbl-tede', remarks:'lbl-remarks'
     };
     Object.keys(mapLbl).forEach(k=>{
         const el = document.getElementById(mapLbl[k]);
@@ -333,10 +354,11 @@ async function loadEmployeesFromCSV() {
                     iqama: row[2] || '',
                     brand: row[4] || '',
                     branch: branchName,
+                    cost_center: branchRaw,
                     region: row[16] || '',
                     health_expiry: row[12] || '', 
-                    train_status_1: row[10] || '',
-                    train_status_2: row[13] || '',
+                    status1: row[10] || '',
+                    status2: row[13] || '',
                     training_end: row[9] || '',
                     email: row[20] || ''
                 };
@@ -502,7 +524,7 @@ function viewEmployee(iqama) {
     if(banner) banner.style.background = `linear-gradient(135deg, ${color}, #0b0e2b)`;
     if(avatar){ 
         if(emp.photo){
-            avatar.innerHTML = `<img src="${emp.photo}" alt="" style="width:100%;height:100%;border-radius:50%;">`;
+            avatar.innerHTML = `<img src="${emp.photo}" alt="" style="width:100%;height:100%;">`;
             avatar.style.background = 'transparent';
         } else {
             avatar.textContent = initials; 
@@ -513,25 +535,22 @@ function viewEmployee(iqama) {
     if(roleD) roleD.textContent = emp.brand||'';
     if(idD) idD.textContent = `ID: ${emp.id||'-'}`;
     const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val||''; };
-    set('emp-name', emp.name);
-    set('emp-position', emp.position);
     set('emp-sap', emp.sap_id);
-    set('emp-iqama', emp.iqama);
-    set('emp-brand', emp.brand);
-    set('emp-branch', emp.branch);
-    set('emp-region', emp.region);
-    set('emp-city', emp.city);
-    set('emp-status', emp.status);
-    set('emp-status1', emp.status1);
-    set('emp-status2', emp.status2);
-    set('emp-health', emp.health_expiry);
-    set('emp-hire', emp.hire_date);
-    set('emp-train-end', emp.training_end);
-    set('emp-train1', emp.train_status_1);
-    set('emp-train2', emp.train_status_2);
-    set('emp-ops1', emp.ops1);
     set('emp-ref', emp.ref);
-    set('emp-email', emp.email);
+    set('emp-iqama', emp.iqama);
+    set('emp-name', emp.name);
+    set('emp-band', emp.brand);
+    set('emp-cost', emp.cost_center);
+    set('emp-ops1', emp.ops1);
+    set('emp-hire', emp.hire_date);
+    set('emp-tede', emp.training_end);
+    set('emp-train-end', emp.training_end);
+    set('emp-status1', emp.status1);
+    set('emp-health', emp.health_expiry);
+    set('emp-status2', emp.status2);
+    set('emp-city', emp.city);
+    set('emp-region', emp.region);
+    set('emp-remarks', emp.remarks);
     // Days left
     const daysLeft = (dateStr)=>{
         if(!dateStr) return '';
@@ -543,6 +562,34 @@ function viewEmployee(iqama) {
     };
     set('emp-days-train', daysLeft(emp.training_end));
     set('emp-days-health', daysLeft(emp.health_expiry));
+
+    // Badge Logic
+    const updateBadge = (bid, val) => {
+        const el = document.getElementById(bid);
+        if(!el) return;
+        const v = (val||'').toLowerCase();
+        if(v.includes('valid') || v.includes('ساري') || v.includes('active')) {
+            el.textContent = 'Valid';
+            el.style.background = 'rgba(16, 185, 129, 0.2)';
+            el.style.color = '#10b981';
+            el.style.display = 'block';
+        } else if(v.includes('expired') || v.includes('منتهي')) {
+            el.textContent = 'Expired';
+            el.style.background = 'rgba(225, 29, 72, 0.2)';
+            el.style.color = '#e11d48';
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    };
+    updateBadge('badge-status1', emp.status1);
+    updateBadge('badge-status2', emp.status2);
+    
+    const s1 = document.getElementById('emp-status1');
+    const s2 = document.getElementById('emp-status2');
+    if(s1) s1.oninput = (e)=>updateBadge('badge-status1', e.target.value);
+    if(s2) s2.oninput = (e)=>updateBadge('badge-status2', e.target.value);
+
     if(m) m.style.display = 'flex';
 }
 
@@ -568,7 +615,7 @@ function exportEmployees() {
     csvContent += "الاسم,رقم الإقامة,العلامة التجارية,الفرع,المنطقة,انتهاء الصحية,تدريب 1,تدريب 2\n";
 
     employees.forEach(e => {
-        csvContent += `"${e.name}","${e.iqama}","${e.brand}","${e.branch}","${e.region}","${e.health_expiry}","${e.train_status_1}","${e.train_status_2}"\n`;
+        csvContent += `"${e.name}","${e.iqama}","${e.brand}","${e.branch}","${e.region}","${e.health_expiry}","${e.status1}","${e.status2}"\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
@@ -776,24 +823,20 @@ async function saveEmployeeChanges(){
     const photo = await readPhoto(photoFile);
     employees[idx] = {
         ...employees[idx],
-        name: document.getElementById('emp-name').value.trim(),
-        position: document.getElementById('emp-position').value.trim(),
-        sap_id: document.getElementById('emp-sap').value.trim(),
-        brand: document.getElementById('emp-brand').value.trim(),
-        branch: document.getElementById('emp-branch').value.trim(),
-        region: document.getElementById('emp-region').value.trim(),
-        city: document.getElementById('emp-city').value.trim(),
-        status: document.getElementById('emp-status').value.trim(),
-        status1: document.getElementById('emp-status1').value.trim(),
-        status2: document.getElementById('emp-status2').value.trim(),
-        health_expiry: document.getElementById('emp-health').value.trim(),
-        hire_date: document.getElementById('emp-hire').value.trim(),
-        training_end: document.getElementById('emp-train-end').value.trim(),
-        train_status_1: document.getElementById('emp-train1').value.trim(),
-        train_status_2: document.getElementById('emp-train2').value.trim(),
-        ops1: document.getElementById('emp-ops1').value.trim(),
-        ref: document.getElementById('emp-ref').value.trim(),
-        email: document.getElementById('emp-email').value.trim(),
+        name: document.getElementById('emp-name')?.value?.trim() || employees[idx].name,
+        sap_id: document.getElementById('emp-sap')?.value?.trim() || employees[idx].sap_id,
+        brand: document.getElementById('emp-band')?.value?.trim() || employees[idx].brand,
+        cost_center: document.getElementById('emp-cost')?.value?.trim() || employees[idx].cost_center,
+        region: document.getElementById('emp-region')?.value?.trim() || employees[idx].region,
+        city: document.getElementById('emp-city')?.value?.trim() || employees[idx].city,
+        status1: document.getElementById('emp-status1')?.value?.trim() || employees[idx].status1,
+        status2: document.getElementById('emp-status2')?.value?.trim() || employees[idx].status2,
+        health_expiry: document.getElementById('emp-health')?.value?.trim() || employees[idx].health_expiry,
+        hire_date: document.getElementById('emp-hire')?.value?.trim() || employees[idx].hire_date,
+        training_end: document.getElementById('emp-train-end')?.value?.trim() || employees[idx].training_end,
+        ops1: document.getElementById('emp-ops1')?.value?.trim() || employees[idx].ops1,
+        ref: document.getElementById('emp-ref')?.value?.trim() || employees[idx].ref,
+        remarks: document.getElementById('emp-remarks')?.value?.trim() || employees[idx].remarks,
         photo: photo || employees[idx].photo
     };
     localStorage.setItem('admin_employees', JSON.stringify(employees));

@@ -539,106 +539,100 @@
         </main>
     </div>
 
-    <div id="employee-modal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:9999;">
-        <div style="background:#fff; color:#000; width:90%; max-width:800px; border-radius:12px; overflow:hidden;">
-            <div id="emp-banner" style="height:120px; background:#0b0e2b;"></div>
+            <div id="employee-modal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:9999;">
+        <div style="background:#0b0e2b; color:#fff; width:92%; max-width:900px; border-radius:16px; overflow:hidden;">
+            <div id="emp-banner" style="height:140px; background:#0b0e2b;"></div>
             <div style="padding:20px;">
-                <div style="display:flex; align-items:center; gap:15px; margin-top:-60px;">
-                    <div id="emp-avatar" style="width:80px; height:80px; border-radius:50%; background:#4facfe; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.4rem;">A</div>
+                <div style="display:flex; align-items:center; gap:15px; margin-top:-70px;">
+                    <div style="position:relative; width:96px; height:96px;">
+                        <div id="emp-avatar" style="width:96px; height:96px; border-radius:14px; background:#4facfe; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.6rem; overflow:hidden;">A</div>
+                        <button id="btn-change-photo" class="btn btn-secondary" style="position:absolute; bottom:-10px; inset-inline-start:0; transform:translateY(50%); padding:4px 8px; font-size:0.75rem;">تغيير الصورة</button>
+                        <input id="emp-photo" type="file" accept="image/*" style="display:none;">
+                    </div>
                     <div>
                         <div id="emp-name-display" style="font-size:1.4rem; font-weight:700;"></div>
                         <div id="emp-role-display" style="color:#4facfe; font-size:0.95rem;"></div>
-                        <div id="emp-id-display" style="color:#64748b; font-size:0.85rem;"></div>
+                        <div id="emp-id-display" style="color:#94a3b8; font-size:0.85rem;"></div>
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px;">
                     <div>
-                        <label id="lbl-name" style="display:block; color:#666; font-size:0.85rem;">الاسم</label>
-                        <input id="emp-name" class="form-control" type="text">
+                        <label id="lbl-sap" style="display:block; color:#b0bec5; font-size:0.85rem;">SAP ID</label>
+                        <input id="emp-sap" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-position" style="display:block; color:#666; font-size:0.85rem;">الوظيفة</label>
-                        <input id="emp-position" class="form-control" type="text">
+                        <label id="lbl-ref" style="display:block; color:#b0bec5; font-size:0.85rem;">REF#</label>
+                        <input id="emp-ref" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-sap" style="display:block; color:#666; font-size:0.85rem;">SAP ID</label>
-                        <input id="emp-sap" class="form-control" type="text">
+                        <label id="lbl-iqama" style="display:block; color:#b0bec5; font-size:0.85rem;">ID#</label>
+                        <input id="emp-iqama" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-iqama" style="display:block; color:#666; font-size:0.85rem;">رقم الهوية/الإقامة</label>
-                        <input id="emp-iqama" class="form-control" type="text" disabled>
+                        <label id="lbl-name" style="display:block; color:#b0bec5; font-size:0.85rem;">Name</label>
+                        <input id="emp-name" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-brand" style="display:block; color:#666; font-size:0.85rem;">العلامة التجارية</label>
-                        <input id="emp-brand" class="form-control" type="text">
+                        <label id="lbl-band" style="display:block; color:#b0bec5; font-size:0.85rem;">Band</label>
+                        <input id="emp-band" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-branch" style="display:block; color:#666; font-size:0.85rem;">الفرع</label>
-                        <input id="emp-branch" class="form-control" type="text">
+                        <label id="lbl-cost" style="display:block; color:#b0bec5; font-size:0.85rem;">Cost center</label>
+                        <input id="emp-cost" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-region" style="display:block; color:#666; font-size:0.85rem;">المنطقة</label>
-                        <input id="emp-region" class="form-control" type="text">
+                        <label id="lbl-ops1" style="display:block; color:#b0bec5; font-size:0.85rem;">Ops</label>
+                        <input id="emp-ops1" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-city" style="display:block; color:#666; font-size:0.85rem;">المدينة</label>
-                        <input id="emp-city" class="form-control" type="text">
+                        <label id="lbl-hire" style="display:block; color:#b0bec5; font-size:0.85rem;">Hire date</label>
+                        <input id="emp-hire" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-status" style="display:block; color:#666; font-size:0.85rem;">الحالة</label>
-                        <input id="emp-status" class="form-control" type="text">
+                        <label id="lbl-tede" style="display:block; color:#b0bec5; font-size:0.85rem;">T. E. D.E</label>
+                        <input id="emp-tede" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-status1" style="display:block; color:#666; font-size:0.85rem;">الحالة 1</label>
-                        <input id="emp-status1" class="form-control" type="text">
+                        <label id="lbl-train-end" style="display:block; color:#b0bec5; font-size:0.85rem;">Training END Date</label>
+                        <input id="emp-train-end" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-status2" style="display:block; color:#666; font-size:0.85rem;">الحالة 2</label>
-                        <input id="emp-status2" class="form-control" type="text">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label id="lbl-status1" style="display:block; color:#b0bec5; font-size:0.85rem;">Status1</label>
+                            <span id="badge-status1" style="font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:bold; display:none;"></span>
+                        </div>
+                        <input id="emp-status1" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-health" style="display:block; color:#666; font-size:0.85rem;">انتهاء الصحية</label>
-                        <input id="emp-health" class="form-control" type="date">
+                        <label id="lbl-days-train" style="display:block; color:#b0bec5; font-size:0.85rem;">Days Left - T.E.D.E</label>
+                        <input id="emp-days-train" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-hire" style="display:block; color:#666; font-size:0.85rem;">بداية الكرت الصحي</label>
-                        <input id="emp-hire" class="form-control" type="date">
+                        <label id="lbl-health" style="display:block; color:#b0bec5; font-size:0.85rem;">Health card expired Date</label>
+                        <input id="emp-health" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-train-end" style="display:block; color:#666; font-size:0.85rem;">انتهاء التدريب الصحي</label>
-                        <input id="emp-train-end" class="form-control" type="date">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label id="lbl-status2" style="display:block; color:#b0bec5; font-size:0.85rem;">Status2</label>
+                            <span id="badge-status2" style="font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:bold; display:none;"></span>
+                        </div>
+                        <input id="emp-status2" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-train1" style="display:block; color:#666; font-size:0.85rem;">تدريب 1</label>
-                        <input id="emp-train1" class="form-control" type="text">
+                        <label id="lbl-days-health" style="display:block; color:#b0bec5; font-size:0.85rem;">Days Left - Health card</label>
+                        <input id="emp-days-health" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-train2" style="display:block; color:#666; font-size:0.85rem;">تدريب 2</label>
-                        <input id="emp-train2" class="form-control" type="text">
+                        <label id="lbl-city" style="display:block; color:#b0bec5; font-size:0.85rem;">city</label>
+                        <input id="emp-city" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
-                        <label id="lbl-ops1" style="display:block; color:#666; font-size:0.85rem;">التشغيل OPS1</label>
-                        <input id="emp-ops1" class="form-control" type="text">
-                    </div>
-                    <div>
-                        <label id="lbl-ref" style="display:block; color:#666; font-size:0.85rem;">الرقم المرجعي</label>
-                        <input id="emp-ref" class="form-control" type="text">
-                    </div>
-                    <div>
-                        <label id="lbl-days-train" style="display:block; color:#666; font-size:0.85rem;">المتبقي انتهاء التدريب الصحي</label>
-                        <input id="emp-days-train" class="form-control" type="text" disabled>
-                    </div>
-                    <div>
-                        <label id="lbl-days-health" style="display:block; color:#666; font-size:0.85rem;">المتبقي انتهاء الكرت الصحي</label>
-                        <input id="emp-days-health" class="form-control" type="text" disabled>
+                        <label id="lbl-region" style="display:block; color:#b0bec5; font-size:0.85rem;">Region</label>
+                        <input id="emp-region" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div style="grid-column: span 2;">
-                        <label id="lbl-email" style="display:block; color:#666; font-size:0.85rem;">البريد الإلكتروني</label>
-                        <input id="emp-email" class="form-control" type="email">
-                    </div>
-                    <div style="grid-column: span 2;">
-                        <label id="lbl-photo" style="display:block; color:#666; font-size:0.85rem;">صورة الموظف</label>
-                        <input id="emp-photo" class="form-control" type="file" accept="image/*">
+                        <label id="lbl-remarks" style="display:block; color:#b0bec5; font-size:0.85rem;">Remarks</label>
+                        <input id="emp-remarks" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                 </div>
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
@@ -647,7 +641,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div
     
 
 </body>
