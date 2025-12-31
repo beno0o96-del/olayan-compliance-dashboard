@@ -203,7 +203,7 @@
             <a href="branches.html" class="side-link"><i>🏬</i> <span data-en="Branches" data-ar="الفروع">Branches</span></a>
             <a href="board.html" class="side-link active"><i>📊</i> <span data-en="Management Report" data-ar="تقرير الإدارة">Management Report</span></a>
             <a href="login.html" class="side-link"><i>🔐</i> <span data-en="Login" data-ar="تسجيل الدخول">Login</span></a>
-            <a href="admin.html" class="side-link" id="admin-link" style="display:none;"><i>🛠️</i> <span data-en="Admin" data-ar="لوحة الأدمن">Admin</span></a>
+            <!-- Admin link moved to header for better accessibility -->
         </nav>
         <div style="margin-top: auto; padding-top: 20px;">
             <div class="lang-switch" style="display: flex; gap: 10px; justify-content: center;"> 
@@ -225,7 +225,10 @@
                     <span data-en="Real-time insights and operational metrics" data-ar="رؤى فورية ومقاييس تشغيلية">Real-time insights and operational metrics</span>
                 </p>
             </div>
-            <div style="text-align: right;">
+            <div style="text-align: right; display:flex; gap:10px; align-items:center;">
+                <a href="admin.html" id="admin-link" style="display:none; padding:6px 12px; border-radius:8px; border:1px solid #4facfe; color:#4facfe; font-size:0.85rem; text-decoration:none;">
+                    <span data-en="Admin Panel" data-ar="لوحة الأدمن">Admin Panel</span>
+                </a>
                 <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(16, 185, 129, 0.2);">● <span data-en="System Active" data-ar="النظام نشط">System Active</span></span>
             </div>
         </div>

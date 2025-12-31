@@ -80,7 +80,7 @@
                 <a href="#" onclick="showSection('email')" class="nav-item" id="nav-email">
                     <i>✉️</i> ايميل
                 </a>
-                <a href="branches.html" target="_blank" class="nav-item" id="nav-branches">
+                <a href="#" onclick="showSection('branches')" class="nav-item" id="nav-branches">
                     <i>🏬</i> فروع
                 </a>
                 <a href="tasks.html" target="_blank" class="nav-item" id="nav-tasks">
@@ -104,11 +104,29 @@
             <header class="admin-header">
                 <div class="header-title" id="page-title">ملخص النظام</div>
                 <div class="header-actions">
-                    <div style="display:flex; gap:8px; align-items:center;">
+                    <div style="display:flex; gap:8px; align-items:center; position:relative;">
                         <button class="btn btn-secondary" id="btn-lang-ar">العربية</button>
                         <button class="btn btn-secondary" id="btn-lang-en">English</button>
                         <span id="merge-mode-indicator" style="margin-inline-start:8px; padding:4px 10px; border-radius:12px; border:1px solid #4facfe; color:#4facfe; font-size:0.85rem;">وضع الدمج: تحديث فقط</span>
                         <span id="update-source-indicator" style="margin-inline-start:8px; padding:4px 10px; border-radius:12px; border:1px solid #a78bfa; color:#a78bfa; font-size:0.85rem;">آخر تحديث: Excel</span>
+                        <button class="btn btn-secondary" id="btn-control-menu" style="margin-inline-start:8px;">تحكم البيانات ⌄</button>
+                        <div id="control-menu" style="position:absolute; top:100%; inset-inline-end:0; background:#fff; border:1px solid #ddd; border-radius:10px; padding:10px; box-shadow:0 10px 25px rgba(0,0,0,0.15); width: min(900px, 90vw); overflow:hidden; height:0; transition: height 250ms ease;">
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                <button class="btn btn-secondary" onclick="importEmployeesFromJSON()">استيراد الموظفين (JSON خارجي)</button>
+                                <button class="btn btn-primary" onclick="publishEmployeesJSON()">حفظ الموظفين (JSON خارجي)</button>
+                                <input type="file" id="emp-json-file" accept="application/json" style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:6px;">
+                                <button class="btn btn-secondary" onclick="importEmployeesFromLocalJSON()">استيراد JSON محلي</button>
+                                <button class="btn btn-primary" onclick="downloadEmployeesJSON()">تنزيل الموظفين (JSON)</button>
+                                <div id="merge-mode" style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:6px; display:flex; gap:8px; align-items:center;">
+                                    <span id="lbl-merge-mode" style="color:#333; font-size:0.9rem;">وضع الدمج:</span>
+                                    <button class="btn btn-secondary" id="btn-mode-merge">تحديث فقط</button>
+                                    <button class="btn btn-secondary" id="btn-mode-replace">استبدال كامل</button>
+                                </div>
+                            </div>
+                            <div style="margin-top:8px; color:#555; font-size:0.85rem;">
+                                <span class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="user-profile">
                         <div class="text-right">
@@ -164,7 +182,7 @@
                         <div class="section-header">
                             <span class="section-title">وسائط</span>
                         </div>
-                        <p style="color:#555;">إدارة الصور والملفات هنا.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
                     </div>
                 </div>
 
@@ -175,7 +193,88 @@
                             <span class="section-title">صفحات</span>
                             <button class="btn btn-primary">صفحة جديدة +</button>
                         </div>
-                        <p style="color:#555;">قائمة الصفحات وإدارتها.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
+                    </div>
+                </div>
+
+                <!-- SECTION: BRANCHES -->
+                <div id="section-branches" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="section-title" id="branches-title">فروع</span>
+                            <a href="branches.html" target="_blank" class="btn btn-secondary" id="btn-open-branches">فتح صفحة الفروع ↗</a>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div>
+                                <label id="lbl-branch-name" style="display:block; color:#666; font-size:0.85rem;">اسم الفرع</label>
+                                <input id="br-name" class="form-control" type="text">
+                            </div>
+                            <div>
+                                <label id="lbl-branch-type" style="display:block; color:#666; font-size:0.85rem;">النوع</label>
+                                <select id="br-type" class="form-control">
+                                    <option value="basic" id="opt-type-basic">أساسي</option>
+                                    <option value="opening" id="opt-type-opening">افتتاح</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label id="lbl-branch-brand" style="display:block; color:#666; font-size:0.85rem;">العلامة التجارية</label>
+                                <input id="br-brand" class="form-control" type="text" placeholder="BK / TC / BWW">
+                            </div>
+                            <div>
+                                <label id="lbl-branch-email" style="display:block; color:#666; font-size:0.85rem;">الايميل</label>
+                                <input id="br-email" class="form-control" type="email">
+                            </div>
+                            <div>
+                                <label id="lbl-branch-cost" style="display:block; color:#666; font-size:0.85rem;">Cost Center</label>
+                                <input id="br-cost" class="form-control" type="text">
+                            </div>
+                            <div>
+                                <label id="lbl-branch-ops" style="display:block; color:#666; font-size:0.85rem;">OPS1</label>
+                                <input id="br-ops" class="form-control" type="text">
+                            </div>
+                            <div>
+                                <label id="lbl-branch-logo" style="display:block; color:#666; font-size:0.85rem;">شعار العلامة</label>
+                                <input id="br-logo" class="form-control" type="file" accept="image/*">
+                            </div>
+                            <div>
+                                <label id="lbl-branch-kpi-target" style="display:block; color:#666; font-size:0.85rem;">هدف KPI</label>
+                                <input id="br-kpi-target" class="form-control" type="number" step="0.01">
+                            </div>
+                            <div>
+                                <label id="lbl-branch-kpi-value" style="display:block; color:#666; font-size:0.85rem;">قيمة KPI</label>
+                                <input id="br-kpi-value" class="form-control" type="number" step="0.01">
+                            </div>
+                        </div>
+                        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+                            <button class="btn btn-primary" id="btn-branch-save">حفظ الفرع</button>
+                            <button class="btn btn-secondary" id="btn-branch-new">فرع جديد</button>
+                            <button class="btn btn-secondary" id="btn-branch-export">تصدير JSON</button>
+                            <input type="file" id="br-json-file" accept="application/json" style="display:none;">
+                            <button class="btn btn-secondary" id="btn-branch-import">استيراد JSON</button>
+                            <button class="btn btn-secondary" id="btn-branch-import-text">استيراد من نص</button>
+                        </div>
+                        <div style="margin-top:8px;">
+                            <label style="display:block; color:#666; font-size:0.85rem;">لصق قائمة (الاسم TAB مركز التكلفة TAB الايميل)</label>
+                            <textarea id="br-bulk-text" class="form-control" rows="4" placeholder="الاسم\t6120... - BK - فرع\tbk.example@olayanfood.com"></textarea>
+                        </div>
+                        <div style="margin-top:16px; overflow:auto;">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>اسم الفرع</th>
+                                        <th>النوع</th>
+                                        <th>العلامة</th>
+                                        <th>الايميل</th>
+                                        <th>Cost Center</th>
+                                        <th>OPS1</th>
+                                        <th>KPI%</th>
+                                        <th>الشعار</th>
+                                        <th>إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="branches-table-body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -185,7 +284,7 @@
                         <div class="section-header">
                             <span class="section-title">تعليقات</span>
                         </div>
-                        <p style="color:#555;">إدارة التعليقات والمراجعات.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
                     </div>
                 </div>
 
@@ -195,7 +294,7 @@
                         <div class="section-header">
                             <span class="section-title">مظهر</span>
                         </div>
-                        <p style="color:#555;">إعدادات المظهر والتنسيق.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
                     </div>
                 </div>
 
@@ -206,7 +305,7 @@
                             <span class="section-title">إضافات</span>
                             <button class="btn btn-primary">إضافة جديدة +</button>
                         </div>
-                        <p style="color:#555;">إدارة الإضافات.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
                     </div>
                 </div>
 
@@ -216,7 +315,7 @@
                         <div class="section-header">
                             <span class="section-title">أدوات</span>
                         </div>
-                        <p style="color:#555;">أدوات النظام والصيانة.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
                     </div>
                 </div>
 
@@ -226,7 +325,7 @@
                         <div class="section-header">
                             <span class="section-title">الإعدادات</span>
                         </div>
-                        <p style="color:#555;">إعدادات عامة للنظام.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
                     </div>
                 </div>
 
@@ -236,7 +335,7 @@
                         <div class="section-header">
                             <span class="section-title">ايميل</span>
                         </div>
-                        <p style="color:#555;">إرسال بريد وإعداداته.</p>
+                        <p class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</p>
                     </div>
                 </div>
 
@@ -406,6 +505,20 @@
                                 <div id="desc-merge-replace" style="margin-top:4px;">استبدال كامل: يستبدل القائمة بالكامل بالمصدر القادم.</div>
                                 <div id="desc-merge-sources" style="margin-top:6px; color:#333;">مصادر التحديث: Excel، JSON من GitHub، JSON محلي، تعديل يدوي عبر اللوحة.</div>
                             </div>
+                            <div id="update-time-settings" style="margin-top:12px; padding:10px; border:1px solid #eee; border-radius:8px; display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <label id="lbl-show-update-time" style="font-size:0.85rem; color:#777;">عرض الوقت بجانب آخر تحديث</label>
+                                    <input type="checkbox" id="chk-show-update-time">
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <label id="lbl-date-format" style="font-size:0.85rem; color:#777;">تنسيق التاريخ</label>
+                                    <select id="sel-date-format" class="form-control" style="min-width:180px;">
+                                        <option value="locale" id="opt-format-locale">محلي</option>
+                                        <option value="iso" id="opt-format-iso">ISO</option>
+                                        <option value="relative" id="opt-format-relative">نسبي</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -448,6 +561,10 @@
                         <input id="emp-position" class="form-control" type="text">
                     </div>
                     <div>
+                        <label id="lbl-sap" style="display:block; color:#666; font-size:0.85rem;">SAP ID</label>
+                        <input id="emp-sap" class="form-control" type="text">
+                    </div>
+                    <div>
                         <label id="lbl-iqama" style="display:block; color:#666; font-size:0.85rem;">رقم الهوية/الإقامة</label>
                         <input id="emp-iqama" class="form-control" type="text" disabled>
                     </div>
@@ -464,12 +581,32 @@
                         <input id="emp-region" class="form-control" type="text">
                     </div>
                     <div>
+                        <label id="lbl-city" style="display:block; color:#666; font-size:0.85rem;">المدينة</label>
+                        <input id="emp-city" class="form-control" type="text">
+                    </div>
+                    <div>
                         <label id="lbl-status" style="display:block; color:#666; font-size:0.85rem;">الحالة</label>
                         <input id="emp-status" class="form-control" type="text">
                     </div>
                     <div>
+                        <label id="lbl-status1" style="display:block; color:#666; font-size:0.85rem;">الحالة 1</label>
+                        <input id="emp-status1" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-status2" style="display:block; color:#666; font-size:0.85rem;">الحالة 2</label>
+                        <input id="emp-status2" class="form-control" type="text">
+                    </div>
+                    <div>
                         <label id="lbl-health" style="display:block; color:#666; font-size:0.85rem;">انتهاء الصحية</label>
                         <input id="emp-health" class="form-control" type="date">
+                    </div>
+                    <div>
+                        <label id="lbl-hire" style="display:block; color:#666; font-size:0.85rem;">بداية الكرت الصحي</label>
+                        <input id="emp-hire" class="form-control" type="date">
+                    </div>
+                    <div>
+                        <label id="lbl-train-end" style="display:block; color:#666; font-size:0.85rem;">انتهاء التدريب الصحي</label>
+                        <input id="emp-train-end" class="form-control" type="date">
                     </div>
                     <div>
                         <label id="lbl-train1" style="display:block; color:#666; font-size:0.85rem;">تدريب 1</label>
@@ -479,9 +616,29 @@
                         <label id="lbl-train2" style="display:block; color:#666; font-size:0.85rem;">تدريب 2</label>
                         <input id="emp-train2" class="form-control" type="text">
                     </div>
+                    <div>
+                        <label id="lbl-ops1" style="display:block; color:#666; font-size:0.85rem;">التشغيل OPS1</label>
+                        <input id="emp-ops1" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-ref" style="display:block; color:#666; font-size:0.85rem;">الرقم المرجعي</label>
+                        <input id="emp-ref" class="form-control" type="text">
+                    </div>
+                    <div>
+                        <label id="lbl-days-train" style="display:block; color:#666; font-size:0.85rem;">المتبقي انتهاء التدريب الصحي</label>
+                        <input id="emp-days-train" class="form-control" type="text" disabled>
+                    </div>
+                    <div>
+                        <label id="lbl-days-health" style="display:block; color:#666; font-size:0.85rem;">المتبقي انتهاء الكرت الصحي</label>
+                        <input id="emp-days-health" class="form-control" type="text" disabled>
+                    </div>
                     <div style="grid-column: span 2;">
                         <label id="lbl-email" style="display:block; color:#666; font-size:0.85rem;">البريد الإلكتروني</label>
                         <input id="emp-email" class="form-control" type="email">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label id="lbl-photo" style="display:block; color:#666; font-size:0.85rem;">صورة الموظف</label>
+                        <input id="emp-photo" class="form-control" type="file" accept="image/*">
                     </div>
                 </div>
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
@@ -491,18 +648,7 @@
             </div>
         </div>
     </div>
-    <div style="position:fixed; bottom:20px; right:20px; display:flex; gap:10px; z-index:9999; flex-wrap:wrap;">
-        <button class="btn btn-secondary" onclick="importEmployeesFromJSON()">استيراد الموظفين (JSON خارجي)</button>
-        <button class="btn btn-primary" onclick="publishEmployeesJSON()">حفظ الموظفين (JSON خارجي)</button>
-        <input type="file" id="emp-json-file" accept="application/json" style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:6px;">
-        <button class="btn btn-secondary" onclick="importEmployeesFromLocalJSON()">استيراد JSON محلي</button>
-        <button class="btn btn-primary" onclick="downloadEmployeesJSON()">تنزيل الموظفين (JSON)</button>
-        <div id="merge-mode" style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:6px; display:flex; gap:8px; align-items:center;">
-            <span id="lbl-merge-mode" style="color:#333; font-size:0.9rem;">وضع الدمج:</span>
-            <button class="btn btn-secondary" id="btn-mode-merge">تحديث فقط</button>
-            <button class="btn btn-secondary" id="btn-mode-replace">استبدال كامل</button>
-        </div>
-    </div>
+    
 
 </body>
 </html>

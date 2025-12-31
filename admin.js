@@ -70,6 +70,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     const btnModeReplace = document.getElementById('btn-mode-replace');
     const btnModeMergeCms = document.getElementById('btn-mode-merge-cms');
     const btnModeReplaceCms = document.getElementById('btn-mode-replace-cms');
+    const chkShowUpdateTime = document.getElementById('chk-show-update-time');
+    const selDateFormat = document.getElementById('sel-date-format');
+    const btnBranchSave = document.getElementById('btn-branch-save');
+    const btnBranchNew = document.getElementById('btn-branch-new');
+    const btnBranchExport = document.getElementById('btn-branch-export');
+    const btnBranchImport = document.getElementById('btn-branch-import');
+    const brJsonFile = document.getElementById('br-json-file');
+    const btnBranchImportText = document.getElementById('btn-branch-import-text');
+    const btnControlMenu = document.getElementById('btn-control-menu');
+    const controlMenu = document.getElementById('control-menu');
 
     if(loginBtn) loginBtn.onclick=login; 
     if(setupBtn) setupBtn.onclick=setup; 
@@ -80,11 +90,47 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(btnModeReplace) btnModeReplace.onclick=()=>setMergeMode('replace');
     if(btnModeMergeCms) btnModeMergeCms.onclick=()=>setMergeMode('merge');
     if(btnModeReplaceCms) btnModeReplaceCms.onclick=()=>setMergeMode('replace');
+    if(chkShowUpdateTime){
+        chkShowUpdateTime.checked = getShowUpdateTime();
+        chkShowUpdateTime.onchange = ()=>setShowUpdateTime(chkShowUpdateTime.checked);
+    }
+    if(selDateFormat){
+        selDateFormat.value = getDateFormat();
+        selDateFormat.onchange = ()=>setDateFormat(selDateFormat.value);
+    }
+    if(btnBranchSave) btnBranchSave.onclick=saveBranch;
+    if(btnBranchNew) btnBranchNew.onclick=newBranchForm;
+    if(btnBranchExport) btnBranchExport.onclick=exportBranchesJSON;
+    if(btnBranchImport) btnBranchImport.onclick=()=>brJsonFile && brJsonFile.click();
+    if(brJsonFile) brJsonFile.onchange=importBranchesJSON;
+    if(btnBranchImportText) btnBranchImportText.onclick=importBranchesFromText;
+    if(btnControlMenu && controlMenu){
+        btnControlMenu.onclick=()=>{
+            const open = controlMenu.style.height && controlMenu.style.height!=='0px';
+            if(open){
+                controlMenu.style.height = '0px';
+            }else{
+                controlMenu.style.height = controlMenu.scrollHeight + 'px';
+            }
+        };
+        window.addEventListener('click',(e)=>{
+            if(!controlMenu.contains(e.target) && e.target!==btnControlMenu){
+                controlMenu.style.height = '0px';
+            }
+        });
+        window.addEventListener('resize',()=>{
+            const open = controlMenu.style.height && controlMenu.style.height!=='0px';
+            if(open){
+                controlMenu.style.height = controlMenu.scrollHeight + 'px';
+            }
+        });
+    }
     
     checkLogin();
     applyAdminLang();
     renderMergeModeUI();
     renderUpdateSourceIndicator();
+    renderBranchesTable();
 });
 
 function checkLogin() {
@@ -142,6 +188,7 @@ function showSection(sectionId) {
         'cms': 'إعدادات البيانات (CMS)',
         'services': 'الشكاوى والطلبات',
         'media': 'وسائط',
+        'branches': 'فروع',
         'pages': 'صفحات',
         'comments': 'تعليقات',
         'appearance': 'مظهر',
@@ -162,18 +209,42 @@ function applyAdminLang(){
     const lang = localStorage.getItem('admin_lang') || 'ar';
     document.body.classList.toggle('ar', lang==='ar');
     document.dir = lang==='ar' ? 'rtl' : 'ltr';
+    const generic = document.querySelectorAll('[data-en],[data-ar]');
+    generic.forEach(el=>{
+        if(lang==='en'){
+            if(el.dataset.en) el.textContent = el.dataset.en;
+        }else{
+            if(el.dataset.ar) el.textContent = el.dataset.ar;
+        }
+    });
     const t = {
         ar: {
             pageTitles: { dashboard:'الرئيسية', users:'الأعضاء', employees:'الموظفين', cms:'إعدادات البيانات (CMS)', services:'الشكاوى والطلبات', media:'وسائط', pages:'صفحات', comments:'تعليقات', appearance:'مظهر', plugins:'إضافات', tools:'أدوات', settings:'الإعدادات', email:'ايميل' },
             th: { emp:'الموظف', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', health:'الشهادة الصحية', training:'حالة التدريب', view:'عرض' },
-            labels: { name:'الاسم', position:'الوظيفة', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', status:'الحالة', health:'انتهاء الصحية', train1:'تدريب 1', train2:'تدريب 2', email:'البريد الإلكتروني' },
+            labels: { 
+                name:'الاسم', position:'الوظيفة', sap:'SAP ID', iqama:'رقم الهوية/الإقامة', brand:'العلامة التجارية', branch:'الفرع', region:'المنطقة', city:'المدينة',
+                status:'الحالة', status1:'الحالة 1', status2:'الحالة 2',
+                health:'انتهاء الصحية', hire:'بداية الكرت الصحي', train_end:'انتهاء التدريب الصحي',
+                train1:'تدريب 1', train2:'تدريب 2',
+                ops1:'التشغيل OPS1', ref:'الرقم المرجعي',
+                days_train:'المتبقي انتهاء التدريب الصحي', days_health:'المتبقي انتهاء الكرت الصحي',
+                email:'البريد الإلكتروني', photo:'صورة الموظف'
+            },
             buttons: { save:'حفظ', cancel:'إلغاء' },
             merge: { title:'وضع الدمج:', update:'تحديث فقط', replace:'استبدال كامل' }
         },
         en: {
             pageTitles: { dashboard:'Dashboard', users:'Users', employees:'Employees', cms:'Data Settings (CMS)', services:'Complaints', media:'Media', pages:'Pages', comments:'Comments', appearance:'Appearance', plugins:'Plugins', tools:'Tools', settings:'Settings', email:'Email' },
             th: { emp:'Employee', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', health:'Health Card', training:'Training', view:'View' },
-            labels: { name:'Name', position:'Position', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', status:'Status', health:'Health Expiry', train1:'Training 1', train2:'Training 2', email:'Email' },
+            labels: { 
+                name:'Name', position:'Position', sap:'SAP ID', iqama:'ID/Iqama', brand:'Brand', branch:'Branch', region:'Region', city:'City',
+                status:'Status', status1:'Status1', status2:'Status2',
+                health:'Health card expired Date', hire:'Health card start Date', train_end:'Training END Date',
+                train1:'Training 1', train2:'Training 2',
+                ops1:'OPS1', ref:'REF',
+                days_train:'Days Left (Training)', days_health:'Days Left (Health card)',
+                email:'Email', photo:'Employee Photo'
+            },
             buttons: { save:'Save', cancel:'Cancel' },
             merge: { title:'Merge Mode:', update:'Update Only', replace:'Replace All' }
         }
@@ -183,7 +254,15 @@ function applyAdminLang(){
         const el = document.getElementById(mapTh[k]);
         if(el) el.textContent = t.th[k];
     });
-    const mapLbl = { name:'lbl-name', position:'lbl-position', iqama:'lbl-iqama', brand:'lbl-brand', branch:'lbl-branch', region:'lbl-region', status:'lbl-status', health:'lbl-health', train1:'lbl-train1', train2:'lbl-train2', email:'lbl-email' };
+    const mapLbl = { 
+        name:'lbl-name', position:'lbl-position', sap:'lbl-sap', iqama:'lbl-iqama', brand:'lbl-brand', branch:'lbl-branch', region:'lbl-region', city:'lbl-city',
+        status:'lbl-status', status1:'lbl-status1', status2:'lbl-status2',
+        health:'lbl-health', hire:'lbl-hire', train_end:'lbl-train-end',
+        train1:'lbl-train1', train2:'lbl-train2',
+        ops1:'lbl-ops1', ref:'lbl-ref',
+        days_train:'lbl-days-train', days_health:'lbl-days-health',
+        email:'lbl-email', photo:'lbl-photo'
+    };
     Object.keys(mapLbl).forEach(k=>{
         const el = document.getElementById(mapLbl[k]);
         if(el) el.textContent = t.labels[k];
@@ -210,8 +289,19 @@ function applyAdminLang(){
     if(descUpdate) descUpdate.textContent = lang==='ar' ? 'تحديث فقط: دمج ذكي يحافظ على الموجود ويحدّث القيم ويضيف الجديد.' : 'Update Only: Smart merge that keeps existing, updates fields, and adds new.';
     if(descReplace) descReplace.textContent = lang==='ar' ? 'استبدال كامل: يستبدل القائمة بالكامل بالمصدر القادم.' : 'Replace All: Replaces the entire list with the incoming source.';
     if(descSources) descSources.textContent = lang==='ar' ? 'مصادر التحديث: Excel، JSON من GitHub، JSON محلي، تعديل يدوي عبر اللوحة.' : 'Update sources: Excel, GitHub JSON, local JSON, manual edits via the admin panel.';
+    const lblShowTime = document.getElementById('lbl-show-update-time');
+    const lblDateFormat = document.getElementById('lbl-date-format');
+    const optLocale = document.getElementById('opt-format-locale');
+    const optIso = document.getElementById('opt-format-iso');
+    const optRelative = document.getElementById('opt-format-relative');
+    if(lblShowTime) lblShowTime.textContent = lang==='ar' ? 'عرض الوقت بجانب آخر تحديث' : 'Show time next to Last Update';
+    if(lblDateFormat) lblDateFormat.textContent = lang==='ar' ? 'تنسيق التاريخ' : 'Date format';
+    if(optLocale) optLocale.textContent = lang==='ar' ? 'محلي' : 'Locale';
+    if(optIso) optIso.textContent = 'ISO';
+    if(optRelative) optRelative.textContent = lang==='ar' ? 'نسبي' : 'Relative';
     renderMergeModeUI();
     renderUpdateSourceIndicator();
+    renderBranchesTable();
 }
 
 // --- EMPLOYEES LOGIC ---
@@ -410,22 +500,49 @@ function viewEmployee(iqama) {
     const idD = document.getElementById('emp-id-display');
     const m = document.getElementById('employee-modal');
     if(banner) banner.style.background = `linear-gradient(135deg, ${color}, #0b0e2b)`;
-    if(avatar){ avatar.textContent = initials; avatar.style.background = color; }
+    if(avatar){ 
+        if(emp.photo){
+            avatar.innerHTML = `<img src="${emp.photo}" alt="" style="width:100%;height:100%;border-radius:50%;">`;
+            avatar.style.background = 'transparent';
+        } else {
+            avatar.textContent = initials; 
+            avatar.style.background = color; 
+        }
+    }
     if(nameD) nameD.textContent = emp.name||'';
     if(roleD) roleD.textContent = emp.brand||'';
     if(idD) idD.textContent = `ID: ${emp.id||'-'}`;
     const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val||''; };
     set('emp-name', emp.name);
     set('emp-position', emp.position);
+    set('emp-sap', emp.sap_id);
     set('emp-iqama', emp.iqama);
     set('emp-brand', emp.brand);
     set('emp-branch', emp.branch);
     set('emp-region', emp.region);
+    set('emp-city', emp.city);
     set('emp-status', emp.status);
+    set('emp-status1', emp.status1);
+    set('emp-status2', emp.status2);
     set('emp-health', emp.health_expiry);
+    set('emp-hire', emp.hire_date);
+    set('emp-train-end', emp.training_end);
     set('emp-train1', emp.train_status_1);
     set('emp-train2', emp.train_status_2);
+    set('emp-ops1', emp.ops1);
+    set('emp-ref', emp.ref);
     set('emp-email', emp.email);
+    // Days left
+    const daysLeft = (dateStr)=>{
+        if(!dateStr) return '';
+        const d = new Date(dateStr);
+        if(isNaN(d.getTime())) return '';
+        const ms = d.getTime() - new Date().setHours(0,0,0,0);
+        const days = Math.ceil(ms / (1000*60*60*24));
+        return days >= 0 ? `${days} يوم` : `منتهي منذ ${Math.abs(days)} يوم`;
+    };
+    set('emp-days-train', daysLeft(emp.training_end));
+    set('emp-days-health', daysLeft(emp.health_expiry));
     if(m) m.style.display = 'flex';
 }
 
@@ -512,6 +629,26 @@ function setLastUpdateSource(src){
     renderUpdateSourceIndicator();
 }
 
+function getShowUpdateTime(){
+    const v = localStorage.getItem('employees_show_update_time');
+    if(v===null) return true;
+    return v==='true';
+}
+
+function setShowUpdateTime(v){
+    localStorage.setItem('employees_show_update_time', v ? 'true' : 'false');
+    renderUpdateSourceIndicator();
+}
+
+function getDateFormat(){
+    return localStorage.getItem('employees_date_format') || 'locale';
+}
+
+function setDateFormat(fmt){
+    localStorage.setItem('employees_date_format', fmt);
+    renderUpdateSourceIndicator();
+}
+
 function renderUpdateSourceIndicator(){
     const src = localStorage.getItem('employees_last_source') || 'csv';
     const lang = localStorage.getItem('admin_lang') || 'ar';
@@ -526,7 +663,30 @@ function renderUpdateSourceIndicator(){
     };
     const m = map[src] || map.csv;
     const text = lang==='ar' ? m.ar : m.en;
-    badge.textContent = `${title} ${m.emoji} ${text}`;
+    const timeISO = localStorage.getItem('employees_last_source_time');
+    let timeText = '';
+    if (timeISO && getShowUpdateTime()) {
+        const d = new Date(timeISO);
+        const fmt = getDateFormat();
+        if(fmt==='iso'){
+            const s = d.toISOString();
+            timeText = s.slice(0,16).replace('T',' ');
+        }else if(fmt==='relative'){
+            const diffMs = Date.now() - d.getTime();
+            const sec = Math.floor(diffMs/1000);
+            const min = Math.floor(sec/60);
+            const hr = Math.floor(min/60);
+            const day = Math.floor(hr/24);
+            if(day>0) timeText = lang==='ar' ? `منذ ${day} يوم` : `${day} day(s) ago`;
+            else if(hr>0) timeText = lang==='ar' ? `منذ ${hr} ساعة` : `${hr} hour(s) ago`;
+            else if(min>0) timeText = lang==='ar' ? `منذ ${min} دقيقة` : `${min} minute(s) ago`;
+            else timeText = lang==='ar' ? 'الآن' : 'just now';
+        }else{
+            const locale = lang==='ar' ? 'ar-SA' : 'en-US';
+            timeText = d.toLocaleString(locale, { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+        }
+    }
+    badge.textContent = `${title} ${m.emoji} ${text}${timeText ? ' — ' + timeText : ''}`;
     badge.style.color = m.color;
     badge.style.border = `1px solid ${m.color}`;
 }
@@ -538,7 +698,7 @@ function mergeEmployees(existingArr, incomingArr){
     incoming.forEach(n => {
         const prev = byIqama.get(n.iqama);
         if (prev) {
-            const fields = ['id','name','position','brand','branch','region','status','health_expiry','train_status_1','train_status_2','email'];
+            const fields = ['id','name','position','sap_id','brand','branch','region','city','status','status1','status2','health_expiry','hire_date','training_end','train_status_1','train_status_2','ops1','ref','email','photo'];
             fields.forEach(f => {
                 const val = n[f];
                 if (val !== undefined && val !== null && String(val).trim() !== '') {
@@ -603,23 +763,38 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(saveBtn) saveBtn.onclick = saveEmployeeChanges;
 });
 
-function saveEmployeeChanges(){
+async function saveEmployeeChanges(){
     const iqama = document.getElementById('emp-iqama').value.trim();
     let employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
     const idx = employees.findIndex(e=>e.iqama===iqama);
     if(idx===-1) return;
+    const readPhoto = (file)=>new Promise(res=>{
+        if(!file) return res(null);
+        const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file);
+    });
+    const photoFile = document.getElementById('emp-photo')?.files?.[0] || null;
+    const photo = await readPhoto(photoFile);
     employees[idx] = {
         ...employees[idx],
         name: document.getElementById('emp-name').value.trim(),
         position: document.getElementById('emp-position').value.trim(),
+        sap_id: document.getElementById('emp-sap').value.trim(),
         brand: document.getElementById('emp-brand').value.trim(),
         branch: document.getElementById('emp-branch').value.trim(),
         region: document.getElementById('emp-region').value.trim(),
+        city: document.getElementById('emp-city').value.trim(),
         status: document.getElementById('emp-status').value.trim(),
+        status1: document.getElementById('emp-status1').value.trim(),
+        status2: document.getElementById('emp-status2').value.trim(),
         health_expiry: document.getElementById('emp-health').value.trim(),
+        hire_date: document.getElementById('emp-hire').value.trim(),
+        training_end: document.getElementById('emp-train-end').value.trim(),
         train_status_1: document.getElementById('emp-train1').value.trim(),
         train_status_2: document.getElementById('emp-train2').value.trim(),
-        email: document.getElementById('emp-email').value.trim()
+        ops1: document.getElementById('emp-ops1').value.trim(),
+        ref: document.getElementById('emp-ref').value.trim(),
+        email: document.getElementById('emp-email').value.trim(),
+        photo: photo || employees[idx].photo
     };
     localStorage.setItem('admin_employees', JSON.stringify(employees));
     const modal = document.getElementById('employee-modal');
@@ -1076,5 +1251,174 @@ function saveTokenAndPublish() {
     } catch (e) {
         console.error(e);
         setMsg('❌ حدث خطأ أثناء تجهيز البيانات للنشر.');
+    }
+}
+
+let branchEditIndex = -1;
+
+function getBranchesData(){
+    try{
+        return JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
+    }catch(e){
+        return [];
+    }
+}
+function setBranchesData(arr){
+    localStorage.setItem('admin_branches_data', JSON.stringify(arr));
+    localStorage.setItem('admin_branches', JSON.stringify(arr.map(b=>b.name)));
+}
+
+function clearBranchForm(){
+    const ids = ['br-name','br-type','br-brand','br-email','br-cost','br-ops','br-kpi-target','br-kpi-value','br-logo'];
+    ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(el.tagName==='SELECT') el.value='basic';
+        else if(el.type==='file') el.value='';
+        else el.value='';
+    });
+}
+
+function newBranchForm(){
+    branchEditIndex = -1;
+    clearBranchForm();
+}
+
+function readLogoFile(file){
+    return new Promise((resolve)=>{
+        if(!file){ resolve(null); return; }
+        const r = new FileReader();
+        r.onload = ()=>resolve(r.result);
+        r.readAsDataURL(file);
+    });
+}
+
+async function saveBranch(){
+    const name = document.getElementById('br-name')?.value?.trim();
+    const type = document.getElementById('br-type')?.value || 'basic';
+    const brand = document.getElementById('br-brand')?.value?.trim() || '';
+    const email = document.getElementById('br-email')?.value?.trim() || '';
+    const cost = document.getElementById('br-cost')?.value?.trim() || '';
+    const ops = document.getElementById('br-ops')?.value?.trim() || '';
+    const kpiTarget = parseFloat(document.getElementById('br-kpi-target')?.value || '0') || 0;
+    const kpiValue = parseFloat(document.getElementById('br-kpi-value')?.value || '0') || 0;
+    const logoFile = document.getElementById('br-logo')?.files?.[0] || null;
+    const logo = await readLogoFile(logoFile);
+    if(!name) return;
+    const kpiScore = kpiTarget>0 ? Math.round((kpiValue / kpiTarget) * 100) : 0;
+    const item = { name, type, brand, email, cost_center: cost, ops1: ops, kpi_target: kpiTarget, kpi_value: kpiValue, kpi_score: kpiScore, logo };
+    const data = getBranchesData();
+    if(branchEditIndex>=0){
+        data[branchEditIndex] = { ...data[branchEditIndex], ...item };
+    }else{
+        data.push(item);
+    }
+    setBranchesData(data);
+    renderBranchesTable();
+    clearBranchForm();
+}
+
+function renderBranchesTable(){
+    const tbody = document.getElementById('branches-table-body');
+    if(!tbody) return;
+    const data = getBranchesData();
+    tbody.innerHTML = '';
+    data.forEach((b, idx)=>{
+        const tr = document.createElement('tr');
+        const logoCell = b.logo ? `<img src="${b.logo}" alt="" style="width:28px;height:28px;border-radius:50%;">` : '';
+        const typeText = b.type==='opening' ? 'افتتاح' : 'أساسي';
+        const kpi = typeof b.kpi_score==='number' ? `${b.kpi_score}%` : '';
+        tr.innerHTML = `
+            <td>${b.name||''}</td>
+            <td>${typeText}</td>
+            <td>${b.brand||''}</td>
+            <td>${b.email||''}</td>
+            <td>${b.cost_center||''}</td>
+            <td>${b.ops1||''}</td>
+            <td>${kpi}</td>
+            <td>${logoCell}</td>
+            <td>
+                <button class="btn btn-secondary" data-act="edit">تعديل</button>
+                <button class="btn btn-danger" data-act="delete">حذف</button>
+            </td>
+        `;
+        tr.querySelector('[data-act="edit"]').onclick=()=>{
+            branchEditIndex = idx;
+            document.getElementById('br-name').value = b.name||'';
+            document.getElementById('br-type').value = b.type||'basic';
+            document.getElementById('br-brand').value = b.brand||'';
+            document.getElementById('br-email').value = b.email||'';
+            document.getElementById('br-cost').value = b.cost_center||'';
+            document.getElementById('br-ops').value = b.ops1||'';
+            document.getElementById('br-kpi-target').value = b.kpi_target||'';
+            document.getElementById('br-kpi-value').value = b.kpi_value||'';
+            const top = document.getElementById('br-name');
+            if(top) top.scrollIntoView({ behavior:'smooth', block:'center' });
+        };
+        tr.querySelector('[data-act="delete"]').onclick=()=>{
+            const arr = getBranchesData();
+            arr.splice(idx,1);
+            setBranchesData(arr);
+            renderBranchesTable();
+        };
+        tbody.appendChild(tr);
+    });
+}
+
+function exportBranchesJSON(){
+    const data = getBranchesData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'branches.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importBranchesJSON(e){
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+        try{
+            const data = JSON.parse(r.result);
+            if(Array.isArray(data)){
+                setBranchesData(data);
+                renderBranchesTable();
+                e.target.value='';
+            }
+        }catch(err){}
+    };
+    r.readAsText(file);
+}
+
+function importBranchesFromText(){
+    const ta = document.getElementById('br-bulk-text');
+    if(!ta) return;
+    const lines = ta.value.split('\n').map(l=>l.trim()).filter(l=>l);
+    const out = [];
+    lines.forEach(line=>{
+        const parts = line.split('\t').map(p=>p.trim());
+        if(parts.length>=3){
+            const name = parts[0];
+            const cost = parts[1];
+            const email = parts[2];
+            let brand = '';
+            if(cost.includes('BK')) brand='BK';
+            else if(cost.includes('TC')) brand='TC';
+            else if(cost.toUpperCase().includes('BWW')) brand='BWW';
+            const type = 'basic';
+            out.push({ name, type, brand, email, cost_center: cost, ops1: '' });
+        }
+    });
+    if(out.length){
+        const data = getBranchesData();
+        const merged = data.concat(out);
+        setBranchesData(merged);
+        renderBranchesTable();
+        ta.value='';
     }
 }

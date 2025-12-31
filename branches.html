@@ -486,21 +486,28 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const branches = JSON.parse(localStorage.getItem('admin_branches') || '[]');
+        const data = JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
+        const branches = data.length ? data : JSON.parse(localStorage.getItem('admin_branches') || '[]');
         const container = document.getElementById('dynamic-branches');
         
         if (branches.length > 0 && container) {
-            branches.forEach(branchName => {
+            const items = Array.isArray(branches) ? branches : [];
+            items.forEach(item => {
+                const isObj = typeof item === 'object';
+                const name = isObj ? (item.name || '') : item;
+                const type = isObj ? (item.type || 'basic') : 'basic';
+                const brand = isObj ? (item.brand || '') : '';
+                const logo = isObj ? (item.logo || '') : '';
                 const div = document.createElement('div');
                 div.className = 'opening-card';
                 div.innerHTML = `
-                    <span class="opening-status status-now-open" data-en="Open" data-ar="مفتوح">مفتوح</span>
+                    <span class="opening-status ${type==='opening' ? 'status-opening-soon' : 'status-now-open'}" data-en="${type==='opening'?'Opening Soon':'Open'}" data-ar="${type==='opening'?'قريباً':'مفتوح'}">${type==='opening'?'قريباً':'مفتوح'}</span>
                     <div class="opening-content">
                         <div class="opening-brand-row">
-                            <div class="brand-logo-circle">📌</div>
-                            <div class="opening-brand">Olayan Food</div>
+                            <div class="brand-logo-circle">${logo ? `<img src="${logo}" class="brand-logo-img" alt="">` : '📌'}</div>
+                            <div class="opening-brand">${brand || 'Olayan Food'}</div>
                         </div>
-                        <div class="opening-location">${branchName}</div>
+                        <div class="opening-location">${name}</div>
                         <div class="opening-date">
                             <span>✅</span>
                             <span data-en="Operational" data-ar="يعمل حالياً">يعمل حالياً</span>
