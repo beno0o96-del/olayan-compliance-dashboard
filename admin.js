@@ -68,6 +68,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     const langEnBtn = document.getElementById('btn-lang-en');
     const btnModeMerge = document.getElementById('btn-mode-merge');
     const btnModeReplace = document.getElementById('btn-mode-replace');
+    const btnModeMergeCms = document.getElementById('btn-mode-merge-cms');
+    const btnModeReplaceCms = document.getElementById('btn-mode-replace-cms');
 
     if(loginBtn) loginBtn.onclick=login; 
     if(setupBtn) setupBtn.onclick=setup; 
@@ -76,6 +78,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(langEnBtn) langEnBtn.onclick=()=>setAdminLang('en');
     if(btnModeMerge) btnModeMerge.onclick=()=>setMergeMode('merge');
     if(btnModeReplace) btnModeReplace.onclick=()=>setMergeMode('replace');
+    if(btnModeMergeCms) btnModeMergeCms.onclick=()=>setMergeMode('merge');
+    if(btnModeReplaceCms) btnModeReplaceCms.onclick=()=>setMergeMode('replace');
     
     checkLogin();
     applyAdminLang();
@@ -193,6 +197,12 @@ function applyAdminLang(){
     if(lblMerge) lblMerge.textContent = t.merge.title;
     if(btnMerge) btnMerge.textContent = t.merge.update;
     if(btnReplace) btnReplace.textContent = t.merge.replace;
+    const lblMergeCms = document.getElementById('lbl-merge-mode-cms');
+    const btnMergeCms = document.getElementById('btn-mode-merge-cms');
+    const btnReplaceCms = document.getElementById('btn-mode-replace-cms');
+    if(lblMergeCms) lblMergeCms.textContent = t.merge.title;
+    if(btnMergeCms) btnMergeCms.textContent = t.merge.update;
+    if(btnReplaceCms) btnReplaceCms.textContent = t.merge.replace;
 }
 
 // --- EMPLOYEES LOGIC ---
@@ -456,6 +466,8 @@ function renderMergeModeUI(){
     const mode = getMergeMode();
     const btnMerge = document.getElementById('btn-mode-merge');
     const btnReplace = document.getElementById('btn-mode-replace');
+    const btnMergeCms = document.getElementById('btn-mode-merge-cms');
+    const btnReplaceCms = document.getElementById('btn-mode-replace-cms');
     if(btnMerge) {
         btnMerge.style.opacity = mode==='merge' ? '1' : '0.6';
         btnMerge.style.border = mode==='merge' ? '2px solid #4facfe' : '';
@@ -463,6 +475,14 @@ function renderMergeModeUI(){
     if(btnReplace) {
         btnReplace.style.opacity = mode==='replace' ? '1' : '0.6';
         btnReplace.style.border = mode==='replace' ? '2px solid #e11d48' : '';
+    }
+    if(btnMergeCms) {
+        btnMergeCms.style.opacity = mode==='merge' ? '1' : '0.6';
+        btnMergeCms.style.border = mode==='merge' ? '2px solid #4facfe' : '';
+    }
+    if(btnReplaceCms) {
+        btnReplaceCms.style.opacity = mode==='replace' ? '1' : '0.6';
+        btnReplaceCms.style.border = mode==='replace' ? '2px solid #e11d48' : '';
     }
 }
 
