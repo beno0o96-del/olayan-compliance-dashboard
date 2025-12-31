@@ -1743,7 +1743,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if user is admin (simple localStorage check)
     const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('is_admin') === 'true';
     const adminLink = document.getElementById('admin-link');
-    if (adminLink) adminLink.style.display = isAdmin ? '' : 'none';
+    // if (adminLink) adminLink.style.display = isAdmin ? '' : 'none'; // Commented out to allow access to login page
     
     // Elements restricted to admin
     const restrictedSelectors = [
@@ -1763,6 +1763,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // If we are on admin.html and not admin, show access denied
+    /* 
+    // DISABLED: admin.html handles its own login view. This block was preventing the login screen from showing.
     if (window.location.pathname.includes('admin.html') && !isAdmin) {
          document.body.innerHTML = `
             <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#0b0e2b;color:white;flex-direction:column;font-family:Arial;">
@@ -1772,4 +1774,5 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
     }
+    */
 });

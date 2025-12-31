@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دخول الموظفين | Olayan Employee Login</title>
+    <link rel="stylesheet" href="style-admin.css">
+    <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
+    <style>
+        /* Reusing style-admin.css for consistency but overriding specific parts if needed */
+        body {
+            background-color: #0f172a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        .login-box {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box; /* Ensure padding doesn't affect width */
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-box">
+            <img src="olayan-logo.png" alt="Olayan Logo" style="height: 60px; margin-bottom: 20px;">
+            <h2 data-en="Employee Login" data-ar="دخول الموظفين">دخول الموظفين</h2>
+            <p style="color: #94a3b8; margin-bottom: 30px;" data-en="Welcome back, please login to your account." data-ar="مرحباً بك، يرجى تسجيل الدخول لحسابك.">مرحباً بك، يرجى تسجيل الدخول لحسابك.</p>
+            
+            <div class="form-group">
+                <label style="display:block; margin-bottom:8px; color:#cbd5e1;" data-en="Employee ID" data-ar="الرقم الوظيفي">الرقم الوظيفي</label>
+                <input type="text" id="emp-id" class="form-control" placeholder="EMP-XXX">
+            </div>
+            <div class="form-group">
+                <label style="display:block; margin-bottom:8px; color:#cbd5e1;" data-en="Password" data-ar="كلمة المرور">كلمة المرور</label>
+                <input type="password" id="emp-pass" class="form-control" placeholder="••••••••">
+            </div>
+            
+            <button onclick="handleLogin()" class="btn btn-primary" data-en="Login" data-ar="تسجيل الدخول">تسجيل الدخول</button>
+            
+            <a href="index.html" class="back-link" data-en="Back to Home" data-ar="العودة للرئيسية">العودة للرئيسية</a>
+
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+                <button onclick="setLang('ar')" style="background:none; border:none; color:#94a3b8; cursor:pointer;">العربية</button>
+                <span style="color:#475569">|</span>
+                <button onclick="setLang('en')" style="background:none; border:none; color:#94a3b8; cursor:pointer;">English</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setLang(lang) {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            const elements = document.querySelectorAll('[data-en]');
+            elements.forEach(el => {
+                el.textContent = el.getAttribute(`data-${lang}`);
+            });
+
+            // Update placeholders
+            const idInput = document.getElementById('emp-id');
+            const passInput = document.getElementById('emp-pass');
+            
+            if(lang === 'ar') {
+                idInput.placeholder = "الرقم الوظيفي";
+                passInput.placeholder = "كلمة المرور";
+                document.querySelector('.form-group').style.textAlign = 'right';
+            } else {
+                idInput.placeholder = "Employee ID";
+                passInput.placeholder = "Password";
+                document.querySelectorAll('.form-group').forEach(el => el.style.textAlign = 'left');
+            }
+        }
+
+        function handleLogin() {
+            const id = document.getElementById('emp-id').value;
+            const pass = document.getElementById('emp-pass').value;
+
+            if(!id || !pass) {
+                alert(document.documentElement.lang === 'ar' ? 'يرجى إدخال البيانات' : 'Please enter credentials');
+                return;
+            }
+
+            // Simple mock login for now
+            alert(document.documentElement.lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Login Successful!');
+            // Redirect to Employees page or Home
+            window.location.href = 'employees.html';
+        }
+
+        // Set initial lang based on previous preference or default
+        // Simple check since we don't have the full app.js here yet, or we could include it.
+        // For standalone simplicity:
+        setLang('ar'); 
+    </script>
+</body>
+</html>
