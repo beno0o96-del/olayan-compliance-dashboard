@@ -105,7 +105,7 @@
         
         /* Table Styles */
         .modern-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .modern-table th { text-align: left; padding: 12px; color: #94a3b8; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .modern-table th { text-align: start; padding: 12px; color: #94a3b8; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .modern-table td { padding: 12px; color: #e2e8f0; border-bottom: 1px solid rgba(255,255,255,0.02); }
         .modern-table tr:last-child td { border-bottom: none; }
         .modern-table tr:hover td { background: rgba(255,255,255,0.02); }
@@ -118,6 +118,18 @@
         #b-kpi-table th:nth-child(5), #b-kpi-table td:nth-child(5) { text-align: center; } /* Achieved */
         #b-kpi-table th:nth-child(6), #b-kpi-table td:nth-child(6) { text-align: center; } /* Progress */
         #b-kpi-table th:nth-child(7), #b-kpi-table td:nth-child(7) { text-align: center; } /* Status */
+
+        /* Financial Table Alignment (Revenue) */
+        #b-table-revenue th:nth-child(1), #b-table-revenue td:nth-child(1) { text-align: start; } /* Sector */
+        #b-table-revenue th:nth-child(2), #b-table-revenue td:nth-child(2) { text-align: center; } /* Actual */
+        #b-table-revenue th:nth-child(3), #b-table-revenue td:nth-child(3) { text-align: center; } /* Target */
+        #b-table-revenue th:nth-child(4), #b-table-revenue td:nth-child(4) { text-align: center; direction: ltr; } /* Var % */
+
+        /* Expenses Table Alignment */
+        #b-table-expenses th:nth-child(1), #b-table-expenses td:nth-child(1) { text-align: start; } /* Category */
+        #b-table-expenses th:nth-child(2), #b-table-expenses td:nth-child(2) { text-align: center; } /* Actual */
+        #b-table-expenses th:nth-child(3), #b-table-expenses td:nth-child(3) { text-align: center; } /* Budget */
+        #b-table-expenses th:nth-child(4), #b-table-expenses td:nth-child(4) { text-align: center; } /* Status */
 
         /* Neon Text */
         .neon-text-blue { color: #4facfe; text-shadow: 0 0 10px rgba(79, 172, 254, 0.5); }

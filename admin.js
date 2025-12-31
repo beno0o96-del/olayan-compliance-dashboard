@@ -247,7 +247,8 @@ function applyAdminLang(){
                 ops1:'التشغيل OPS1', ref:'الرقم المرجعي',
                 days_train:'المتبقي انتهاء التدريب الصحي', days_health:'المتبقي انتهاء الكرت الصحي',
                 email:'البريد الإلكتروني', photo:'صورة الموظف',
-                band:'Band', cost:'مركز التكلفة', tede:'T. E. D.E', remarks:'ملاحظات'
+                band:'Band', cost:'مركز التكلفة', tede:'T. E. D.E', remarks:'ملاحظات',
+                has_airport:'يمتلك تصريح مطار / أرامكو', airport_no:'رقم التصريح', airport_expiry:'تاريخ الانتهاء', airport_issuer:'جهة الإصدار / المنطقة', airport_photo:'صورة التصريح'
             },
             buttons: { save:'حفظ', cancel:'إلغاء' },
             merge: { title:'وضع الدمج:', update:'تحديث فقط', replace:'استبدال كامل' }
@@ -263,7 +264,8 @@ function applyAdminLang(){
                 ops1:'OPS1', ref:'REF',
                 days_train:'Days Left (Training)', days_health:'Days Left (Health card)',
                 email:'Email', photo:'Employee Photo',
-                band:'Band', cost:'Cost center', tede:'T. E. D.E', remarks:'Remarks'
+                band:'Band', cost:'Cost center', tede:'T. E. D.E', remarks:'Remarks',
+                has_airport:'Has Airport/Aramco Permit', airport_no:'Permit Number', airport_expiry:'Expiry Date', airport_issuer:'Issuing Authority / Region', airport_photo:'Permit Photo'
             },
             buttons: { save:'Save', cancel:'Cancel' },
             merge: { title:'Merge Mode:', update:'Update Only', replace:'Replace All' }
@@ -282,7 +284,8 @@ function applyAdminLang(){
         ops1:'lbl-ops1', ref:'lbl-ref',
         days_train:'lbl-days-train', days_health:'lbl-days-health',
         email:'lbl-email', photo:'lbl-photo',
-        band:'lbl-band', cost:'lbl-cost', tede:'lbl-tede', remarks:'lbl-remarks'
+        band:'lbl-band', cost:'lbl-cost', tede:'lbl-tede', remarks:'lbl-remarks',
+        has_airport:'lbl-has-airport', airport_no:'lbl-airport-no', airport_expiry:'lbl-airport-expiry', airport_issuer:'lbl-airport-issuer', airport_photo:'lbl-airport-photo'
     };
     Object.keys(mapLbl).forEach(k=>{
         const el = document.getElementById(mapLbl[k]);
@@ -533,7 +536,22 @@ function viewEmployee(iqama) {
     }
     if(nameD) nameD.textContent = emp.name||'';
     if(roleD) roleD.textContent = emp.brand||'';
-    if(idD) idD.textContent = `ID: ${emp.id||'-'}`;
+    
+    // Improved ID Display Logic
+    let idText = '';
+    if(emp.sap_id && emp.sap_id !== '-') idText += `SAP: ${emp.sap_id}`;
+    if(emp.iqama) {
+        if(idText) idText += ' | ';
+        idText += `ID: ${emp.iqama}`;
+    }
+    if(idD) {
+        idD.textContent = idText;
+        idD.style.color = '#e2e8f0'; // Brighter text for better visibility
+    }
+    
+    // Store original iqama for saving logic
+    if(m) m.dataset.originalIqama = emp.iqama;
+
     const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val||''; };
     set('emp-sap', emp.sap_id);
     set('emp-ref', emp.ref);
@@ -551,6 +569,32 @@ function viewEmployee(iqama) {
     set('emp-city', emp.city);
     set('emp-region', emp.region);
     set('emp-remarks', emp.remarks);
+    
+    // Airport Card
+    const chkAirport = document.getElementById('emp-has-airport');
+    const airportSection = document.getElementById('airport-card-section');
+    const btnRemoveAirportPhoto = document.getElementById('btn-remove-airport-photo');
+    const preview = document.getElementById('emp-airport-photo-preview');
+    
+    if(chkAirport) {
+        chkAirport.checked = emp.has_airport_card === true || emp.has_airport_card === 'true';
+        if(airportSection) airportSection.style.display = chkAirport.checked ? 'block' : 'none';
+    }
+    set('emp-airport-no', emp.airport_card_no);
+    set('emp-airport-expiry', emp.airport_card_expiry);
+    set('emp-airport-issuer', emp.airport_card_issuer);
+    
+    if(preview){
+        if(emp.airport_card_photo){
+            preview.innerHTML = `<img src="${emp.airport_card_photo}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+            if(btnRemoveAirportPhoto) btnRemoveAirportPhoto.style.display = 'inline-block';
+            preview.dataset.deleted = 'false';
+        } else {
+            preview.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">No image selected</span>';
+            if(btnRemoveAirportPhoto) btnRemoveAirportPhoto.style.display = 'none';
+        }
+    }
+    
     // Days left
     const daysLeft = (dateStr)=>{
         if(!dateStr) return '';
@@ -745,7 +789,7 @@ function mergeEmployees(existingArr, incomingArr){
     incoming.forEach(n => {
         const prev = byIqama.get(n.iqama);
         if (prev) {
-            const fields = ['id','name','position','sap_id','brand','branch','region','city','status','status1','status2','health_expiry','hire_date','training_end','train_status_1','train_status_2','ops1','ref','email','photo'];
+            const fields = ['id','name','position','sap_id','brand','branch','region','city','status','status1','status2','health_expiry','hire_date','training_end','train_status_1','train_status_2','ops1','ref','email','photo','has_airport_card','airport_card_no','airport_card_expiry','airport_card_issuer','airport_card_photo'];
             fields.forEach(f => {
                 const val = n[f];
                 if (val !== undefined && val !== null && String(val).trim() !== '') {
@@ -808,21 +852,81 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const modal = document.getElementById('employee-modal');
     if(closeBtn) closeBtn.onclick = ()=>{ if(modal) modal.style.display='none'; };
     if(saveBtn) saveBtn.onclick = saveEmployeeChanges;
+    
+    // Airport Card Logic
+    const chkAirport = document.getElementById('emp-has-airport');
+    const airportSection = document.getElementById('airport-card-section');
+    if(chkAirport && airportSection){
+        chkAirport.onchange = ()=>{
+            airportSection.style.display = chkAirport.checked ? 'block' : 'none';
+        };
+    }
+    
+    const airportPhotoInput = document.getElementById('emp-airport-photo-input');
+    const btnRemoveAirportPhoto = document.getElementById('btn-remove-airport-photo');
+    if(airportPhotoInput){
+        airportPhotoInput.onchange = ()=>{
+            const file = airportPhotoInput.files?.[0];
+            if(file){
+                const r = new FileReader();
+                r.onload = ()=>{
+                    const preview = document.getElementById('emp-airport-photo-preview');
+                    if(preview){
+                        preview.innerHTML = `<img src="${r.result}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+                        if(btnRemoveAirportPhoto) btnRemoveAirportPhoto.style.display = 'inline-block';
+                    }
+                };
+                r.readAsDataURL(file);
+            }
+        };
+    }
+    if(btnRemoveAirportPhoto){
+        btnRemoveAirportPhoto.onclick = ()=>{
+            const preview = document.getElementById('emp-airport-photo-preview');
+            const input = document.getElementById('emp-airport-photo-input');
+            if(preview) preview.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">No image selected</span>';
+            if(input) input.value = '';
+            btnRemoveAirportPhoto.style.display = 'none';
+            // Mark for deletion in save logic if needed (handled by checking preview content or a flag)
+            if(preview) preview.dataset.deleted = 'true';
+        };
+    }
 });
 
 async function saveEmployeeChanges(){
-    const iqama = document.getElementById('emp-iqama').value.trim();
+    const modal = document.getElementById('employee-modal');
+    const newIqama = document.getElementById('emp-iqama').value.trim();
+    const originalIqama = modal?.dataset.originalIqama; // Get original ID
+
     let employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-    const idx = employees.findIndex(e=>e.iqama===iqama);
+    
+    // Find by original ID if available, otherwise try new ID (for safety)
+    const idx = employees.findIndex(e => e.iqama === (originalIqama || newIqama));
+    
     if(idx===-1) return;
+
     const readPhoto = (file)=>new Promise(res=>{
         if(!file) return res(null);
         const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file);
     });
     const photoFile = document.getElementById('emp-photo')?.files?.[0] || null;
     const photo = await readPhoto(photoFile);
+
+    const airportPhotoFile = document.getElementById('emp-airport-photo-input')?.files?.[0] || null;
+    const airportPhoto = await readPhoto(airportPhotoFile);
+    
+    // Check if airport photo was deleted
+    const airportPreview = document.getElementById('emp-airport-photo-preview');
+    let finalAirportPhoto = employees[idx].airport_card_photo;
+    if(airportPhoto) {
+        finalAirportPhoto = airportPhoto;
+    } else if(airportPreview && airportPreview.dataset.deleted === 'true'){
+        finalAirportPhoto = null;
+    }
+    
     employees[idx] = {
         ...employees[idx],
+        iqama: newIqama, // Update ID to new value
         name: document.getElementById('emp-name')?.value?.trim() || employees[idx].name,
         sap_id: document.getElementById('emp-sap')?.value?.trim() || employees[idx].sap_id,
         brand: document.getElementById('emp-band')?.value?.trim() || employees[idx].brand,
@@ -837,7 +941,12 @@ async function saveEmployeeChanges(){
         ops1: document.getElementById('emp-ops1')?.value?.trim() || employees[idx].ops1,
         ref: document.getElementById('emp-ref')?.value?.trim() || employees[idx].ref,
         remarks: document.getElementById('emp-remarks')?.value?.trim() || employees[idx].remarks,
-        photo: photo || employees[idx].photo
+        photo: photo || employees[idx].photo,
+        has_airport_card: document.getElementById('emp-has-airport')?.checked || false,
+        airport_card_no: document.getElementById('emp-airport-no')?.value?.trim() || '',
+        airport_card_expiry: document.getElementById('emp-airport-expiry')?.value?.trim() || '',
+        airport_card_issuer: document.getElementById('emp-airport-issuer')?.value?.trim() || '',
+        airport_card_photo: finalAirportPhoto
     };
     localStorage.setItem('admin_employees', JSON.stringify(employees));
     const modal = document.getElementById('employee-modal');

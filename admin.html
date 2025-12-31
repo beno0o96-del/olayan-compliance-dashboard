@@ -557,8 +557,10 @@
                     </div>
                     <div>
                         <div id="emp-name-display" style="font-size:1.4rem; font-weight:700;"></div>
-                        <div id="emp-role-display" style="color:#4facfe; font-size:0.95rem;"></div>
-                        <div id="emp-id-display" style="color:#94a3b8; font-size:0.85rem;"></div>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                            <div id="emp-role-display" style="color:#4facfe; font-size:0.95rem; font-weight:bold;"></div>
+                            <div id="emp-id-display" style="color:#94a3b8; font-size:0.85rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;"></div>
+                        </div>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px;">
@@ -572,7 +574,7 @@
                     </div>
                     <div>
                         <label id="lbl-iqama" style="display:block; color:#b0bec5; font-size:0.85rem;">ID#</label>
-                        <input id="emp-iqama" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                        <input id="emp-iqama" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
                     <div>
                         <label id="lbl-name" style="display:block; color:#b0bec5; font-size:0.85rem;">Name</label>
@@ -636,6 +638,38 @@
                         <label id="lbl-region" style="display:block; color:#b0bec5; font-size:0.85rem;">Region</label>
                         <input id="emp-region" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
+                    <div style="grid-column: span 2; border-top: 1px solid #334155; margin-top: 10px; padding-top: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <input type="checkbox" id="emp-has-airport" style="width: 18px; height: 18px; cursor: pointer;">
+                            <label for="emp-has-airport" id="lbl-has-airport" style="color: #4facfe; font-weight: bold; cursor: pointer;">يمتلك تصريح مطار / أرامكو</label>
+                        </div>
+                        
+                        <div id="airport-card-section" style="display: none; background: rgba(15, 23, 42, 0.5); padding: 15px; border-radius: 8px; border: 1px solid #334155;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <label id="lbl-airport-no" style="display:block; color:#b0bec5; font-size:0.85rem;">Card Number</label>
+                                    <input id="emp-airport-no" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                                </div>
+                                <div>
+                                    <label id="lbl-airport-expiry" style="display:block; color:#b0bec5; font-size:0.85rem;">Expiry Date</label>
+                                    <input id="emp-airport-expiry" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label id="lbl-airport-issuer" style="display:block; color:#b0bec5; font-size:0.85rem;">Issuing Authority / Region</label>
+                                    <input id="emp-airport-issuer" class="form-control" type="text" placeholder="e.g. Riyadh Airport, Aramco Dhahran..." style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label id="lbl-airport-photo" style="display:block; color:#b0bec5; font-size:0.85rem;">Card Photo</label>
+                                    <input id="emp-airport-photo-input" class="form-control" type="file" accept="image/*" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                                    <div id="emp-airport-photo-preview" style="margin-top: 10px; max-width: 100%; height: 150px; border: 1px dashed #334155; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 6px;">
+                                        <span style="color: #64748b; font-size: 0.8rem;">No image selected</span>
+                                    </div>
+                                    <button id="btn-remove-airport-photo" class="btn btn-secondary" style="margin-top: 5px; font-size: 0.8rem; display: none;">حذف الصورة</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="grid-column: span 2;">
                         <label id="lbl-remarks" style="display:block; color:#b0bec5; font-size:0.85rem;">Remarks</label>
                         <input id="emp-remarks" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
