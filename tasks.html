@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tasks Management - Olayan Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style-base.css">
+  <link rel="stylesheet" href="style-home.css">
+  <link rel="stylesheet" href="style-complex-dashboard.css">
+  <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
+  <link rel="apple-touch-icon" href="olayan-logo.png">
+  <link rel="mask-icon" href="olayan-mark.svg" color="#2d6cdf">
+  <meta name="theme-color" content="#0b0e2b">
+
+  <!-- JS -->
+  <script src="app.js?v=4" defer></script>
+  <script src="tasks.js" defer></script>
+</head>
+
+<body class="en">
+<div class="brand-bar">
+  <img src="olayan-logo.png" alt="Olayan">
+  <span class="brand-name">Olayan Compliance Dashboard</span>
+</div>
+
+<!-- Hamburger Button -->
+<button class="hamburger-btn" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+</button>
+
+<!-- Sliding Side Menu -->
+<div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleMenu()"></div>
+<aside class="side-menu" id="sideMenu">
+    <div class="side-menu-header">
+        <img src="olayan-logo.png" class="side-menu-logo" alt="Logo">
+        <button class="close-menu-btn" onclick="toggleMenu()">&times;</button>
+    </div>
+    <nav class="side-menu-nav">
+        <a href="index.html" class="side-link">
+            <i>🏠</i> <span data-en="Home" data-ar="الرئيسية">Home</span>
+        </a>
+        <a href="violations.html" class="side-link">
+            <i>⚠️</i> <span data-en="Violations" data-ar="المخالفات">Violations</span>
+        </a>
+        <a href="training.html" class="side-link">
+            <i>🎓</i> <span data-en="Training" data-ar="التدريب">Training</span>
+        </a>
+        <a href="branches.html" class="side-link">
+            <i>🏬</i> <span data-en="Branches" data-ar="الفروع">Branches</span>
+        </a>
+        <a href="board.html" class="side-link">
+        <i>📊</i> <span data-en="Management Report" data-ar="تقرير الإدارة">Management Report</span>
+    </a>
+    <a href="employees.html" class="side-link">
+        <i>👥</i> <span data-en="Employees" data-ar="الموظفين">Employees</span>
+    </a>
+    <a href="tasks.html" class="side-link active">
+        <i>✅</i> <span data-en="Tasks" data-ar="المهام">Tasks</span>
+    </a>
+    <a href="login.html" class="side-link">
+        <i>🔐</i> <span data-en="Login" data-ar="تسجيل الدخول">Login</span>
+    </a>
+    </nav>
+    <div style="margin-top: auto; padding-top: 20px;">
+        <div class="lang-switch" style="display: flex; gap: 10px; justify-content: center;"> 
+            <button class="lang-btn" onclick="setLang('ar')" style="flex:1;">العربية</button> 
+            <button class="lang-btn" onclick="setLang('en')" style="flex:1;">English</button> 
+        </div>
+    </div>
+</aside>
+
+<div class="board-container" style="margin-top: 60px;">
+    <!-- Page Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-title">
+            <span style="font-size: 2rem;">✅</span>
+            <div>
+                <h2 style="margin:0;" data-en="Tasks Management" data-ar="إدارة المهام">Tasks Management</h2>
+                <span style="font-size: 0.9rem; color: var(--text-secondary);" data-en="Track and assign tasks to employees" data-ar="تتبع وإسناد المهام للموظفين">Track and assign tasks to employees</span>
+            </div>
+        </div>
+        <div>
+            <button onclick="openTaskModal()" class="btn-primary" style="background: var(--neon-blue); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                <span>+</span> <span data-en="New Task" data-ar="مهمة جديدة">New Task</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-board">
+        <!-- Column 1: Pending -->
+        <div class="kanban-column">
+            <div class="kanban-header status-pending">
+                <span data-en="Pending" data-ar="قيد الانتظار">Pending</span>
+                <span class="task-count" id="count-pending">0</span>
+            </div>
+            <div class="kanban-body" id="col-pending" ondrop="drop(event, 'pending')" ondragover="allowDrop(event)">
+                <!-- Tasks go here -->
+            </div>
+        </div>
+
+        <!-- Column 2: In Progress -->
+        <div class="kanban-column">
+            <div class="kanban-header status-progress">
+                <span data-en="In Progress" data-ar="جاري العمل">In Progress</span>
+                <span class="task-count" id="count-inprogress">0</span>
+            </div>
+            <div class="kanban-body" id="col-inprogress" ondrop="drop(event, 'inprogress')" ondragover="allowDrop(event)">
+                <!-- Tasks go here -->
+            </div>
+        </div>
+
+        <!-- Column 3: Completed -->
+        <div class="kanban-column">
+            <div class="kanban-header status-completed">
+                <span data-en="Completed" data-ar="مكتملة">Completed</span>
+                <span class="task-count" id="count-completed">0</span>
+            </div>
+            <div class="kanban-body" id="col-completed" ondrop="drop(event, 'completed')" ondragover="allowDrop(event)">
+                <!-- Tasks go here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Task Modal -->
+<div id="taskModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="background: var(--card-dark); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; max-width: 500px; width: 100%;">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modalTitle" style="margin: 0;" data-en="Add New Task" data-ar="إضافة مهمة جديدة">Add New Task</h3>
+            <button onclick="closeTaskModal()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <form id="taskForm" onsubmit="handleTaskSubmit(event)">
+                <input type="hidden" id="taskId">
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);" data-en="Title" data-ar="العنوان">Title</label>
+                    <input type="text" id="taskTitle" required style="width: 100%; padding: 10px; background: #0b0e2b; border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);" data-en="Description" data-ar="الوصف">Description</label>
+                    <textarea id="taskDesc" rows="3" style="width: 100%; padding: 10px; background: #0b0e2b; border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);" data-en="Assign To" data-ar="إسناد إلى">Assign To</label>
+                    <select id="taskAssignee" style="width: 100%; padding: 10px; background: #0b0e2b; border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
+                        <option value="" data-en="Select Employee..." data-ar="اختر موظف...">Select Employee...</option>
+                    </select>
+                </div>
+
+                <div class="row" style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);" data-en="Priority" data-ar="الأولوية">Priority</label>
+                        <select id="taskPriority" style="width: 100%; padding: 10px; background: #0b0e2b; border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
+                            <option value="high" data-en="High" data-ar="عالية">High</option>
+                            <option value="medium" data-en="Medium" data-ar="متوسطة" selected>Medium</option>
+                            <option value="low" data-en="Low" data-ar="منخفضة">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);" data-en="Due Date" data-ar="تاريخ الاستحقاق">Due Date</label>
+                        <input type="date" id="taskDueDate" style="width: 100%; padding: 10px; background: #0b0e2b; border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 25px; text-align: right;">
+                    <button type="button" onclick="closeTaskModal()" style="background: transparent; color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-left: 10px;" data-en="Cancel" data-ar="إلغاء">Cancel</button>
+                    <button type="submit" style="background: var(--neon-blue); color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer;" data-en="Save" data-ar="حفظ">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

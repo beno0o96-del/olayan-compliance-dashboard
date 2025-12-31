@@ -94,7 +94,9 @@ function checkLogin() {
         loadComplaints();
         loadUsers();
         loadCMSData();
-        updateAdminStats();
+        
+        // Initial Employee Load
+        loadEmployeesFromCSV();
         
         // Default Section
         showSection('dashboard');
@@ -120,10 +122,229 @@ function showSection(sectionId) {
     const titles = {
         'dashboard': 'ملخص النظام',
         'users': 'إدارة المستخدمين',
+        'employees': 'شؤون الموظفين',
         'cms': 'إعدادات البيانات (CMS)',
         'services': 'الشكاوى والطلبات'
     };
     document.getElementById('page-title').textContent = titles[sectionId];
+}
+
+// --- EMPLOYEES LOGIC ---
+
+async function loadEmployeesFromCSV() {
+    try {
+        const response = await fetch('Data.csv');
+        if (!response.ok) throw new Error('CSV file not found');
+        const text = await response.text();
+        const data = parseCSV(text);
+
+        if (data && data.length > 0) {
+            // Transform CSV data to Employee object structure
+            // CSV Indices:
+            // 2: ID#, 3: Name, 4: Band, 5: Cost center, 9: Training End, 10: Status1, 12: Health Exp, 13: Status2, 16: Region, 20: Email
+            const employees = data.map((row, index) => {
+                const branchRaw = row[5] || '';
+                // Attempt to extract branch name from "Code - Band - Name" format
+                let branchName = branchRaw;
+                if (branchRaw.includes('-')) {
+                    const parts = branchRaw.split('-');
+                    if (parts.length >= 3) branchName = parts.slice(2).join('-').trim();
+                    else if (parts.length === 2) branchName = parts[1].trim();
+                }
+
+                return {
+                    id: (index + 1).toString(),
+                    name: row[3] || '',
+                    iqama: row[2] || '',
+                    brand: row[4] || '',
+                    branch: branchName,
+                    region: row[16] || '',
+                    health_expiry: row[12] || '', 
+                    train_status_1: row[10] || '',
+                    train_status_2: row[13] || '',
+                    training_end: row[9] || '',
+                    email: row[20] || ''
+                };
+            }).filter(e => e.name && e.name.trim() !== '' && e.iqama); // Filter empty rows
+
+            localStorage.setItem('admin_employees', JSON.stringify(employees));
+            extractBranchesFromData(employees);
+            loadEmployees();
+            console.log(`Loaded ${employees.length} employees from CSV`);
+        }
+    } catch (err) {
+        console.error('CSV Load Error:', err);
+        // Fallback to existing local storage if CSV fails
+        loadEmployees();
+    }
+}
+
+function parseCSV(text) {
+    const lines = text.split('\n');
+    const result = [];
+    // Skip header (index 0)
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        // Robust CSV Split (handles commas in quotes)
+        const row = [];
+        let inQuote = false;
+        let currentField = '';
+        for (let j = 0; j < lines[i].length; j++) {
+            const char = lines[i][j];
+            if (char === '"') {
+                inQuote = !inQuote;
+            } else if (char === ',' && !inQuote) {
+                row.push(currentField.trim());
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+        row.push(currentField.trim());
+        result.push(row);
+    }
+    return result;
+}
+
+function extractBranchesFromData(employees) {
+    const branches = [...new Set(employees.map(e => e.branch).filter(b => b))];
+    localStorage.setItem('admin_branches', JSON.stringify(branches));
+}
+
+function generateRandomEmployees() {
+    if (!confirm('سيتم مسح البيانات الحالية وتوليد بيانات عشوائية جديدة. هل أنت متأكد؟')) return;
+
+    const names = ["محمد علي", "فهد السالم", "خالد العتيبي", "سعيد القحطاني", "عمر الدوسري", "ياسر الشمري", "أحمد الحربي", "عبدالله العنزي", "تركي المطيري", "سلطان المالكي"];
+    const branches = ["الرياض - العليا", "الرياض - الملز", "جدة - التحلية", "الدمام - الكورنيش", "مكة - العزيزية", "المدينة - الدائري", "الطائف - شهار", "أبها - الحزام"];
+    const positions = ["مدير فرع", "كاشير", "مشرف صالة", "طباخ", "محاسب", "أمن وسلامة", "خدمة عملاء"];
+    const regions = ["الوسطى", "الغربية", "الشرقية", "الجنوبية", "الشمالية"];
+    const brands = ["BK", "TC", "BWW"];
+
+    const employees = [];
+    
+    for (let i = 0; i < 50; i++) {
+        const today = new Date();
+        const randomDate = (start, end) => new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().split('T')[0];
+
+        const healthExp = randomDate(new Date(2023, 0, 1), new Date(2026, 0, 1));
+        const train1Status = Math.random() > 0.2 ? "Valid" : "Expired";
+        const train2Status = Math.random() > 0.3 ? "Valid" : "Expired";
+
+        employees.push({
+            id: (1000 + i).toString(),
+            name: names[Math.floor(Math.random() * names.length)],
+            iqama: "2" + Math.floor(Math.random() * 1000000000),
+            brand: brands[Math.floor(Math.random() * brands.length)],
+            branch: branches[Math.floor(Math.random() * branches.length)],
+            region: regions[Math.floor(Math.random() * regions.length)],
+            health_expiry: healthExp,
+            train_status_1: train1Status,
+            train_status_2: train2Status
+        });
+    }
+
+    localStorage.setItem('admin_employees', JSON.stringify(employees));
+    loadEmployees();
+    alert('تم توليد 50 موظف بنجاح!');
+}
+
+function loadEmployees(filterText = "") {
+    const tbody = document.getElementById('employees-table-body');
+    if (!tbody) return;
+
+    let employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    
+    // Auto-generate if empty (and no CSV loaded yet)
+    if (employees.length === 0) {
+        // Optional: Trigger random generation if needed, but better to wait for CSV
+        // generateRandomEmployees(); 
+    }
+
+    tbody.innerHTML = '';
+    const today = new Date().toISOString().split('T')[0];
+
+    employees.forEach(emp => {
+        // Filter Logic
+        if (filterText) {
+            const txt = filterText.toLowerCase();
+            const match = (emp.name && emp.name.toLowerCase().includes(txt)) || 
+                          (emp.iqama && emp.iqama.includes(txt)) || 
+                          (emp.branch && emp.branch.toLowerCase().includes(txt));
+            if (!match) return;
+        }
+
+        const tr = document.createElement('tr');
+        
+        // Health Date Check
+        const isHealthExpired = emp.health_expiry < today;
+        const healthStyle = isHealthExpired ? 'color: #ef4444; font-weight: bold;' : 'color: #22c55e;';
+        
+        // Training Check (L1)
+        const t1Style = emp.train_status_1 && emp.train_status_1.toLowerCase().includes('valid') ? 'background: #dcfce7; color: #15803d;' : 'background: #fee2e2; color: #b91c1c;';
+        
+        // Training Check (L2) - assuming similar logic or just display
+        const t2Style = emp.train_status_2 && emp.train_status_2.toLowerCase().includes('valid') ? 'background: #dcfce7; color: #15803d;' : 'background: #fee2e2; color: #b91c1c;';
+
+        tr.innerHTML = `
+            <td style="font-weight:bold;">${emp.name}</td>
+            <td>${emp.iqama}</td>
+            <td><span class="badge badge-brand">${emp.brand}</span></td>
+            <td>${emp.branch}</td>
+            <td>${emp.region}</td>
+            <td style="${healthStyle}">${emp.health_expiry} ${isHealthExpired ? '⚠️' : ''}</td>
+            <td>
+                <div style="font-size:0.75rem;">L1: <span style="padding: 1px 4px; border-radius: 3px; ${t1Style}">${emp.train_status_1}</span></div>
+                <div style="font-size:0.75rem; margin-top:2px;">L2: <span style="padding: 1px 4px; border-radius: 3px; ${t2Style}">${emp.train_status_2}</span></div>
+            </td>
+            <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.8rem;" onclick="viewEmployee('${emp.iqama}')">👁️</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Update Counter
+    const countEl = document.getElementById('emp-pagination');
+    if (countEl) countEl.textContent = `عرض ${tbody.children.length} من أصل ${employees.length} موظف`;
+}
+
+function viewEmployee(iqama) {
+    alert('سيتم عرض تفاصيل الموظف: ' + iqama);
+    // Future: Open modal with full details
+}
+
+function filterEmployees(text) {
+    loadEmployees(text);
+}
+
+// Attach event listener to search input
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('emp-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => filterEmployees(e.target.value));
+    }
+});
+
+function sortEmployees(key) {
+    // Sort logic implementation if needed
+}
+
+function exportEmployees() {
+    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM for Arabic support
+    csvContent += "الاسم,رقم الإقامة,العلامة التجارية,الفرع,المنطقة,انتهاء الصحية,تدريب 1,تدريب 2\n";
+
+    employees.forEach(e => {
+        csvContent += `"${e.name}","${e.iqama}","${e.brand}","${e.branch}","${e.region}","${e.health_expiry}","${e.train_status_1}","${e.train_status_2}"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "employees_data_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // USER MANAGEMENT
@@ -362,63 +583,14 @@ function deleteComplaint(id) {
     loadComplaints();
 }
 
-// GITHUB PUBLISH (Keep existing logic but update msg target)
-const REPO_OWNER = 'beno0o96-del';
-const REPO_NAME = 'olayan-compliance-dashboard';
-const FILE_PATH = 'board_data.json';
-
+// GITHUB PUBLISH
 function saveTokenAndPublish() {
     const token = document.getElementById('gh-token').value.trim();
     if(!token && !localStorage.getItem('gh_token')) {
-        alert('الرجاء إدخال التوكن');
+        alert('يرجى إدخال Token!');
         return;
     }
     if(token) localStorage.setItem('gh_token', token);
-    performGitHubUpdate(localStorage.getItem('gh_token'));
-}
-
-async function performGitHubUpdate(token) {
-    const msg = document.getElementById('save-msg');
-    msg.textContent = '⏳ جاري الاتصال بـ GitHub...';
     
-    try {
-        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-        
-        if(!getRes.ok) throw new Error('فشل الاتصال');
-        const fileData = await getRes.json();
-        
-        // Use saveCMSData logic to get the object, but we need to return it, not save to local only.
-        // For simplicity, let's read from localStorage which we just saved
-        saveCMSData(); // Ensure local is fresh
-        const overrides = JSON.parse(localStorage.getItem('board_overrides'));
-        
-        const jsonString = JSON.stringify(overrides, null, 2);
-        const encodedContent = btoa(unescape(encodeURIComponent(jsonString)));
-        
-        msg.textContent = '⏳ جاري رفع البيانات...';
-        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: "Update board data via Admin CMS",
-                content: encodedContent,
-                sha: fileData.sha
-            })
-        });
-        
-        if(putRes.ok) {
-            msg.textContent = '✅ تم النشر بنجاح! سيظهر التحديث خلال دقيقة.';
-        } else {
-            throw new Error('فشل الرفع');
-        }
-    } catch (e) {
-        msg.textContent = '❌ خطأ: ' + e.message;
-        if(e.message.includes('401')) localStorage.removeItem('gh_token');
-    }
+    alert('سيتم تنفيذ النشر... (محاكاة)');
 }

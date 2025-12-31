@@ -53,6 +53,9 @@
                 <a href="#" onclick="showSection('users')" class="nav-item" id="nav-users">
                     <i>👥</i> إدارة المستخدمين
                 </a>
+                <a href="#" onclick="showSection('employees')" class="nav-item" id="nav-employees">
+                    <i>👔</i> شؤون الموظفين
+                </a>
                 <a href="#" onclick="showSection('cms')" class="nav-item" id="nav-cms">
                     <i>⚙️</i> إعدادات البيانات (CMS)
                 </a>
@@ -60,6 +63,9 @@
                     <i>📩</i> الشكاوى والطلبات
                 </a>
                 <div style="border-top: 1px solid #eee; margin: 10px 20px;"></div>
+                <a href="tasks.html" target="_blank" class="nav-item">
+                    <i>✅</i> إدارة المهام
+                </a>
                 <a href="board.html" target="_blank" class="nav-item">
                     <i>🔗</i> الذهاب للموقع
                 </a>
@@ -142,6 +148,43 @@
                                 <!-- Users will be loaded here -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- SECTION: EMPLOYEES -->
+                <div id="section-employees" class="d-none">
+                    <div class="card-section" style="background: #1e293b; color: white; border: 1px solid #334155;">
+                        <div class="section-header" style="border-bottom: 1px solid #334155;">
+                            <span class="section-title" style="color: #60a5fa;">سجل الموظفين الشامل</span>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="emp-search" placeholder="بحث (الاسم، الهوية، الفرع)..." class="form-control" style="width: 250px; background: #0f172a; border: 1px solid #334155; color: white;">
+                                <button onclick="generateRandomEmployees()" class="btn btn-secondary">🔄 توليد بيانات</button>
+                                <button onclick="exportEmployees()" class="btn btn-primary">📊 تصدير Excel</button>
+                            </div>
+                        </div>
+                        
+                        <div style="overflow-x: auto; margin-top: 15px;">
+                            <table class="data-table" style="width: 100%; min-width: 1000px;">
+                                <thead>
+                                    <tr style="background: #0f172a;">
+                                        <th>الموظف</th>
+                                        <th>رقم الهوية/الإقامة</th>
+                                        <th>العلامة التجارية</th>
+                                        <th>الفرع</th>
+                                        <th>المنطقة</th>
+                                        <th>الشهادة الصحية</th>
+                                        <th>حالة التدريب</th>
+                                        <th>عرض</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employees-table-body">
+                                    <!-- Dynamic Content -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="emp-pagination" style="margin-top: 20px; text-align: left; color: #94a3b8; font-size: 0.9rem;">
+                            عرض 50 من أصل 1200 موظف
+                        </div>
                     </div>
                 </div>
 

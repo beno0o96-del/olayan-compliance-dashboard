@@ -243,8 +243,17 @@
             <i>🏬</i> <span data-en="Branches" data-ar="الفروع">Branches</span>
         </a>
         <a href="board.html" class="side-link">
-            <i>📊</i> <span data-en="Management Report" data-ar="تقرير الإدارة">Management Report</span>
-        </a>
+        <i>📊</i> <span data-en="Management Report" data-ar="تقرير الإدارة">Management Report</span>
+    </a>
+    <a href="employees.html" class="side-link">
+        <i>👥</i> <span data-en="Employees" data-ar="الموظفين">Employees</span>
+    </a>
+    <a href="tasks.html" class="side-link">
+        <i>✅</i> <span data-en="Tasks" data-ar="المهام">Tasks</span>
+    </a>
+    <a href="login.html" class="side-link">
+        <i>🔐</i> <span data-en="Login" data-ar="تسجيل الدخول">Login</span>
+    </a>
 
         </nav>
         <div style="margin-top: auto; padding-top: 20px;">
@@ -472,7 +481,44 @@
         </div>
     </div>
 
+    <!-- AUTO-GENERATED BRANCHES -->
+    <h2 class="section-title" style="margin-top: 50px;" data-en="Active Branches Network" data-ar="شبكة الفروع النشطة">Active Branches Network</h2>
+    <div id="dynamic-branches" class="openings-grid">
+        <!-- Loaded from admin_branches -->
+    </div>
+
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const branches = JSON.parse(localStorage.getItem('admin_branches') || '[]');
+        const container = document.getElementById('dynamic-branches');
+        
+        if (branches.length > 0 && container) {
+            branches.forEach(branchName => {
+                const div = document.createElement('div');
+                div.className = 'opening-card';
+                div.innerHTML = `
+                    <span class="opening-status status-now-open" data-en="Open" data-ar="مفتوح">مفتوح</span>
+                    <div class="opening-content">
+                        <div class="opening-brand-row">
+                            <div class="brand-logo-circle">📌</div>
+                            <div class="opening-brand">Olayan Food</div>
+                        </div>
+                        <div class="opening-location">${branchName}</div>
+                        <div class="opening-date">
+                            <span>✅</span>
+                            <span data-en="Operational" data-ar="يعمل حالياً">يعمل حالياً</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        } else if (container) {
+             container.innerHTML = '<p style="color:#aaa; grid-column: 1/-1; padding: 20px;">No dynamic branch data found. Please load CSV in Admin Panel.</p>';
+        }
+    });
+</script>
 
 
 <!-- ================= FOOTER ================= -->

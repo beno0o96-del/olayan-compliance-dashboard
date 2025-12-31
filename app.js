@@ -129,6 +129,98 @@ const FALLBACK_BOARD = {
     { "label": { "en": "IT", "ar": "التقنية" }, "value": "77%" },
     { "label": { "en": "Finance", "ar": "المالية" }, "value": "83%" },
     { "label": { "en": "HR", "ar": "الموارد البشرية" }, "value": "90%" }
+  ],
+  "violations": {
+    "western": [
+      { 
+        "branch": { "en": "BK Al Ula", "ar": "برجر كنج العلا" },
+        "type": { "en": "Shop not physically found", "ar": "عدم وجود المحل على الطبيعة" },
+        "level": { "en": "High", "ar": "عالية" },
+        "count": 3,
+        "color": "#f44336"
+      },
+      { 
+        "branch": { "en": "TXC Yanbu", "ar": "تكساس تشيكن ينبع" },
+        "type": { "en": "Low general hygiene", "ar": "تدني مستوى النظافة العامة" },
+        "level": { "en": "Med", "ar": "متوسطة" },
+        "count": 2,
+        "color": "#FFC107"
+      }
+    ],
+    "central": [
+      { 
+        "branch": { "en": "TXC Olaya", "ar": "تكساس تشيكن العليا" },
+        "type": { "en": "Unsafe temperatures", "ar": "عدم التقيد بدرجات الحرارة المناسبة لحفظ المواد الغذائية" },
+        "level": { "en": "High", "ar": "عالية" },
+        "count": 5,
+        "color": "#f44336"
+      },
+      { 
+        "branch": { "en": "BK Malaz", "ar": "برجر كنج الملز" },
+        "type": { "en": "Pests detected", "ar": "وجود حشرات أو قوارض" },
+        "level": { "en": "High", "ar": "عالية" },
+        "count": 1,
+        "color": "#f44336"
+      }
+    ],
+    "eastern": [
+       { 
+        "branch": { "en": "BK Dammam", "ar": "برجر كنج الدمام" },
+        "type": { "en": "Expired license", "ar": "انتهاء رخصة المحل" },
+        "level": { "en": "High", "ar": "عالية" },
+        "count": 4,
+        "color": "#f44336"
+      },
+      { 
+        "branch": { "en": "TXC Khobar", "ar": "تكساس تشيكن الخبر" },
+        "type": { "en": "Worker health card expired", "ar": "انتهاء الشهادة الصحية للعامل" },
+        "level": { "en": "Med", "ar": "متوسطة" },
+        "count": 2,
+        "color": "#FFC107"
+      }
+    ],
+    "southern": [
+       { 
+        "branch": { "en": "BK Abha", "ar": "برجر كنج أبها" },
+        "type": { "en": "Improper storage", "ar": "سواء تخزين المواد الغذائية" },
+        "level": { "en": "Med", "ar": "متوسطة" },
+        "count": 3,
+        "color": "#FFC107"
+      }
+    ]
+  },
+  "metrics_row": [
+    { "label": { "en": "Overall Compliance", "ar": "الامتثال العام" }, "value": "+95%", "color": "#00d2be", "subtext": { "en": "Licenses & Health Cards", "ar": "الرخص والشهادات الصحية" }, "subcolor": "#4caf50" },
+    { "label": { "en": "Critical Expiries", "ar": "حالات انتهاء حرجة" }, "value": "Zero", "color": "#4caf50", "subtext": { "en": "Impacting Operations", "ar": "تؤثر على التشغيل" }, "subcolor": "#fff" },
+    { "label": { "en": "High Risk Violations", "ar": "مخالفات عالية الخطورة" }, "value": "12", "color": "#f44336", "subtext": { "en": "Requiring Immediate Action", "ar": "تتطلب إجراء فوري" }, "subcolor": "#f44336" },
+    { "label": { "en": "Audit Score", "ar": "نتيجة التدقيق" }, "value": "88/100", "color": "#FFC107", "subtext": { "en": "Internal Audit Q4", "ar": "التدقيق الداخلي الربع الرابع" }, "subcolor": "#FFC107" }
+  ],
+  "brand_performance": [
+    { "brand": { "en": "Burger King", "ar": "برجر كنج" }, "score": "92%", "color": "#f44336" },
+    { "brand": { "en": "Texas Chicken", "ar": "تكساس تشيكن" }, "score": "88%", "color": "#FFC107" },
+    { "brand": { "en": "Buffalo Wild Wings", "ar": "بافلو وايلد وينجز" }, "score": "95%", "color": "#ffeb3b" }
+  ],
+  "kpi_table": [
+    { "id": "KPI-001", "kpi": { "en": "Food Safety Score", "ar": "درجة سلامة الغذاء" }, "measurement": { "en": "External Audit", "ar": "تدقيق خارجي" }, "target": "95%", "achieved": "92%", "progress": "96%", "status": { "en": "Good", "ar": "جيد" } },
+    { "id": "KPI-002", "kpi": { "en": "Staff Hygiene", "ar": "نظافة العاملين" }, "measurement": { "en": "Internal Check", "ar": "فحص داخلي" }, "target": "100%", "achieved": "98%", "progress": "98%", "status": { "en": "Excellent", "ar": "ممتاز" } },
+    { "id": "KPI-003", "kpi": { "en": "License Validity", "ar": "صلاحية الرخص" }, "measurement": { "en": "System Record", "ar": "سجل النظام" }, "target": "100%", "achieved": "94%", "progress": "94%", "status": { "en": "Action Required", "ar": "يتطلب إجراء" } },
+    { "id": "KPI-004", "kpi": { "en": "Pest Control", "ar": "مكافحة الآفات" }, "measurement": { "en": "Monthly Visit", "ar": "زيارة شهرية" }, "target": "100%", "achieved": "100%", "progress": "100%", "status": { "en": "Achieved", "ar": "محقق" } }
+  ],
+  "monthly_trend": [
+    { "label": "Jan", "val": "65" },
+    { "label": "Feb", "val": "70" },
+    { "label": "Mar", "val": "60" },
+    { "label": "Apr", "val": "75" },
+    { "label": "May", "val": "80" },
+    { "label": "Jun", "val": "85" }
+  ],
+  "violations_trend": [
+    { "label": "Jan", "val": "40" },
+    { "label": "Feb", "val": "35" },
+    { "label": "Mar", "val": "50" },
+    { "label": "Apr", "val": "30" },
+    { "label": "May", "val": "25" },
+    { "label": "Jun", "val": "20" }
   ]
 };
 
@@ -1175,7 +1267,7 @@ function renderViolations(region) {
         
         // Parse hex to rgb for background opacity
         let r=0, g=0, b=0;
-        if(color.startsWith('#') && color.length === 7) {
+        if(color && color.startsWith('#') && color.length === 7) {
             r = parseInt(color.slice(1,3), 16);
             g = parseInt(color.slice(3,5), 16);
             b = parseInt(color.slice(5,7), 16);
@@ -1187,11 +1279,28 @@ function renderViolations(region) {
         div.style.animationDelay = `${index * 0.1}s`;
         div.style.borderLeft = `3px solid ${color}`;
         div.style.background = `linear-gradient(90deg, rgba(${r}, ${g}, ${b}, 0.15) 0%, rgba(255,255,255,0.02) 100%)`;
+        div.style.cursor = 'pointer'; // Make clickable
         
+        // Construct item for modal
+        // We need to map the "Board Item" to "Violation Type Item" expected by openViolationModal
+        // The modal expects: { type: "Arabic Name", count: N, icon: "X", branches: [{name: "Branch", count: N}] }
+        
+        // Find correct Arabic type name for metadata lookup
+        const typeAr = item.type.ar || item.type; 
+        
+        div.onclick = () => {
+            openViolationModal({
+                type: typeAr,
+                count: item.count || 1,
+                icon: "⚠️", // Default icon
+                branches: [{ name: branch, count: item.count || 1 }]
+            });
+        };
+
         div.innerHTML = `
             <div>
                 <strong style="color: #fff;">${branch}</strong>
-                <small style="color: #b0bec5;">${type}</small>
+                <small style="color: #b0bec5; display:block;">${type}</small>
             </div>
             <span class="severity-badge-glow" style="color:${color}; text-shadow: 0 0 10px ${color};">${level}</span>
         `;
