@@ -194,6 +194,44 @@ body.ar .modal-branch-item {
     font-weight: 600;
 }
 
+/* Comparison Table Styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    color: #e2e8f0;
+}
+
+.comparison-table th {
+    text-align: left;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.ar .comparison-table th {
+    text-align: right;
+}
+
+.comparison-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.comparison-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.comparison-table tr:last-child td {
+    border-bottom: none;
+}
+
 /* Violation Types Grid */
 .types-list {
     display: grid;

@@ -24,7 +24,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* High-Tech Interactive Background */
 body.admin-body {
-    background-color: #02040a; /* Deepest Navy Base */
+    background-color: #0b0e2b; /* Main Deep Navy */
     color: var(--text-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -388,33 +388,14 @@ body:not(.ar) .admin-main {
     background: rgba(255, 255, 255, 0.03);
 }
 
-/* Enhanced Login Screen (Brand Identity Luxury Theme) */
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-}
-
+/* Enhanced Login Screen (Reverted to Clean Dark Theme) */
 .login-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    /* Fluid Navy Background (No Image) */
-    background: linear-gradient(-45deg, #02040a, #0b0e2b, #16213e, #0f172a);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+    background-color: #0b0e2b; /* Solid Dark Navy */
+    background-image: none; /* No Gradient */
     font-family: 'Segoe UI', sans-serif;
     position: fixed;
     top: 0;
@@ -423,137 +404,73 @@ body:not(.ar) .admin-main {
     z-index: 9999;
 }
 
-/* Luxury Glassmorphism Card */
+/* Clean Login Card */
 .login-box {
-    background: rgba(44, 62, 80, 0.7); /* Brand Secondary with transparency */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 210, 190, 0.3); /* Brand Primary Border */
+    background: #111432; /* Slightly lighter navy for contrast */
+    border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 50px 40px;
-    border-radius: 24px;
+    border-radius: 12px; /* Less rounded */
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     text-align: center;
-    box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    animation: fadeInUp 0.8s ease-out;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     position: relative;
     overflow: hidden;
+    backdrop-filter: none; /* Removed blur */
 }
 
-/* Brand glow effect on top */
+/* Removed brand glow on top */
 .login-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, transparent, #00d2be, transparent); /* Brand Primary */
-    opacity: 0.8;
+    display: none;
 }
 
 .login-box h2 {
     color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: 30px; /* More space */
     font-weight: 700;
-    font-size: 2rem;
-    letter-spacing: 1px;
-    background: linear-gradient(135deg, #fff 0%, #00d2be 100%); /* White to Brand Primary */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 10px 20px rgba(0, 210, 190, 0.2);
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+    background: none;
+    -webkit-text-fill-color: #fff;
+    text-shadow: none;
 }
 
 .login-box p {
-    color: #bdc3c7;
+    color: #94a3b8;
     font-size: 0.95rem;
-    margin-bottom: 40px;
-    letter-spacing: 0.5px;
-}
-
-.login-box .form-group {
-    margin-bottom: 25px;
-    position: relative;
-    text-align: left; /* Default LTR */
-}
-/* RTL Fix for form groups */
-body[dir="rtl"] .login-box .form-group,
-.login-wrapper:has([dir="rtl"]) .form-group {
-    text-align: right;
-}
-
-.login-box label {
-    display: block;
-    margin-bottom: 10px;
-    color: #ecf0f1;
-    font-size: 0.9rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    margin-bottom: 30px;
 }
 
 .login-box .form-control {
-    width: 100%;
-    padding: 15px 20px;
-    background: rgba(0, 0, 0, 0.3);
+    background: #1e2240; /* Darker input background */
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
     color: #fff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
 }
 
 .login-box .form-control:focus {
-    outline: none;
-    border-color: #00d2be; /* Brand Primary */
-    background: rgba(0, 0, 0, 0.5);
-    box-shadow: 0 0 0 4px rgba(0, 210, 190, 0.1);
+    background: #252a4d;
+    border-color: #00d4ff;
+    box-shadow: none;
 }
 
-.login-box .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-/* Luxury Brand Button */
+/* Bright Cyan Button */
 .login-box .btn-primary {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #00d2be 0%, #16a085 100%); /* Brand Primary Gradient */
+    background: #00d4ff; /* Solid Cyan */
+    background: linear-gradient(90deg, #00d4ff 0%, #00b8d4 100%); /* Slight gradient */
+    color: #000; /* Black text for contrast on cyan */
+    font-weight: 700;
     border: none;
-    border-radius: 12px;
-    color: #fff;
-    font-weight: 800;
-    font-size: 1.1rem;
-    margin-top: 20px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: 0 10px 20px -10px rgba(0, 210, 190, 0.5);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.login-box .btn-primary::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    transition: 0.5s;
+    box-shadow: none;
 }
 
 .login-box .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px -10px rgba(0, 210, 190, 0.6);
+    transform: translateY(-1px);
+    opacity: 0.9;
+    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
 }
 
-.login-box .btn-primary:hover::after {
-    left: 100%;
+.login-box .btn-primary::after {
+    display: none; /* Remove shine animation */
 }
 
 .login-box .btn-secondary {

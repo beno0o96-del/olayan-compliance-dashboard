@@ -44,10 +44,7 @@
          <button class="lang-btn" onclick="setLang('en')">EN</button>
      </div>
      
-     <!-- Hamburger Button (Visible on Mobile via CSS) -->
-     <button class="hamburger-btn" onclick="toggleMenu()">
-        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
+
     </div>
   </header>
 
@@ -192,6 +189,27 @@
             <div class="chart-card">
                 <h3 data-en="Violations by Region" data-ar="المخالفات حسب المنطقة">Violations by Region</h3>
                 <div id="chart-region" class="bar-chart"></div>
+            </div>
+
+            <!-- Regional Comparison Matrix (New) -->
+            <div class="chart-card" style="grid-column: span 2;">
+                <h3 data-en="Regional Performance Comparison" data-ar="مقارنة الأداء الإقليمي">Regional Performance Comparison</h3>
+                <div class="table-responsive">
+                    <table class="comparison-table" id="region-comparison-table">
+                        <thead>
+                            <tr>
+                                <th data-en="Region" data-ar="المنطقة">Region</th>
+                                <th data-en="Total Violations" data-ar="إجمالي المخالفات">Total Violations</th>
+                                <th data-en="Total Fines (SAR)" data-ar="إجمالي الغرامات (ريال)">Total Fines (SAR)</th>
+                                <th data-en="Risk Level" data-ar="مستوى الخطورة">Risk Level</th>
+                                <th data-en="Top Violation" data-ar="أكثر مخالفة شيوعاً">Top Violation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Top 15 Risk -->

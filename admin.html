@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم النظام | Olayan Admin</title>
-    <link rel="stylesheet" href="style-admin.css?v=2">
+    <link rel="stylesheet" href="style-admin.css?v=4">
     <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
-    <script src="admin.js?v=2" defer></script>
+    <!-- SheetJS for Excel Import -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
+    <script src="admin.js?v=3" defer></script>
     <!-- app.js is needed for data fetching logic if we want to sync with board data -->
     <script src="app.js?v=6" defer></script>
 </head>
@@ -14,7 +16,7 @@
 
     <!-- LOGIN SCREEN -->
     <div id="login-section" class="login-wrapper">
-        <div class="login-box">
+        <div class="login-box" style="background: rgba(17, 20, 50, 0.65) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;">
             <img src="olayan-logo.png" alt="Olayan Logo" style="height: 60px; margin-bottom: 20px;">
             <h2 id="login-title">Admin Login</h2>
             
@@ -45,7 +47,11 @@
             <div class="lang-switch" style="margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
                 <button class="btn btn-secondary" id="login-lang-en" style="border-radius: 15px; padding: 5px 15px;">English</button>
                 <button class="btn btn-secondary" id="login-lang-ar" style="border-radius: 15px; padding: 5px 15px;">العربية</button>
-           </div>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">العودة للرئيسية (Back to Home)</a>
+            </div>
         </div>
     </div>
 
@@ -295,6 +301,55 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- SECTION: VIOLATIONS -->
+                <div id="section-violations" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="section-title" id="violations-title">إدارة المخالفات</span>
+                            <a href="violations.html" target="_blank" class="btn btn-secondary">فتح لوحة المخالفات ↗</a>
+                        </div>
+                        
+                        <div style="background: rgba(79,172,254,0.05); border: 1px solid rgba(79,172,254,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                            <h4 style="margin-top: 0; color: #4facfe;">استيراد البيانات (Excel / CSV)</h4>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">
+                                قم برفع ملف Excel يحتوي على بيانات المخالفات. النظام سيقوم تلقائياً بحساب الإحصائيات (الإجمالي، المبالغ، المناطق، الأكثر تكراراً).
+                            </p>
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <input type="file" id="vio-excel-file" accept=".xlsx, .xls, .csv" style="display: none;">
+                                <button class="btn btn-primary" onclick="document.getElementById('vio-excel-file').click()">📂 رفع ملف Excel</button>
+                                <span id="vio-file-name" style="color: #666; font-size: 0.9rem;"></span>
+                            </div>
+                            <div style="margin-top: 15px; font-size: 0.85rem; color: #888;">
+                                <strong>الأعمدة المطلوبة (الترتيب غير مهم، ابحث عن الأسماء):</strong><br>
+                                Branch (الفرع), Region (المنطقة), Violation (المخالفة), Amount (الغرامة), Status (الحالة: Open/Closed), Date (التاريخ)
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <!-- JSON Management -->
+                            <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+                                <h4 style="margin-top: 0; color: #555;">إدارة ملف JSON</h4>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <button class="btn btn-secondary" onclick="document.getElementById('vio-json-file').click()">استيراد JSON جاهز</button>
+                                    <input type="file" id="vio-json-file" accept=".json" style="display: none;">
+                                    
+                                    <button class="btn btn-secondary" onclick="downloadViolationsJSON()">تصدير البيانات الحالية (JSON)</button>
+                                    <button class="btn btn-danger" onclick="clearViolationsData()">🗑️ مسح جميع البيانات</button>
+                                </div>
+                            </div>
+
+                            <!-- Current Stats Preview -->
+                            <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+                                <h4 style="margin-top: 0; color: #555;">حالة البيانات الحالية</h4>
+                                <div id="vio-stats-preview" style="font-size: 0.9rem; color: #333;">
+                                    جاري التحميل...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!-- SECTION: COMMENTS -->
                 <div id="section-comments" class="d-none">

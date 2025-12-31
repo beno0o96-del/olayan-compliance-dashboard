@@ -27,6 +27,15 @@
             justify-content: center;
             align-items: center;
         }
+        /* Luxury Glassmorphism Card for Employee Login */
+        .login-box {
+            background: rgba(17, 20, 50, 0.65) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+        }
+
         /* Removing .login-box, .form-control, .btn styles to inherit from style-admin.css for consistency */
         
         .back-link {
@@ -36,8 +45,35 @@
             text-decoration: none;
             font-size: 0.9rem;
         }
-        .back-link:hover {
-            color: #fff;
+        /* RTL Fixes for Password Field */
+        body[dir="rtl"] .eye-icon {
+            right: auto;
+            left: 15px;
+        }
+        body[dir="rtl"] #emp-pass {
+            padding-right: 15px; /* Default padding */
+            padding-left: 40px; /* Space for icon */
+        }
+        /* LTR Fixes for Password Field */
+        body[dir="ltr"] .eye-icon {
+            right: 15px;
+            left: auto;
+        }
+        body[dir="ltr"] #emp-pass {
+            padding-right: 40px; /* Space for icon */
+            padding-left: 15px; /* Default padding */
+        }
+
+        .forgot-password-link {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .forgot-password-link:hover {
+            color: #38bdf8;
         }
     </style>
 </head>
@@ -66,7 +102,11 @@
                 </div>
             </div>
             
-            <button onclick="handleLogin()" class="btn btn-primary" data-en="Login" data-ar="تسجيل الدخول">تسجيل الدخول</button>
+            <button onclick="handleLogin()" class="btn btn-primary" data-en="Login" data-ar="تسجيل الدخول" style="width: 100%; justify-content: center;">تسجيل الدخول</button>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="#" class="forgot-password-link" data-en="Forgot Password?" data-ar="نسيت كلمة السر؟" style="font-size: 0.85rem; color: #94a3b8; text-decoration: none;">نسيت كلمة السر؟</a>
+            </div>
             
             <a href="index.html" class="back-link" data-en="Back to Home" data-ar="العودة للرئيسية">العودة للرئيسية</a>
 
@@ -75,6 +115,10 @@
                 <span style="color:#475569">|</span>
                 <button onclick="setLang('en')" style="background:none; border:none; color:#94a3b8; cursor:pointer;">English</button>
             </div>
+
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'" data-en="Back to Home" data-ar="العودة للرئيسية">العودة للرئيسية</a>
+            </div>
         </div>
     </div>
 
@@ -82,6 +126,13 @@
         function setLang(lang) {
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            if(lang === 'ar') {
+                document.body.classList.add('ar');
+            } else {
+                document.body.classList.remove('ar');
+            }
             
             const elements = document.querySelectorAll('[data-en]');
             elements.forEach(el => {
@@ -95,7 +146,7 @@
             if(lang === 'ar') {
                 idInput.placeholder = "الرقم الوظيفي";
                 passInput.placeholder = "كلمة المرور";
-                document.querySelector('.form-group').style.textAlign = 'right';
+                document.querySelectorAll('.form-group').forEach(el => el.style.textAlign = 'right');
             } else {
                 idInput.placeholder = "Employee ID";
                 passInput.placeholder = "Password";

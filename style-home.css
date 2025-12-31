@@ -338,29 +338,8 @@ body.ar .next-btn { left: 30px; right: auto; }
     background: conic-gradient(from 0deg, transparent 70%, #2d6cdf, #00d4ff);
     animation: rotate-border 4s linear infinite;
     z-index: -2;
-    opacity: 0; /* Hidden by default */
-    transition: opacity 0.3s ease;
-}
-
-.kpi-card:hover::after {
-    opacity: 1; /* Show on hover */
-}
-
-/* Always show a subtle border when not hovering? 
-   Or maybe the user wants it ALWAYS running?
-   "Make the strip that rotates... go all around and disappear nicely"
-   Usually implies continuous movement. 
-   Let's make it visible but subtle, or maybe only on hover?
-   "Don't leave them like this" implies the current state (static border) is boring.
-   I'll make it ALWAYS running but maybe subtle, or run on hover.
-   The user said "disappear nicely". Maybe the TAIL disappears.
-   I'll make it visible always for now as it's a "dashboard" and movement is good.
-   Actually, constant motion on all cards might be distracting.
-   I will make it run ALWAYS because "Don't leave them like this" suggests a permanent change.
-   And "disappear nicely" refers to the gradient tail.
-*/
-.kpi-card::after {
     opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
 @keyframes rotate-border {
@@ -389,20 +368,62 @@ body.ar .next-btn { left: 30px; right: auto; }
     margin: 0;
     color: #fff;
 }
+
+/* ================= DESKTOP SPECIFIC (WEB) ================= */
+@media (min-width: 769px) {
+    /* Hide navigation controls on desktop */
+    .prev-btn, .next-btn, .dots-container {
+        display: none !important;
+    }
+
+    /* Force static layout for desktop */
+    .slide {
+        position: relative !important; /* Not absolute */
+        opacity: 1 !important;
+        transform: none !important;
+        display: none; /* Hide all by default */
+        width: 100%;
+        left: auto;
+        right: auto;
+        transition: none !important;
+    }
+    
+    /* Show only the active slide (controlled by JS to be index 0) */
+    .slide.active {
+        display: block;
+    }
+}
+
+/* ================= MOBILE SPECIFIC ================= */
 @media (max-width: 768px){
     body{
         background: linear-gradient(rgba(11, 14, 43, 0.9), rgba(11, 14, 43, 0.95)), url('olayan-bg.jpg') no-repeat center center;
         background-size: cover;
     }
-    .hero{ height: 280px; }
-    .slide h2{ font-size: 2rem; }
-    .hero-main-text{ font-size: 1.25rem; }
-    .hero-sub-text{ font-size: 1rem; }
-    .prev-btn, .next-btn{ padding: 12px; width: 44px; height: 44px; }
-    .dots-container{ bottom: 12px; }
+    .hero{ height: 320px; } /* Slightly taller for better spacing */
+    .slide h2{ font-size: 1.8rem; line-height: 1.3; }
+    .hero-main-text{ font-size: 1.1rem; margin-top: 5px; }
+    .hero-sub-text{ font-size: 0.9rem; margin-top: 5px; opacity: 0.9; }
+    
+    /* Better touch targets for buttons */
+    .prev-btn, .next-btn{ 
+        padding: 10px; 
+        width: 40px; 
+        height: 40px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1); /* Lighter bg */
+        backdrop-filter: blur(4px);
+    }
+    
+    .dots-container{ bottom: 15px; }
+    .dot { width: 10px; height: 10px; }
+    
     .link-card{ backdrop-filter: none; background: rgba(22,33,62,0.85); }
     .kpi-grid{ margin-top: 10px; }
 }
+
 @media (prefers-reduced-motion: reduce){
     .hero::before{ animation: none; }
     .kpi-card::after{ animation: none; }

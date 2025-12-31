@@ -10,79 +10,15 @@ const FALLBACK_DATA = {
 
 const FALLBACK_VIOLATIONS = {
     "summary": {
-        "total_violations": 143,
-        "total_amount": 335150.48,
-        "open_violations": 15,
-        "closed_violations": 128
+        "total_violations": 0,
+        "total_amount": 0,
+        "open_violations": 0,
+        "closed_violations": 0
     },
-    "regions": [
-        {"name": "Western", "count": 73, "amount": 170750.00},
-        {"name": "Central", "count": 39, "amount": 124300.48},
-        {"name": "Eastern", "count": 16, "amount": 40100.00}
-    ],
-    "top_branches_frequency": [
-        {"branch": "30744-BK Benzoul", "count": 6},
-        {"branch": "15856-BK- Abraj", "count": 5},
-        {"branch": "18721-BK Noor Mall", "count": 4},
-        {"branch": "26614-BK Batha Qurais", "count": 4},
-        {"branch": "11734-TXC-The Village", "count": 3}
-    ],
-    "top_branches_risk": [
-        {"branch": "BK Al ulla", "amount": 30000.0},
-        {"branch": "BK ulla", "amount": 30000.0},
-        {"branch": "26614-BK Batha Qurais", "amount": 13000.0},
-        {"branch": "11926-BK Holly Mosque-I", "amount": 12000.0}
-    ],
-    "common_types": [
-        {
-            "type": "عدم وجود المحل على الطبيعة",
-            "count": 18,
-            "icon": "🏢",
-            "branches": [{"name": "26614-BK Batha Qurais", "count": 5}, {"name": "15313-BK Serafy Mall", "count": 4}]
-        },
-        {
-            "type": "عدم التقيد بدرجات الحرارة المناسبة لحفظ المواد الغذائية",
-            "count": 15,
-            "icon": "🌡️",
-            "branches": [{"name": "15856-BK- Abraj", "count": 8}, {"name": "BK ulla", "count": 4}]
-        },
-        {
-            "type": "تلوث الغذاء بالميكروبات أو السموم الممرضة في المنشأة",
-            "count": 12,
-            "icon": "🦠",
-            "branches": [{"name": "BK Al ulla", "count": 2}, {"name": "15313-BK Serafy Mall", "count": 2}]
-        },
-        {
-            "type": "عدم تجديد كرت صحي",
-            "count": 10,
-            "icon": "🪪",
-            "branches": [{"name": "11926-BK Holly Mosque-I", "count": 4}]
-        },
-        {
-            "type": "عدم ارتداء الزي الموحد المخصص للعمل",
-            "count": 9,
-            "icon": "👕",
-            "branches": [{"name": "30744-BK Benzoul", "count": 3}]
-        },
-        {
-            "type": "تدني مستوى النظافة العامة",
-            "count": 8,
-            "icon": "🧹",
-            "branches": [{"name": "30505-BK Jabal Omar", "count": 3}]
-        },
-        {
-            "type": "وجود حشرات أو قوارض",
-            "count": 7,
-            "icon": "🐀",
-            "branches": [{"name": "11926-BK Holly Mosque-I", "count": 2}]
-        },
-        {
-            "type": "سوء تداول الغذاء",
-            "count": 6,
-            "icon": "🍔",
-            "branches": [{"name": "BK Al ulla", "count": 3}]
-        }
-    ]
+    "regions": [],
+    "top_branches_frequency": [],
+    "top_branches_risk": [],
+    "common_types": []
 };
 
 const FALLBACK_BOARD = {
@@ -351,8 +287,9 @@ function initSlideshow() {
     // Show initial slide
     showSlide(slideIndex);
     
-    // Start auto-play
-    startTimer();
+    // Start auto-play ONLY on Mobile
+    handleSlideTimer();
+    window.addEventListener('resize', handleSlideTimer);
 
     const heroSection = document.querySelector('.hero');
     const heroOverlay = document.querySelector('.hero-overlay');
@@ -439,6 +376,17 @@ function startTimer() {
     }, slideIntervalTime);
 }
 
+function handleSlideTimer() {
+    if (window.innerWidth <= 768) {
+        // Mobile: Enable Slideshow
+        if (!slideInterval) startTimer();
+    } else {
+        // Desktop: Disable Slideshow & Reset to first slide
+        stopTimer();
+        showSlide(0);
+    }
+}
+
 function stopTimer() {
     if (slideInterval) {
         clearInterval(slideInterval);
@@ -482,11 +430,25 @@ async function fetchViolationsData() {
     // Only run on violations.html
     if (!document.getElementById('v-total-count')) return;
 
+    // 1. Check LocalStorage (Admin Updates)
+    const localData = localStorage.getItem('violations_data_override');
+    if (localData) {
+        try {
+            const parsed = JSON.parse(localData);
+            console.log("Using LocalStorage Violations Data");
+            updateViolationsDashboard(parsed);
+            return; // Exit if local data exists
+        } catch (e) {
+            console.error("Error parsing local violations data", e);
+        }
+    }
+
+    // 2. Fetch from JSON File (Default)
     try {
         const response = await fetch('violations_data.json?t=' + new Date().getTime());
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        console.log("Violations Data Loaded:", data);
+        console.log("Violations Data Loaded from File:", data);
         updateViolationsDashboard(data);
     } catch (error) {
         console.warn('Error fetching violations data, using fallback:', error);
@@ -577,6 +539,63 @@ function updateViolationsDashboard(data) {
     }
 
 
+}
+
+function renderRegionalComparison(regions) {
+    const tbody = document.querySelector('#region-comparison-table tbody');
+    if (!tbody || !regions) return;
+
+    tbody.innerHTML = '';
+    const currentLang = document.body.classList.contains('ar') ? 'ar' : 'en';
+
+    // Mock data for missing fields if not present in fallback
+    const riskLevels = { 
+        "Western": "High", 
+        "Central": "Medium", 
+        "Eastern": "Low", 
+        "Riyadh": "Medium",
+        "Northern": "Low",
+        "Southern": "Low"
+    };
+    const topViolations = { 
+        "Western": { ar: "انتهاء الرخصة", en: "License Expired" },
+        "Central": { ar: "درجات الحرارة", en: "Temperature" },
+        "Riyadh": { ar: "درجات الحرارة", en: "Temperature" },
+        "Eastern": { ar: "الشهادات الصحية", en: "Health Cards" },
+        "Northern": { ar: "النظافة العامة", en: "General Hygiene" },
+        "Southern": { ar: "الزي الموحد", en: "Uniform" }
+    };
+
+    regions.forEach(region => {
+        // Map "Central" to "Riyadh" if needed based on user request, or keep as is.
+        // User asked for "Riyadh Region", "Eastern", "Western".
+        // If data has "Central", we display it as "Riyadh (Central)" or just "Riyadh"
+        
+        let displayName = region.name;
+        if (region.name === "Central") displayName = currentLang === 'ar' ? "منطقة الرياض" : "Riyadh Region";
+        else if (region.name === "Western") displayName = currentLang === 'ar' ? "المنطقة الغربية" : "Western Region";
+        else if (region.name === "Eastern") displayName = currentLang === 'ar' ? "المنطقة الشرقية" : "Eastern Region";
+        else if (region.name === "Northern") displayName = currentLang === 'ar' ? "المنطقة الشمالية" : "Northern Region";
+        else if (region.name === "Southern") displayName = currentLang === 'ar' ? "المنطقة الجنوبية" : "Southern Region";
+
+        const risk = riskLevels[region.name] || "Low";
+        const topVio = topViolations[region.name] ? (currentLang === 'ar' ? topViolations[region.name].ar : topViolations[region.name].en) : "-";
+        
+        // Risk Color
+        let riskColor = '#4caf50';
+        if (risk === 'High') riskColor = '#f44336';
+        if (risk === 'Medium') riskColor = '#FFC107';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight:bold; color:#fff;">${displayName}</td>
+            <td>${region.count}</td>
+            <td>${region.amount.toLocaleString()}</td>
+            <td><span style="color:${riskColor}; font-weight:bold;">${risk}</span></td>
+            <td>${topVio}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 // Modal Functions

@@ -1,4 +1,3 @@
-
 // UTILS
 function hash(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(b=>{ const a=Array.from(new Uint8Array(b)); return a.map(x=>x.toString(16).padStart(2,'0')).join(''); }); }
 function setMsg(t){ const m=document.getElementById('msg'); if(m) m.textContent=t; }
@@ -247,7 +246,8 @@ function showSection(sectionId) {
         'plugins': 'إضافات',
         'tools': 'أدوات',
         'settings': 'الإعدادات',
-        'email': 'ايميل'
+        'email': 'ايميل',
+        'violations': 'إدارة المخالفات'
     };
     document.getElementById('page-title').textContent = titles[sectionId];
 }
@@ -1658,3 +1658,216 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// --- VIOLATIONS MANAGEMENT LOGIC ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Violations Excel Upload
+    const vioExcelInput = document.getElementById('vio-excel-file');
+    if (vioExcelInput) {
+        vioExcelInput.addEventListener('change', handleViolationsExcelUpload);
+    }
+
+    // Violations JSON Upload
+    const vioJsonInput = document.getElementById('vio-json-file');
+    if (vioJsonInput) {
+        vioJsonInput.addEventListener('change', handleViolationsJsonUpload);
+    }
+
+    // Initial Load
+    loadViolationsStats();
+});
+
+function loadViolationsStats() {
+    const preview = document.getElementById('vio-stats-preview');
+    if (!preview) return;
+
+    // Check LocalStorage first
+    const localData = localStorage.getItem('violations_data_override');
+    if (localData) {
+        try {
+            const data = JSON.parse(localData);
+            const summary = data.summary || {};
+            preview.innerHTML = `
+                <div style="color: #4facfe; font-weight: bold;">مصدر البيانات: تحديث محلي (Local Storage)</div>
+                <ul style="margin-top: 10px; padding-right: 20px;">
+                    <li>إجمالي المخالفات: <strong>${summary.total_violations || 0}</strong></li>
+                    <li>إجمالي الغرامات: <strong>${(summary.total_amount || 0).toLocaleString()}</strong></li>
+                    <li>المخالفات المفتوحة: <strong>${summary.open_violations || 0}</strong></li>
+                    <li>آخر تحديث: ${new Date().toLocaleString()}</li>
+                </ul>
+            `;
+        } catch (e) {
+            preview.innerHTML = '<div style="color: red;">خطأ في قراءة البيانات المحلية</div>';
+        }
+    } else {
+        preview.innerHTML = `
+            <div style="color: #666;">مصدر البيانات: ملف JSON الافتراضي (الخادم)</div>
+            <p style="font-size: 0.8rem; margin-top: 5px;">لم يتم رفع أي بيانات مخصصة بعد.</p>
+        `;
+    }
+}
+
+async function handleViolationsExcelUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    document.getElementById('vio-file-name').textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Assume first sheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        processViolationsData(jsonData);
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function processViolationsData(rows) {
+    if (!rows || rows.length === 0) {
+        alert('الملف فارغ!');
+        return;
+    }
+
+    // Expected Columns (flexible matching):
+    // Branch, Region, Violation, Amount, Status, Date
+    
+    let totalViolations = 0;
+    let totalAmount = 0;
+    let openViolations = 0;
+    let closedViolations = 0;
+    
+    const regionsMap = {}; // { RegionName: { count, amount } }
+    const branchesMap = {}; // { BranchName: { count, amount, risk_score } }
+    const typesMap = {}; // { TypeName: count }
+
+    rows.forEach(row => {
+        // Normalize keys (lowercase, trim)
+        const normalizedRow = {};
+        Object.keys(row).forEach(k => normalizedRow[k.toLowerCase().trim()] = row[k]);
+
+        // Extract fields with fallbacks
+        const branch = normalizedRow['branch'] || normalizedRow['الفرع'] || 'Unknown Branch';
+        const region = normalizedRow['region'] || normalizedRow['المنطقة'] || 'Unknown Region';
+        const type = normalizedRow['violation'] || normalizedRow['type'] || normalizedRow['المخالفة'] || 'Other';
+        const amountRaw = normalizedRow['amount'] || normalizedRow['fine'] || normalizedRow['الغرامة'] || 0;
+        const statusRaw = normalizedRow['status'] || normalizedRow['الحالة'] || '';
+        
+        // Clean Amount
+        let amount = 0;
+        if (typeof amountRaw === 'number') amount = amountRaw;
+        else if (typeof amountRaw === 'string') amount = parseFloat(amountRaw.replace(/[^\d.-]/g, '')) || 0;
+
+        // Clean Status
+        const isOpen = statusRaw.toLowerCase().includes('open') || statusRaw.includes('مفتوح') || statusRaw.includes('new') || statusRaw.includes('جديد');
+        
+        // Aggregate Global
+        totalViolations++;
+        totalAmount += amount;
+        if (isOpen) openViolations++;
+        else closedViolations++;
+
+        // Aggregate Region
+        if (!regionsMap[region]) regionsMap[region] = { count: 0, amount: 0 };
+        regionsMap[region].count++;
+        regionsMap[region].amount += amount;
+
+        // Aggregate Branch
+        if (!branchesMap[branch]) branchesMap[branch] = { count: 0, amount: 0 };
+        branchesMap[branch].count++;
+        branchesMap[branch].amount += amount;
+
+        // Aggregate Type
+        if (!typesMap[type]) typesMap[type] = 0;
+        typesMap[type]++;
+    });
+
+    // Format for App
+    const finalData = {
+        summary: {
+            total_violations: totalViolations,
+            total_amount: totalAmount,
+            open_violations: openViolations,
+            closed_violations: closedViolations
+        },
+        regions: Object.keys(regionsMap).map(r => ({
+            name: r,
+            count: regionsMap[r].count,
+            amount: regionsMap[r].amount
+        })),
+        top_branches_frequency: Object.keys(branchesMap)
+            .map(b => ({ branch: b, count: branchesMap[b].count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5),
+        top_branches_risk: Object.keys(branchesMap)
+            .map(b => ({ branch: b, amount: branchesMap[b].amount }))
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 5),
+        common_types: Object.keys(typesMap)
+            .map(t => ({ type: t, count: typesMap[t], icon: "⚠️" })) // Default icon
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5)
+    };
+
+    // Save to LocalStorage
+    localStorage.setItem('violations_data_override', JSON.stringify(finalData));
+    
+    // Update UI
+    loadViolationsStats();
+    alert('تم معالجة الملف وحفظ البيانات بنجاح! سيتم تحديث اللوحة.');
+}
+
+function handleViolationsJsonUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const json = JSON.parse(e.target.result);
+            // Basic validation
+            if (!json.summary) {
+                if(!confirm('هيكل الملف يبدو مختلفاً. هل أنت متأكد من الاستمرار؟')) return;
+            }
+            localStorage.setItem('violations_data_override', JSON.stringify(json));
+            loadViolationsStats();
+            alert('تم استيراد ملف JSON بنجاح!');
+        } catch (err) {
+            alert('خطأ في قراءة ملف JSON: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function downloadViolationsJSON() {
+    const localData = localStorage.getItem('violations_data_override');
+    if (!localData) {
+        alert('لا توجد بيانات مخصصة لتصديرها (يتم استخدام الافتراضي).');
+        return;
+    }
+    
+    const blob = new Blob([localData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'violations_data_export.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function clearViolationsData() {
+    if (confirm('هل أنت متأكد من مسح جميع بيانات المخالفات المخصصة والعودة للوضع الافتراضي؟')) {
+        localStorage.removeItem('violations_data_override');
+        loadViolationsStats();
+        alert('تم مسح البيانات.');
+    }
+}
