@@ -102,6 +102,7 @@ function checkLogin() {
         
         // Initial Employee Load
         loadEmployeesFromCSV();
+        autoImportEmployeesFromGitHub();
         
         // Default Section
         showSection('dashboard');
@@ -429,6 +430,53 @@ function exportEmployees() {
     document.body.removeChild(link);
 }
 
+function mergeEmployees(existingArr, incomingArr){
+    const existing = Array.isArray(existingArr) ? existingArr : [];
+    const incoming = Array.isArray(incomingArr) ? incomingArr : [];
+    const byIqama = new Map(existing.map(e => [e.iqama, { ...e }]));
+    let updated = 0, added = 0;
+    incoming.forEach(n => {
+        const prev = byIqama.get(n.iqama);
+        if (prev) {
+            const fields = ['id','name','position','brand','branch','region','status','health_expiry','train_status_1','train_status_2','email'];
+            fields.forEach(f => {
+                const val = n[f];
+                if (val !== undefined && val !== null && String(val).trim() !== '') {
+                    if (prev[f] !== val) {
+                        prev[f] = val;
+                        updated++;
+                    }
+                }
+            });
+            byIqama.set(n.iqama, prev);
+        } else {
+            byIqama.set(n.iqama, { ...n });
+            added++;
+        }
+    });
+    return { merged: Array.from(byIqama.values()), stats: { updated, added, total: byIqama.size } };
+}
+
+function autoImportEmployeesFromGitHub(){
+    const token = localStorage.getItem('gh_token') || '';
+    if(!token) return;
+    const owner = 'beno0o96-del';
+    const repo = 'olayan-compliance-dashboard';
+    const path = 'employees_data.json';
+    fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+    }).then(r=>r.json()).then(json=>{
+        if(json && json.content){
+            const decoded = decodeURIComponent(escape(atob(json.content)));
+            const incoming = JSON.parse(decoded);
+            const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+            const { merged } = mergeEmployees(existing, incoming);
+            localStorage.setItem('admin_employees', JSON.stringify(merged));
+            loadEmployees();
+        }
+    }).catch(()=>{});
+}
+
 function getEmpColor(emp){
     const brand = (emp.brand||'').toUpperCase();
     const region = emp.region||'';
@@ -485,10 +533,12 @@ function importEmployeesFromJSON(){
     }).then(r=>r.json()).then(json=>{
         if(json && json.content){
             const decoded = decodeURIComponent(escape(atob(json.content)));
-            const employees = JSON.parse(decoded);
-            localStorage.setItem('admin_employees', JSON.stringify(employees));
+            const incoming = JSON.parse(decoded);
+            const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+            const { merged, stats } = mergeEmployees(existing, incoming);
+            localStorage.setItem('admin_employees', JSON.stringify(merged));
             loadEmployees();
-            alert('تم استيراد الموظفين من JSON خارجي بنجاح');
+            alert(`تم الدمج من GitHub: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
         } else {
             alert('لم يتم العثور على ملف employees_data.json في المستودع');
         }
@@ -527,10 +577,12 @@ function importEmployeesFromLocalJSON(){
     const reader = new FileReader();
     reader.onload = () => {
         try {
-            const employees = JSON.parse(reader.result);
-            localStorage.setItem('admin_employees', JSON.stringify(employees));
+            const incoming = JSON.parse(reader.result);
+            const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+            const { merged, stats } = mergeEmployees(existing, incoming);
+            localStorage.setItem('admin_employees', JSON.stringify(merged));
             loadEmployees();
-            alert('تم استيراد الموظفين من ملف JSON المحلي بنجاح');
+            alert(`تم الدمج من الملف المحلي: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
         } catch {
             alert('ملف JSON غير صالح');
         }
