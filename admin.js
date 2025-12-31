@@ -203,6 +203,12 @@ function applyAdminLang(){
     if(lblMergeCms) lblMergeCms.textContent = t.merge.title;
     if(btnMergeCms) btnMergeCms.textContent = t.merge.update;
     if(btnReplaceCms) btnReplaceCms.textContent = t.merge.replace;
+    const descUpdate = document.getElementById('desc-merge-update');
+    const descReplace = document.getElementById('desc-merge-replace');
+    const descSources = document.getElementById('desc-merge-sources');
+    if(descUpdate) descUpdate.textContent = lang==='ar' ? 'تحديث فقط: دمج ذكي يحافظ على الموجود ويحدّث القيم ويضيف الجديد.' : 'Update Only: Smart merge that keeps existing, updates fields, and adds new.';
+    if(descReplace) descReplace.textContent = lang==='ar' ? 'استبدال كامل: يستبدل القائمة بالكامل بالمصدر القادم.' : 'Replace All: Replaces the entire list with the incoming source.';
+    if(descSources) descSources.textContent = lang==='ar' ? 'مصادر التحديث: Excel، JSON من GitHub، JSON محلي، تعديل يدوي عبر اللوحة.' : 'Update sources: Excel, GitHub JSON, local JSON, manual edits via the admin panel.';
 }
 
 // --- EMPLOYEES LOGIC ---
