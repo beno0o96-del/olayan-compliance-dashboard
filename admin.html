@@ -39,6 +39,7 @@
 
     <!-- ADMIN DASHBOARD -->
     <div id="admin-content" class="admin-layout" style="display: none; width: 100%;">
+        <div class="sidebar-overlay" onclick="toggleAdminSidebar()"></div>
         
         <!-- Sidebar -->
         <aside class="admin-sidebar">
@@ -97,11 +98,16 @@
             <div style="padding: 20px;">
                 <button id="logout" class="btn btn-danger" style="width: 100%; justify-content: center;">تسجيل خروج</button>
             </div>
+            <div class="sidebar-footer" style="padding: 10px 20px; text-align: center; font-size: 0.7rem; color: #64748b; border-top: 1px solid #eee;">
+                <div style="margin-bottom: 5px;">جميع الحقوق محفوظة لدى شركة العليان للخدمات الغذائية © 2025</div>
+                <div style="direction: ltr;">Developed by Bandar A. Abdulwahab</div>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="admin-main">
             <header class="admin-header">
+                <button id="sidebar-toggle" class="btn btn-secondary" style="margin-inline-end: 10px; display: none;">☰</button>
                 <div class="header-title" id="page-title">ملخص النظام</div>
                 <div class="header-actions">
                     <div style="display:flex; gap:8px; align-items:center; position:relative;">

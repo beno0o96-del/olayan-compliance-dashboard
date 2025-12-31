@@ -1465,3 +1465,19 @@ function importBranchesFromText(){
         ta.value='';
     }
 }
+
+// Mobile Sidebar Toggle
+window.toggleAdminSidebar = function() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if(sidebar) sidebar.classList.toggle('active');
+    if(overlay) overlay.classList.toggle('active');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    if(toggleBtn) {
+        toggleBtn.addEventListener('click', toggleAdminSidebar);
+    }
+});
+

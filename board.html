@@ -110,6 +110,15 @@
         .modern-table tr:last-child td { border-bottom: none; }
         .modern-table tr:hover td { background: rgba(255,255,255,0.02); }
 
+        /* KPI Table Specific Alignment */
+        #b-kpi-table th:nth-child(1), #b-kpi-table td:nth-child(1) { text-align: center; width: 60px; } /* ID */
+        #b-kpi-table th:nth-child(2), #b-kpi-table td:nth-child(2) { text-align: start; } /* KPI */
+        #b-kpi-table th:nth-child(3), #b-kpi-table td:nth-child(3) { text-align: start; } /* Measurement */
+        #b-kpi-table th:nth-child(4), #b-kpi-table td:nth-child(4) { text-align: center; } /* Target */
+        #b-kpi-table th:nth-child(5), #b-kpi-table td:nth-child(5) { text-align: center; } /* Achieved */
+        #b-kpi-table th:nth-child(6), #b-kpi-table td:nth-child(6) { text-align: center; } /* Progress */
+        #b-kpi-table th:nth-child(7), #b-kpi-table td:nth-child(7) { text-align: center; } /* Status */
+
         /* Neon Text */
         .neon-text-blue { color: #4facfe; text-shadow: 0 0 10px rgba(79, 172, 254, 0.5); }
         .neon-text-purple { color: #a18cd1; text-shadow: 0 0 10px rgba(161, 140, 209, 0.5); }
@@ -209,6 +218,10 @@
             <div class="lang-switch" style="display: flex; gap: 10px; justify-content: center;"> 
                 <button class="lang-btn" onclick="setLang('ar')" style="flex:1;">العربية</button> 
                 <button class="lang-btn" onclick="setLang('en')" style="flex:1;">English</button> 
+            </div>
+            <div class="sidebar-footer" style="margin-top: 20px; text-align: center; font-size: 0.7rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                <div style="margin-bottom: 5px;">جميع الحقوق محفوظة لدى شركة العليان للخدمات الغذائية © 2025</div>
+                <div style="direction: ltr;">Developed by Bandar A. Abdulwahab</div>
             </div>
         </div>
     </aside>
