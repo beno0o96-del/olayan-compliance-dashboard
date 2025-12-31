@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style-home.css?v=2">
     <link rel="stylesheet" href="style-trend.css?v=2">
     <link rel="stylesheet" href="style-violations.css?v=2">
-    <link rel="stylesheet" href="style-complex-dashboard.css?v=3">
+    <link rel="stylesheet" href="style-complex-dashboard.css?v=5">
     <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
     <script src="app.js?v=6" defer></script>
     <script src="od_config.js" defer></script>
@@ -136,10 +136,49 @@
         .neon-text-purple { color: #a18cd1; text-shadow: 0 0 10px rgba(161, 140, 209, 0.5); }
 
         /* Interactive Metrics */
-        .metric-card { background: linear-gradient(135deg, rgba(15,23,42,0.7), rgba(26,35,75,0.8)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; transition: transform .2s, box-shadow .2s; }
-        .metric-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-        .metric-label { color:#94a3b8; font-size:.9rem; }
-        .metric-value { font-size:1.8rem; font-weight:700; }
+        .metric-card { 
+            background: linear-gradient(135deg, rgba(15,23,42,0.7), rgba(26,35,75,0.8)); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 16px; 
+            padding: 16px; 
+            transition: transform .3s, box-shadow .3s, border-color .3s; 
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--metric-color, rgba(255,255,255,0.1));
+            border-color: var(--metric-color, rgba(255,255,255,0.2));
+        }
+        /* Add a subtle shine effect on hover */
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .metric-card:hover::before {
+            left: 125%;
+        }
+
+        .metric-label { color:#94a3b8; font-size:.9rem; transition: color .3s; }
+        .metric-card:hover .metric-label { color: #fff; }
+
+        .metric-value { 
+            font-size:1.8rem; 
+            font-weight:700; 
+            color: var(--metric-color, #fff); /* Default to defined color */
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: text-shadow .3s, transform .3s;
+        }
+        .metric-card:hover .metric-value {
+            text-shadow: 0 0 15px var(--metric-color, rgba(255,255,255,0.5));
+            transform: scale(1.05);
+            display: inline-block; /* Required for transform */
+        }
         .metric-subtext { font-size:.8rem; color:#b0bec5; display:flex; align-items:center; gap:6px; }
         .sub-dot { width:8px; height:8px; border-radius:50%; display:inline-block; box-shadow:0 0 10px currentColor; animation: pulseGlow 2s ease-in-out infinite; }
         @keyframes pulseGlow { 0% { box-shadow:0 0 0px currentColor; } 50% { box-shadow:0 0 12px currentColor; } 100% { box-shadow:0 0 0px currentColor; } }
@@ -231,8 +270,8 @@
         <button class="nav-btn" onclick="location.href='training.html'" data-en="Training" data-ar="التدريب">Training</button> 
         <button class="nav-btn" onclick="location.href='branches.html'" data-en="Branches" data-ar="الفروع">Branches</button> 
         <button class="nav-btn active" onclick="location.href='board.html'" data-en="Board Report" data-ar="تقرير الإدارة">Board Report</button>
-        <button class="nav-btn" onclick="location.href='admin.html'" data-en="Login" data-ar="دخول">Login</button>
-        <button class="nav-btn" onclick="location.href='admin.html'" id="nav-admin-link" style="display:none;" data-en="Admin" data-ar="إدارة">Admin</button>
+        <button class="nav-btn" onclick="location.href='login.html'" data-en="Employee Login" data-ar="دخول الموظفين"><i>👤</i> <span data-en="Employee Login" data-ar="دخول الموظفين">Employee Login</span></button>
+        <button class="nav-btn" onclick="location.href='admin.html'" data-en="Admin Login" data-ar="دخول الإدارة"><i>🔐</i> <span data-en="Admin Login" data-ar="دخول الإدارة">Admin Login</span></button>
       </nav> 
       <div class="lang-switch">
          <button class="lang-btn" onclick="setLang('ar')">AR</button>
@@ -294,9 +333,7 @@
                 </p>
             </div>
             <div style="text-align: right; display:flex; gap:10px; align-items:center;">
-                <a href="admin.html" id="admin-link" style="display:none; padding:6px 12px; border-radius:8px; border:1px solid #4facfe; color:#4facfe; font-size:0.85rem; text-decoration:none;">
-                    <span data-en="Admin Panel" data-ar="لوحة الأدمن">Admin Panel</span>
-                </a>
+                <!-- Admin Panel Link Removed as requested -->
                 <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(16, 185, 129, 0.2);">● <span data-en="System Active" data-ar="النظام نشط">System Active</span></span>
             </div>
         </div>
@@ -412,14 +449,16 @@
                         <button class="r-tab" onclick="switchRegion('eastern', this)"><span data-en="Eastern" data-ar="الشرقية">Eastern</span></button>
                     </div>
                 </div>
-                <div style="display: flex; gap: 20px; align-items: center;">
-                    <div class="radar" style="width: 150px; height: 150px; margin: 0 auto;">
-                        <div class="sweep"></div>
-                        <div class="blip blip-1"></div>
-                        <div class="blip blip-2"></div>
-                    </div>
-                    <div class="radar-list" id="b-violations-list" style="flex: 1;">
+                <div style="display: flex; gap: 20px; align-items: stretch; height: 260px;"> <!-- Increased Height -->
+                    <div class="radar-list" id="b-violations-list" style="flex: 1; height: 100%;">
                         <!-- Dynamic Content -->
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 15px; flex-shrink: 0;">
+                        <div class="radar" style="width: 150px; height: 150px;">
+                            <div class="sweep"></div>
+                            <div class="blip blip-1"></div>
+                            <div class="blip blip-2"></div>
+                        </div>
                     </div>
                 </div>
             </div>

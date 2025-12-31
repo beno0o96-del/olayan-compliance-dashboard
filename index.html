@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#0b0e2b">
  
    <!-- JS --> 
-  <script src="app.js?v=6" defer></script> 
+  <script src="app.js?v=8" defer></script> 
   <script src="od_config.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.37.0/dist/msal-browser.min.js" defer></script>
   <script src="onedrive_activity.js" defer></script>
@@ -59,10 +59,10 @@
         </a>
 
         <a href="login.html" class="side-link">
-            <i>🔐</i> <span data-en="Login" data-ar="تسجيل الدخول">Login</span>
+            <i>👤</i> <span data-en="Employee Login" data-ar="دخول الموظفين">Employee Login</span>
         </a>
-        <a href="admin.html" class="side-link" id="admin-link" style="display:none;">
-            <i>🛠️</i> <span data-en="Admin" data-ar="لوحة الأدمن">Admin</span>
+        <a href="admin.html" class="side-link" id="admin-link">
+            <i>🔐</i> <span data-en="Admin Login" data-ar="دخول الإدارة">Admin Login</span>
         </a>
 
     </nav>
@@ -180,12 +180,8 @@
        <button class="nav-btn" onclick="location.href='training.html'" data-en="Training" data-ar="التدريب">Training</button> 
        <button class="nav-btn" onclick="location.href='branches.html'" data-en="Branches" data-ar="الفروع">Branches</button> 
        <button class="nav-btn" onclick="location.href='board.html'" data-en="Board Report" data-ar="تقرير الإدارة">Board Report</button>
-       <a href="login.html" class="side-link">
-            <i>👤</i> <span data-en="Employee Login" data-ar="دخول الموظفين">Employee Login</span>
-        </a>
-        <a href="admin.html" class="side-link">
-            <i>🔐</i> <span data-en="Admin Login" data-ar="دخول الإدارة">Admin Login</span>
-        </a>
+       <button class="nav-btn" onclick="location.href='login.html'" data-en="Employee Login" data-ar="دخول الموظفين"><i>👤</i> <span data-en="Employee Login" data-ar="دخول الموظفين">Employee Login</span></button>
+       <button class="nav-btn" onclick="location.href='admin.html'" data-en="Admin Login" data-ar="دخول الإدارة"><i>🔐</i> <span data-en="Admin Login" data-ar="دخول الإدارة">Admin Login</span></button>
      </nav> 
      <div class="lang-switch">
         <button class="lang-btn" onclick="setLang('ar')">AR</button>

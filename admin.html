@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم النظام | Olayan Admin</title>
-    <link rel="stylesheet" href="style-admin.css?v=4">
+    <link rel="stylesheet" href="style-admin.css?v=6">
     <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
     <!-- SheetJS for Excel Import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
-    <script src="admin.js?v=3" defer></script>
+    <script src="admin.js?v=5" defer></script>
     <!-- app.js is needed for data fetching logic if we want to sync with board data -->
-    <script src="app.js?v=6" defer></script>
+    <script src="app.js?v=7" defer></script>
 </head>
 <body class="admin-body ar">
 
     <!-- LOGIN SCREEN -->
     <div id="login-section" class="login-wrapper">
-        <div class="login-box" style="background: rgba(17, 20, 50, 0.65) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;">
+        <div class="login-box">
             <img src="olayan-logo.png" alt="Olayan Logo" style="height: 60px; margin-bottom: 20px;">
             <h2 id="login-title">Admin Login</h2>
             
@@ -48,10 +48,6 @@
                 <button class="btn btn-secondary" id="login-lang-en" style="border-radius: 15px; padding: 5px 15px;">English</button>
                 <button class="btn btn-secondary" id="login-lang-ar" style="border-radius: 15px; padding: 5px 15px;">العربية</button>
             </div>
-
-            <div style="margin-top: 20px; text-align: center;">
-                <a href="index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">العودة للرئيسية (Back to Home)</a>
-            </div>
         </div>
     </div>
 
@@ -67,7 +63,13 @@
             </div>
             <nav class="sidebar-nav">
                 <a href="#" onclick="showSection('dashboard')" class="nav-item active" id="nav-dashboard">
-                    <i>🏠</i> الرئيسية
+                    <i>📊</i> الرئيسية
+                </a>
+                <a href="#" onclick="showSection('analytics')" class="nav-item" id="nav-analytics">
+                    <i>🧠</i> التحليل الاستراتيجي (AI)
+                </a>
+                <a href="#" onclick="showSection('violations')" class="nav-item" id="nav-violations">
+                    <i>⚠️</i> إدارة المخالفات
                 </a>
                 <a href="#" onclick="showSection('employees')" class="nav-item" id="nav-employees">
                     <i>👥</i> الموظفين
@@ -128,34 +130,74 @@
                 <button id="sidebar-toggle" class="btn btn-secondary" style="margin-inline-end: 10px; display: none;">☰</button>
                 <div class="header-title" id="page-title">ملخص النظام</div>
                 <div class="header-actions">
-                    <div style="display:flex; gap:8px; align-items:center; position:relative;">
-                        <button class="btn btn-secondary" id="btn-lang-ar">العربية</button>
-                        <button class="btn btn-secondary" id="btn-lang-en">English</button>
-                        <span id="merge-mode-indicator" style="margin-inline-start:8px; padding:4px 10px; border-radius:12px; border:1px solid #4facfe; color:#4facfe; font-size:0.85rem;">وضع الدمج: تحديث فقط</span>
-                        <span id="update-source-indicator" style="margin-inline-start:8px; padding:4px 10px; border-radius:12px; border:1px solid #a78bfa; color:#a78bfa; font-size:0.85rem;">آخر تحديث: Excel</span>
-                        <button class="btn btn-secondary" id="btn-control-menu" style="margin-inline-start:8px;">تحكم البيانات ⌄</button>
-                        <div id="control-menu" style="position:absolute; top:100%; inset-inline-end:0; background:#fff; border:1px solid #ddd; border-radius:10px; padding:10px; box-shadow:0 10px 25px rgba(0,0,0,0.15); width: min(900px, 90vw); overflow:hidden; height:0; transition: height 250ms ease;">
-                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                                <button class="btn btn-secondary" onclick="importEmployeesFromJSON()">استيراد الموظفين (JSON خارجي)</button>
-                                <button class="btn btn-primary" onclick="publishEmployeesJSON()">حفظ الموظفين (JSON خارجي)</button>
-                                <input type="file" id="emp-json-file" accept="application/json" style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:6px;">
-                                <button class="btn btn-secondary" onclick="importEmployeesFromLocalJSON()">استيراد JSON محلي</button>
-                                <button class="btn btn-primary" onclick="downloadEmployeesJSON()">تنزيل الموظفين (JSON)</button>
-                                <div id="merge-mode" style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:6px; display:flex; gap:8px; align-items:center;">
-                                    <span id="lbl-merge-mode" style="color:#333; font-size:0.9rem;">وضع الدمج:</span>
-                                    <button class="btn btn-secondary" id="btn-mode-merge">تحديث فقط</button>
-                                    <button class="btn btn-secondary" id="btn-mode-replace">استبدال كامل</button>
+                    <!-- Language Switcher -->
+                    <div class="lang-toggle">
+                        <button class="btn-icon-text active" id="btn-lang-ar">عربي</button>
+                        <span class="divider">|</span>
+                        <button class="btn-icon-text" id="btn-lang-en">En</button>
+                    </div>
+
+                    <!-- Data Control Trigger -->
+                    <div style="position:relative;">
+                        <button class="btn btn-glass" id="btn-control-menu" title="إدارة البيانات">
+                            <i>💾</i>
+                            <span>البيانات</span>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="control-menu" class="control-menu-dropdown">
+                            <!-- Status Indicators (Moved Here) -->
+                            <div class="menu-status-bar">
+                                <div id="merge-mode-indicator" class="status-badge">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text">وضع الدمج: تحديث فقط</span>
+                                </div>
+                                <div id="update-source-indicator" class="status-badge">
+                                    <span class="status-icon">📊</span>
+                                    <span class="status-text">آخر تحديث: Excel</span>
                                 </div>
                             </div>
-                            <div style="margin-top:8px; color:#555; font-size:0.85rem;">
-                                <span class="dev-badge" data-en="Coming soon — Site under development • Engineer (Bandar A.Abdullwahab)" data-ar="نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)" style="display:inline-block; background: rgba(79,172,254,0.12); border:1px solid #4facfe; color:#4facfe; padding:6px 10px; border-radius:12px;">نراكم قريباً — جاري التطوير على الموقع • المهندس (Bandar A.Abdullwahab)</span>
+
+                            <hr class="menu-divider">
+
+                            <div class="menu-actions-grid">
+                                <button class="menu-action-btn" onclick="document.getElementById('excel-employees-file').click()">
+                                    <i>👥</i> تحديث الموظفين (Excel)
+                                </button>
+                                <button class="menu-action-btn" onclick="document.getElementById('excel-violations-file').click()">
+                                    <i>⚠️</i> تحديث المخالفات (Excel)
+                                </button>
+                                <button class="menu-action-btn" onclick="exportEmployeesToExcel()">
+                                    <i>📊</i> تصدير الموظفين (Excel)
+                                </button>
+                                <button class="menu-action-btn" onclick="exportViolationsToExcel()">
+                                    <i>📉</i> تصدير المخالفات (Excel)
+                                </button>
+                            </div>
+
+                            <div class="merge-controls">
+                                <span class="lbl-merge">وضع الدمج:</span>
+                                <div class="toggle-group">
+                                    <button class="toggle-btn active" id="btn-mode-merge">تحديث</button>
+                                    <button class="toggle-btn" id="btn-mode-replace">استبدال</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden File Inputs -->
+                            <input type="file" id="excel-employees-file" accept=".xlsx, .xls, .csv" style="display:none;">
+                            <input type="file" id="excel-violations-file" accept=".xlsx, .xls, .csv" style="display:none;">
+
+                            <div class="dev-note">
+                                <small>نراكم قريباً — جاري التطوير • Eng. Bandar A. Abdulwahab</small>
                             </div>
                         </div>
                     </div>
+
+                    <!-- User Profile -->
                     <div class="user-profile">
-                        <div class="text-right">
-                            <div style="font-weight: bold; font-size: 0.9rem;" id="admin-user-name">Bandar A.Abdullwahab</div>
-                            <div style="font-size: 0.8rem; color: #777;">مسؤول النظام</div>
+                        <div class="user-info">
+                            <div class="user-name" id="admin-user-name">Bandar A.</div>
+                            <div class="user-role">مسؤول النظام</div>
                         </div>
                         <div class="user-avatar">B</div>
                     </div>
@@ -166,36 +208,210 @@
                 
                 <!-- SECTION: DASHBOARD -->
                 <div id="section-dashboard">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-info">
-                                <h3 id="stat-users">3</h3>
-                                <p>المستخدمين النشطين</p>
-                            </div>
-                            <div class="stat-icon">👥</div>
+                    <!-- Welcome Header -->
+                    <div class="dashboard-v2-header">
+                        <div class="dash-welcome">
+                            <h2>مرحباً، <span style="color: #4facfe;">Bandar</span> 👋</h2>
+                            <p>إليك ملخص أداء النظام اليوم، لديك 3 مهام جديدة.</p>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-info">
-                                <h3 id="stat-complaints">12</h3>
-                                <p>الشكاوى الجديدة</p>
-                            </div>
-                            <div class="stat-icon">📩</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-info">
-                                <h3 id="stat-status" style="color: #4caf50;">98%</h3>
-                                <p>حالة النظام</p>
-                            </div>
-                            <div class="stat-icon">✅</div>
+                        <div class="dash-date" style="text-align: left; opacity: 0.8;">
+                            <h3 style="margin:0; font-size:1.5rem;">31</h3>
+                            <span style="font-size:0.9rem;">December, 2025</span>
                         </div>
                     </div>
 
+                    <!-- AI Command Bar (New) -->
+                    <div class="ai-command-bar">
+                        <div class="ai-input-wrapper">
+                            <span class="ai-icon">✨</span>
+                            <input type="text" id="ai-command-input" placeholder="اطلب من المساعد الذكي... (مثال: 'أظهر الفروع الأكثر مخالفات'، 'اقترح خطة تدريب')">
+                            <button class="btn-ai-send" onclick="processAICommand()">إرسال</button>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="dash-metrics-row">
+                        <div class="dash-metric-card">
+                            <div class="dm-icon" style="color:#4facfe;">👥</div>
+                            <div class="dm-info">
+                                <h4>المستخدمين النشطين</h4>
+                                <span class="dm-val" id="stat-users">3</span>
+                            </div>
+                        </div>
+                        <div class="dash-metric-card">
+                            <div class="dm-icon" style="color:#a18cd1;">📋</div>
+                            <div class="dm-info">
+                                <h4>المهام المكتملة</h4>
+                                <span class="dm-val">85%</span>
+                            </div>
+                        </div>
+                        <div class="dash-metric-card">
+                            <div class="dm-icon" style="color:#ffb74d;">📩</div>
+                            <div class="dm-info">
+                                <h4>الشكاوى الجديدة</h4>
+                                <span class="dm-val" id="stat-complaints">12</span>
+                            </div>
+                        </div>
+                        <div class="dash-metric-card">
+                            <div class="dm-icon" style="color:#00f260;">✅</div>
+                            <div class="dm-info">
+                                <h4>حالة النظام</h4>
+                                <span class="dm-val" style="color:#00f260;">98%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Split View: Goals & Tasks -->
+                    <div class="dash-grid-split">
+                        
+                        <!-- Right Column (In RTL): Performance & Goals -->
+                        <div class="dash-panel">
+                            <div class="dash-panel-header">
+                                <span class="dash-panel-title"><i>🎯</i> الأهداف والتقدم (Goals)</span>
+                                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">تحديث</button>
+                            </div>
+                            
+                            <!-- Efficiency Circle -->
+                            <div class="efficiency-chart">
+                                <div class="circle-chart" style="--p: 85deg;">
+                                    <div class="circle-inner">
+                                        <span class="circle-val">85%</span>
+                                        <span class="circle-lbl">الكفاءة</span>
+                                    </div>
+                                </div>
+                                <div class="circle-chart" style="--p: 62deg; --c: #a18cd1;">
+                                    <div class="circle-inner">
+                                        <span class="circle-val">62%</span>
+                                        <span class="circle-lbl">الإنجاز</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Goals Bars -->
+                             <div style="margin-top: 20px;">
+                                 <div class="goal-item">
+                                     <div class="goal-header">
+                                         <span>تحسين تجربة المستخدم</span>
+                                         <span>75%</span>
+                                     </div>
+                                     <div class="goal-progress"><div class="goal-fill" style="width: 75%; background: linear-gradient(90deg, #4facfe, #00f260);"></div></div>
+                                 </div>
+                                 <div class="goal-item">
+                                     <div class="goal-header">
+                                         <span>معالجة الشكاوى</span>
+                                         <span>90%</span>
+                                     </div>
+                                     <div class="goal-progress"><div class="goal-fill" style="width: 90%; background: linear-gradient(90deg, #f093fb, #f5576c);"></div></div>
+                                 </div>
+                                 <div class="goal-item">
+                                     <div class="goal-header">
+                                         <span>تحديث قاعدة البيانات</span>
+                                         <span>40%</span>
+                                     </div>
+                                     <div class="goal-progress"><div class="goal-fill" style="width: 40%; background: linear-gradient(90deg, #43e97b, #38f9d7);"></div></div>
+                                 </div>
+                             </div>
+                        </div>
+
+                        <!-- Left Column: Tasks -->
+                        <div class="dash-panel">
+                            <div class="dash-panel-header">
+                                <span class="dash-panel-title"><i>📝</i> مهام اليوم (Tasks)</span>
+                                <a href="tasks.html" style="color: #4facfe; font-size: 0.85rem;">عرض الكل</a>
+                            </div>
+                            
+                            <div class="task-list">
+                                <div class="task-item">
+                                    <div class="task-info">
+                                        <div class="task-check completed"></div>
+                                        <div>
+                                            <div class="task-text">مراجعة تقرير المبيعات</div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">10:00 AM</div>
+                                        </div>
+                                    </div>
+                                    <span class="task-tag">High</span>
+                                </div>
+                                <div class="task-item">
+                                    <div class="task-info">
+                                        <div class="task-check"></div>
+                                        <div>
+                                            <div class="task-text">تحديث بيانات الموظفين</div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">02:00 PM</div>
+                                        </div>
+                                    </div>
+                                    <span class="task-tag">Medium</span>
+                                </div>
+                                <div class="task-item">
+                                    <div class="task-info">
+                                        <div class="task-check"></div>
+                                        <div>
+                                            <div class="task-text">اجتماع الفريق التقني</div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">04:30 PM</div>
+                                        </div>
+                                    </div>
+                                    <span class="task-tag">Low</span>
+                                </div>
+                                <div class="task-item">
+                                    <div class="task-info">
+                                        <div class="task-check completed"></div>
+                                        <div>
+                                            <div class="task-text">نسخ احتياطي للنظام</div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">09:00 AM</div>
+                                        </div>
+                                    </div>
+                                    <span class="task-tag">Auto</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION: ANALYTICS (Strategic Analysis) -->
+                <div id="section-analytics" class="d-none">
                     <div class="card-section">
                         <div class="section-header">
-                            <span class="section-title">آخر النشاطات</span>
+                            <span class="section-title">التحليل الاستراتيجي (AI Analysis)</span>
+                            <button class="btn btn-primary" onclick="generateStrategicReport()">🔄 تحديث التحليل</button>
                         </div>
-                        <div id="activity-log" style="font-size: 0.9rem; color: #555;">
-                            جاري التحميل...
+                        
+                        <div class="analytics-grid">
+                            <!-- Risk Map -->
+                            <div class="analytics-card full-width">
+                                <h3>🗺️ خارطة المخاطر (Violations Heatmap)</h3>
+                                <p style="color:#666; font-size:0.9rem;">توزيع المخالفات حسب المناطق والفروع</p>
+                                <div id="chart-risk-map" style="height: 300px; background: rgba(0,0,0,0.02); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    جاري التحليل...
+                                </div>
+                            </div>
+
+                            <!-- Correlation Analysis -->
+                            <div class="analytics-card">
+                                <h3>🔗 علاقة التدريب بالمخالفات</h3>
+                                <p style="color:#666; font-size:0.9rem;">هل الفروع الأقل تدريباً هي الأكثر مخالفة؟</p>
+                                <div id="chart-correlation" style="height: 250px;"></div>
+                                <div class="insight-box" id="insight-correlation">
+                                    💡 <strong>تحليل AI:</strong> جاري المعالجة...
+                                </div>
+                            </div>
+
+                            <!-- Operational Efficiency -->
+                            <div class="analytics-card">
+                                <h3>⚡ الكفاءة التشغيلية</h3>
+                                <p style="color:#666; font-size:0.9rem;">نقاط القوة والضعف لكل منطقة</p>
+                                <div id="chart-efficiency" style="height: 250px;"></div>
+                                <div class="insight-box" id="insight-efficiency">
+                                    💡 <strong>تحليل AI:</strong> جاري المعالجة...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Recommendations -->
+                        <div style="margin-top: 30px;">
+                            <h3 style="color: var(--secondary-color);">🤖 توصيات الذكاء الاصطناعي (Action Plan)</h3>
+                            <div id="ai-recommendations-list" class="ai-rec-list">
+                                <!-- Dynamic Recommendations -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -705,38 +921,6 @@
                         <label id="lbl-region" style="display:block; color:#b0bec5; font-size:0.85rem;">Region</label>
                         <input id="emp-region" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
                     </div>
-                    <div style="grid-column: span 2; border-top: 1px solid #334155; margin-top: 10px; padding-top: 10px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <input type="checkbox" id="emp-has-airport" style="width: 18px; height: 18px; cursor: pointer;">
-                            <label for="emp-has-airport" id="lbl-has-airport" style="color: #4facfe; font-weight: bold; cursor: pointer;">يمتلك تصريح مطار / أرامكو</label>
-                        </div>
-                        
-                        <div id="airport-card-section" style="display: none; background: rgba(15, 23, 42, 0.5); padding: 15px; border-radius: 8px; border: 1px solid #334155;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div>
-                                    <label id="lbl-airport-no" style="display:block; color:#b0bec5; font-size:0.85rem;">Card Number</label>
-                                    <input id="emp-airport-no" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                                </div>
-                                <div>
-                                    <label id="lbl-airport-expiry" style="display:block; color:#b0bec5; font-size:0.85rem;">Expiry Date</label>
-                                    <input id="emp-airport-expiry" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                                </div>
-                                <div style="grid-column: span 2;">
-                                    <label id="lbl-airport-issuer" style="display:block; color:#b0bec5; font-size:0.85rem;">Issuing Authority / Region</label>
-                                    <input id="emp-airport-issuer" class="form-control" type="text" placeholder="e.g. Riyadh Airport, Aramco Dhahran..." style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                                </div>
-                                <div style="grid-column: span 2;">
-                                    <label id="lbl-airport-photo" style="display:block; color:#b0bec5; font-size:0.85rem;">Card Photo</label>
-                                    <input id="emp-airport-photo-input" class="form-control" type="file" accept="image/*" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                                    <div id="emp-airport-photo-preview" style="margin-top: 10px; max-width: 100%; height: 150px; border: 1px dashed #334155; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 6px;">
-                                        <span style="color: #64748b; font-size: 0.8rem;">No image selected</span>
-                                    </div>
-                                    <button id="btn-remove-airport-photo" class="btn btn-secondary" style="margin-top: 5px; font-size: 0.8rem; display: none;">حذف الصورة</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div style="grid-column: span 2;">
                         <label id="lbl-remarks" style="display:block; color:#b0bec5; font-size:0.85rem;">Remarks</label>
                         <input id="emp-remarks" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">

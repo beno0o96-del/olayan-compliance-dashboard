@@ -282,8 +282,7 @@ function applyAdminLang(){
                 ops1:'التشغيل OPS1', ref:'الرقم المرجعي',
                 days_train:'المتبقي انتهاء التدريب الصحي', days_health:'المتبقي انتهاء الكرت الصحي',
                 email:'البريد الإلكتروني', photo:'صورة الموظف',
-                band:'Band', cost:'مركز التكلفة', tede:'T. E. D.E', remarks:'ملاحظات',
-                has_airport:'يمتلك تصريح مطار / أرامكو', airport_no:'رقم التصريح', airport_expiry:'تاريخ الانتهاء', airport_issuer:'جهة الإصدار / المنطقة', airport_photo:'صورة التصريح'
+                band:'Band', cost:'مركز التكلفة', tede:'T. E. D.E', remarks:'ملاحظات'
             },
             buttons: { save:'حفظ', cancel:'إلغاء' },
             merge: { title:'وضع الدمج:', update:'تحديث فقط', replace:'استبدال كامل' }
@@ -300,8 +299,7 @@ function applyAdminLang(){
                 ops1:'OPS1', ref:'REF',
                 days_train:'Days Left (Training)', days_health:'Days Left (Health card)',
                 email:'Email', photo:'Employee Photo',
-                band:'Band', cost:'Cost center', tede:'T. E. D.E', remarks:'Remarks',
-                has_airport:'Has Airport/Aramco Permit', airport_no:'Permit Number', airport_expiry:'Expiry Date', airport_issuer:'Issuing Authority / Region', airport_photo:'Permit Photo'
+                band:'Band', cost:'Cost center', tede:'T. E. D.E', remarks:'Remarks'
             },
             buttons: { save:'Save', cancel:'Cancel' },
             merge: { title:'Merge Mode:', update:'Update Only', replace:'Replace All' }
@@ -320,8 +318,7 @@ function applyAdminLang(){
         ops1:'lbl-ops1', ref:'lbl-ref',
         days_train:'lbl-days-train', days_health:'lbl-days-health',
         email:'lbl-email', photo:'lbl-photo',
-        band:'lbl-band', cost:'lbl-cost', tede:'lbl-tede', remarks:'lbl-remarks',
-        has_airport:'lbl-has-airport', airport_no:'lbl-airport-no', airport_expiry:'lbl-airport-expiry', airport_issuer:'lbl-airport-issuer', airport_photo:'lbl-airport-photo'
+        band:'lbl-band', cost:'lbl-cost', tede:'lbl-tede', remarks:'lbl-remarks'
     };
     Object.keys(mapLbl).forEach(k=>{
         const el = document.getElementById(mapLbl[k]);
@@ -627,31 +624,6 @@ function viewEmployee(iqama) {
     set('emp-region', emp.region);
     set('emp-remarks', emp.remarks);
     
-    // Airport Card
-    const chkAirport = document.getElementById('emp-has-airport');
-    const airportSection = document.getElementById('airport-card-section');
-    const btnRemoveAirportPhoto = document.getElementById('btn-remove-airport-photo');
-    const preview = document.getElementById('emp-airport-photo-preview');
-    
-    if(chkAirport) {
-        chkAirport.checked = emp.has_airport_card === true || emp.has_airport_card === 'true';
-        if(airportSection) airportSection.style.display = chkAirport.checked ? 'block' : 'none';
-    }
-    set('emp-airport-no', emp.airport_card_no);
-    set('emp-airport-expiry', emp.airport_card_expiry);
-    set('emp-airport-issuer', emp.airport_card_issuer);
-    
-    if(preview){
-        if(emp.airport_card_photo){
-            preview.innerHTML = `<img src="${emp.airport_card_photo}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
-            if(btnRemoveAirportPhoto) btnRemoveAirportPhoto.style.display = 'inline-block';
-            preview.dataset.deleted = 'false';
-        } else {
-            preview.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">No image selected</span>';
-            if(btnRemoveAirportPhoto) btnRemoveAirportPhoto.style.display = 'none';
-        }
-    }
-    
     // Days left
     const daysLeft = (dateStr)=>{
         if(!dateStr) return '';
@@ -846,7 +818,7 @@ function mergeEmployees(existingArr, incomingArr){
     incoming.forEach(n => {
         const prev = byIqama.get(n.iqama);
         if (prev) {
-            const fields = ['id','name','position','sap_id','brand','branch','region','city','status','status1','status2','health_expiry','hire_date','training_end','train_status_1','train_status_2','ops1','ref','email','photo','has_airport_card','airport_card_no','airport_card_expiry','airport_card_issuer','airport_card_photo'];
+            const fields = ['id','name','position','sap_id','brand','branch','region','city','status','status1','status2','health_expiry','hire_date','training_end','train_status_1','train_status_2','ops1','ref','email','photo'];
             fields.forEach(f => {
                 const val = n[f];
                 if (val !== undefined && val !== null && String(val).trim() !== '') {
@@ -909,45 +881,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const modal = document.getElementById('employee-modal');
     if(closeBtn) closeBtn.onclick = ()=>{ if(modal) modal.style.display='none'; };
     if(saveBtn) saveBtn.onclick = saveEmployeeChanges;
-    
-    // Airport Card Logic
-    const chkAirport = document.getElementById('emp-has-airport');
-    const airportSection = document.getElementById('airport-card-section');
-    if(chkAirport && airportSection){
-        chkAirport.onchange = ()=>{
-            airportSection.style.display = chkAirport.checked ? 'block' : 'none';
-        };
-    }
-    
-    const airportPhotoInput = document.getElementById('emp-airport-photo-input');
-    const btnRemoveAirportPhoto = document.getElementById('btn-remove-airport-photo');
-    if(airportPhotoInput){
-        airportPhotoInput.onchange = ()=>{
-            const file = airportPhotoInput.files?.[0];
-            if(file){
-                const r = new FileReader();
-                r.onload = ()=>{
-                    const preview = document.getElementById('emp-airport-photo-preview');
-                    if(preview){
-                        preview.innerHTML = `<img src="${r.result}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
-                        if(btnRemoveAirportPhoto) btnRemoveAirportPhoto.style.display = 'inline-block';
-                    }
-                };
-                r.readAsDataURL(file);
-            }
-        };
-    }
-    if(btnRemoveAirportPhoto){
-        btnRemoveAirportPhoto.onclick = ()=>{
-            const preview = document.getElementById('emp-airport-photo-preview');
-            const input = document.getElementById('emp-airport-photo-input');
-            if(preview) preview.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">No image selected</span>';
-            if(input) input.value = '';
-            btnRemoveAirportPhoto.style.display = 'none';
-            // Mark for deletion in save logic if needed (handled by checking preview content or a flag)
-            if(preview) preview.dataset.deleted = 'true';
-        };
-    }
 });
 
 async function saveEmployeeChanges(){
@@ -969,18 +902,6 @@ async function saveEmployeeChanges(){
     const photoFile = document.getElementById('emp-photo')?.files?.[0] || null;
     const photo = await readPhoto(photoFile);
 
-    const airportPhotoFile = document.getElementById('emp-airport-photo-input')?.files?.[0] || null;
-    const airportPhoto = await readPhoto(airportPhotoFile);
-    
-    // Check if airport photo was deleted
-    const airportPreview = document.getElementById('emp-airport-photo-preview');
-    let finalAirportPhoto = employees[idx].airport_card_photo;
-    if(airportPhoto) {
-        finalAirportPhoto = airportPhoto;
-    } else if(airportPreview && airportPreview.dataset.deleted === 'true'){
-        finalAirportPhoto = null;
-    }
-    
     employees[idx] = {
         ...employees[idx],
         iqama: newIqama, // Update ID to new value
@@ -998,12 +919,7 @@ async function saveEmployeeChanges(){
         ops1: document.getElementById('emp-ops1')?.value?.trim() || employees[idx].ops1,
         ref: document.getElementById('emp-ref')?.value?.trim() || employees[idx].ref,
         remarks: document.getElementById('emp-remarks')?.value?.trim() || employees[idx].remarks,
-        photo: photo || employees[idx].photo,
-        has_airport_card: document.getElementById('emp-has-airport')?.checked || false,
-        airport_card_no: document.getElementById('emp-airport-no')?.value?.trim() || '',
-        airport_card_expiry: document.getElementById('emp-airport-expiry')?.value?.trim() || '',
-        airport_card_issuer: document.getElementById('emp-airport-issuer')?.value?.trim() || '',
-        airport_card_photo: finalAirportPhoto
+        photo: photo || employees[idx].photo
     };
     localStorage.setItem('admin_employees', JSON.stringify(employees));
     if(modal) modal.style.display='none';
@@ -1069,33 +985,152 @@ function publishEmployeesJSON(){
     }).then(r=>r.json()).then(()=>alert('تم نشر ملف الموظفين إلى GitHub JSON بنجاح')).catch(()=>alert('فشل النشر إلى GitHub'));
 }
 
-function importEmployeesFromLocalJSON(){
-    const input = document.getElementById('emp-json-file');
-    if(!input || !input.files || input.files.length===0){ alert('اختر ملف JSON أولاً'); return; }
-    const file = input.files[0];
+function handleEmployeesExcelUpload(e){
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = (e) => {
         try {
-            const incoming = JSON.parse(reader.result);
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            
+            if(jsonData.length === 0){ alert('الملف فارغ'); return; }
+            
+            // Map Excel Columns to Employee Object
+            const employees = jsonData.map((row, index) => {
+                // Normalize keys to lowercase for easier matching
+                const k = {};
+                Object.keys(row).forEach(key => k[key.toLowerCase().trim()] = row[key]);
+                
+                // Extract branch logic (similar to CSV parser)
+                const branchRaw = k['cost center'] || k['cost_center'] || k['الفرع'] || '';
+                let branchName = branchRaw;
+                if (typeof branchRaw === 'string' && branchRaw.includes('-')) {
+                    const parts = branchRaw.split('-');
+                    if (parts.length >= 3) branchName = parts.slice(2).join('-').trim();
+                    else if (parts.length === 2) branchName = parts[1].trim();
+                }
+
+                // Robust ID extraction
+                const iqama = k['id'] || k['id#'] || k['iqama'] || k['رقم الهوية'] || k['رقم الإقامة'] || '';
+                
+                return {
+                    id: (index + 1).toString(),
+                    name: k['name'] || k['الاسم'] || '',
+                    iqama: String(iqama),
+                    brand: k['band'] || k['brand'] || k['العلامة التجارية'] || '',
+                    branch: branchName || k['branch'] || '',
+                    cost_center: branchRaw,
+                    region: k['region'] || k['المنطقة'] || '',
+                    health_expiry: k['health card expired date'] || k['health_expiry'] || k['انتهاء الصحية'] || '',
+                    status1: k['status1'] || k['status'] || '',
+                    status2: k['status2'] || '',
+                    training_end: k['training end date'] || k['training_end'] || k['انتهاء التدريب'] || '',
+                    email: k['email'] || k['البريد الإلكتروني'] || '',
+                    // Keep extra fields if needed
+                    sap_id: k['sap id'] || k['sap'] || '',
+                    position: k['position'] || k['الوظيفة'] || '',
+                    ops1: k['ops'] || k['ops1'] || '',
+                    hire_date: k['hire date'] || k['hire_date'] || '',
+                    city: k['city'] || k['المدينة'] || ''
+                };
+            }).filter(e => e.name && e.iqama); // Filter invalid
+
             const mode = getMergeMode();
             let stats = { added:0, updated:0, total:0 };
-            if(mode==='replace'){
-                localStorage.setItem('admin_employees', JSON.stringify(incoming));
-                stats.total = incoming.length;
+            
+            if(mode === 'replace'){
+                localStorage.setItem('admin_employees', JSON.stringify(employees));
+                stats.total = employees.length;
             } else {
                 const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-                const res = mergeEmployees(existing, incoming);
+                const res = mergeEmployees(existing, employees);
                 localStorage.setItem('admin_employees', JSON.stringify(res.merged));
                 stats = res.stats;
             }
+            
+            extractBranchesFromData(employees); // Update branches list
             loadEmployees();
-            setLastUpdateSource('local_json');
-            alert(`تم الدمج من الملف المحلي: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
-        } catch {
-            alert('ملف JSON غير صالح');
+            setLastUpdateSource('manual'); // Mark as manual/excel upload
+            alert(`تم تحديث الموظفين من Excel: مضاف ${stats.added}، محدث ${stats.updated}`);
+            
+        } catch(err){
+            console.error(err);
+            alert('خطأ في قراءة ملف Excel');
         }
     };
-    reader.readAsText(file, 'utf-8');
+    reader.readAsArrayBuffer(file);
+}
+
+function exportEmployeesToExcel(){
+    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    if(employees.length === 0){ alert('لا توجد بيانات للتصدير'); return; }
+    
+    // Map to nice headers
+    const data = employees.map(e => ({
+        "Name": e.name,
+        "ID#": e.iqama,
+        "Band": e.brand,
+        "Branch": e.branch,
+        "Region": e.region,
+        "Health Expired": e.health_expiry,
+        "Training End": e.training_end,
+        "Status1": e.status1,
+        "Status2": e.status2,
+        "Email": e.email,
+        "Cost Center": e.cost_center,
+        "SAP ID": e.sap_id,
+        "OPS": e.ops1
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Employees");
+    XLSX.writeFile(wb, "Employees_Data.xlsx");
+}
+
+function exportViolationsToExcel(){
+    const localData = localStorage.getItem('violations_data_override');
+    if (!localData) { alert('لا توجد بيانات مخالفات مخصصة'); return; }
+    
+    // We don't store raw rows for violations currently, only aggregated stats in the current implementation of processViolationsData.
+    // Wait, processViolationsData saves aggregates. If the user wants to EXPORT the raw data back, we can't if we didn't save it.
+    // Checking handleViolationsExcelUpload... it saves `finalData` which is aggregates.
+    // So we can only export the aggregates or we need to change logic to save raw rows.
+    // For now, let's export the Summary and Top Branches which we have.
+    
+    const data = JSON.parse(localData);
+    
+    // Create a multi-sheet workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Summary Sheet
+    const summary = [
+        { Metric: "Total Violations", Value: data.summary.total_violations },
+        { Metric: "Total Amount", Value: data.summary.total_amount },
+        { Metric: "Open", Value: data.summary.open_violations },
+        { Metric: "Closed", Value: data.summary.closed_violations }
+    ];
+    const wsSummary = XLSX.utils.json_to_sheet(summary);
+    XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+    
+    // Regions Sheet
+    if(data.regions){
+        const wsRegions = XLSX.utils.json_to_sheet(data.regions);
+        XLSX.utils.book_append_sheet(wb, wsRegions, "Regions");
+    }
+    
+    // Top Branches Sheet
+    if(data.top_branches_frequency){
+        const wsBranches = XLSX.utils.json_to_sheet(data.top_branches_frequency);
+        XLSX.utils.book_append_sheet(wb, wsBranches, "Top Branches");
+    }
+
+    XLSX.writeFile(wb, "Violations_Summary.xlsx");
 }
 
 function downloadEmployeesJSON(){
@@ -1661,10 +1696,20 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- VIOLATIONS MANAGEMENT LOGIC ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Violations Excel Upload
+    // Violations Excel Upload (Old & New inputs)
     const vioExcelInput = document.getElementById('vio-excel-file');
     if (vioExcelInput) {
         vioExcelInput.addEventListener('change', handleViolationsExcelUpload);
+    }
+    const vioExcelInputHeader = document.getElementById('excel-violations-file');
+    if (vioExcelInputHeader) {
+        vioExcelInputHeader.addEventListener('change', handleViolationsExcelUpload);
+    }
+
+    // Employees Excel Upload
+    const empExcelInput = document.getElementById('excel-employees-file');
+    if (empExcelInput) {
+        empExcelInput.addEventListener('change', handleEmployeesExcelUpload);
     }
 
     // Violations JSON Upload

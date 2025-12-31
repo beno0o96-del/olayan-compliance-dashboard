@@ -69,16 +69,16 @@ const FALLBACK_BOARD = {
   "violations": {
     "western": [
       { 
-        "branch": { "en": "BK Al Ula", "ar": "برجر كنج العلا" },
-        "type": { "en": "Shop not physically found", "ar": "عدم وجود المحل على الطبيعة" },
-        "level": { "en": "High", "ar": "عالية" },
+        "branch": { "en": "Jeddah Branch", "ar": "فرع جدة" },
+        "type": { "en": "Critical Safety Violation", "ar": "مخالفة سلامة حرجة" },
+        "level": { "en": "High", "ar": "عالي" },
         "count": 3,
         "color": "#f44336"
       },
       { 
-        "branch": { "en": "TXC Yanbu", "ar": "تكساس تشيكن ينبع" },
-        "type": { "en": "Low general hygiene", "ar": "تدني مستوى النظافة العامة" },
-        "level": { "en": "Med", "ar": "متوسطة" },
+        "branch": { "en": "Makkah Branch", "ar": "فرع مكة" },
+        "type": { "en": "Hygiene Alert", "ar": "تنبيه نظافة" },
+        "level": { "en": "Medium", "ar": "متوسط" },
         "count": 2,
         "color": "#FFC107"
       }
@@ -1314,35 +1314,32 @@ function renderViolations(region) {
 
         const div = document.createElement('div');
         div.className = 'radar-item';
+        div.style.color = color; // Set color for pseudo-element
+        
         // Stagger animation
         div.style.animationDelay = `${index * 0.1}s`;
-        div.style.borderLeft = `3px solid ${color}`;
-        div.style.background = `linear-gradient(90deg, rgba(${r}, ${g}, ${b}, 0.15) 0%, rgba(255,255,255,0.02) 100%)`;
         div.style.cursor = 'pointer'; // Make clickable
         
         // Construct item for modal
-        // We need to map the "Board Item" to "Violation Type Item" expected by openViolationModal
-        // The modal expects: { type: "Arabic Name", count: N, icon: "X", branches: [{name: "Branch", count: N}] }
-        
-        // Find correct Arabic type name for metadata lookup
         const typeAr = item.type.ar || item.type; 
         
         div.onclick = () => {
             openViolationModal({
                 type: typeAr,
                 count: item.count || 1,
-                icon: "⚠️", // Default icon
+                icon: "⚠️",
                 branches: [{ name: branch, count: item.count || 1 }]
             });
         };
 
         div.innerHTML = `
-            <div>
-                <strong style="color: #fff;">${branch}</strong>
-                <small style="color: #b0bec5; display:block;">${type}</small>
+            <div class="radar-item-content">
+                <span class="radar-branch-name">${branch}</span>
+                <span class="radar-violation-type">${type}</span>
             </div>
-            <span class="severity-badge-glow" style="color:${color}; text-shadow: 0 0 10px ${color};">${level}</span>
+            <span class="severity-badge-glow" style="color:${color}; border-color:${color}; box-shadow: 0 0 8px ${color}40;">${level}</span>
         `;
+        
         listContainer.appendChild(div);
     });
 }
@@ -1776,8 +1773,8 @@ window.onerror = function(message, source, lineno, colno, error) {
         
         const adminLink = document.getElementById('admin-link');
         if (adminLink) {
-             // Always show for now to ensure access logic works, or rely on HTML visibility
-             adminLink.style.display = ''; 
+             // Force show
+             adminLink.style.display = 'flex'; 
         }
 
     
