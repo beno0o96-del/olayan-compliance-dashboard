@@ -186,17 +186,38 @@
 </head>
 <body class="en complex-dashboard">
     
-    <!-- Header Bar -->
-    <div class="brand-bar" style="background: rgba(11, 14, 43, 0.9); backdrop-filter: blur(10px);">
-      <img src="olayan-logo.png" alt="Olayan">
-      <span class="brand-name">Olayan Strategic Dashboard</span>
-      <span class="brand-info" id="file-activity"></span>
+    <header class="main-header">
+    <div class="header-left">
+        <img src="olayan-logo.png" alt="Olayan Logo" class="logo">
+        <div class="company-text">
+            <h1 data-en="Olayan Food Services" data-ar="شركة العليان للخدمات الغذائية">Olayan Food Services</h1>
+            <p data-en="Excellence in Service" data-ar="التميز في الخدمة">Excellence in Service</p>
+        </div>
     </div>
-
-    <!-- Hamburger Button -->
-    <button class="hamburger-btn" onclick="toggleMenu()">
+    
+    <!-- Right Side: Navigation & Lang Switch -->
+    <div class="header-right"> 
+      <!-- Desktop Nav (Visible on Desktop via CSS) -->
+      <nav class="main-nav"> 
+        <button class="nav-btn" onclick="location.href='index.html'" data-en="Home" data-ar="الرئيسية">Home</button> 
+        <button class="nav-btn" onclick="location.href='violations.html'" data-en="Violations" data-ar="المخالفات">Violations</button> 
+        <button class="nav-btn" onclick="location.href='training.html'" data-en="Training" data-ar="التدريب">Training</button> 
+        <button class="nav-btn" onclick="location.href='branches.html'" data-en="Branches" data-ar="الفروع">Branches</button> 
+        <button class="nav-btn active" onclick="location.href='board.html'" data-en="Board Report" data-ar="تقرير الإدارة">Board Report</button>
+        <button class="nav-btn" onclick="location.href='login.html'" data-en="Login" data-ar="دخول">Login</button>
+        <button class="nav-btn" onclick="location.href='admin.html'" id="nav-admin-link" style="display:none;" data-en="Admin" data-ar="إدارة">Admin</button>
+      </nav> 
+      <div class="lang-switch">
+         <button class="lang-btn" onclick="setLang('ar')">AR</button>
+         <button class="lang-btn" onclick="setLang('en')">EN</button>
+     </div>
+     
+     <!-- Hamburger Button (Visible on Mobile via CSS) -->
+     <button class="hamburger-btn" onclick="toggleMenu()">
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
+    </div>
+  </header>
 
     <!-- Sliding Side Menu -->
     <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleMenu()"></div>

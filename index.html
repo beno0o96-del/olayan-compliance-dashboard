@@ -171,14 +171,20 @@
  
    <!-- Right Side: Navigation & Lang Switch -->
   <div class="header-right"> 
-    <!-- Desktop Nav (Hidden on Mobile) -->
-     <nav class="main-nav" style="display: none;"> <!-- Hiding old nav to prefer burger -->
+    <!-- Desktop Nav (Visible on Desktop via CSS) -->
+     <nav class="main-nav"> 
        <button class="nav-btn active" onclick="location.href='index.html'" data-en="Home" data-ar="الرئيسية">Home</button> 
        <button class="nav-btn" onclick="location.href='violations.html'" data-en="Violations" data-ar="المخالفات">Violations</button> 
        <button class="nav-btn" onclick="location.href='training.html'" data-en="Training" data-ar="التدريب">Training</button> 
        <button class="nav-btn" onclick="location.href='branches.html'" data-en="Branches" data-ar="الفروع">Branches</button> 
-       <button class="nav-btn" onclick="location.href='board.html'" data-en="Board Report" data-ar="تقرير الإدارة">Board Report</button> 
+       <button class="nav-btn" onclick="location.href='board.html'" data-en="Board Report" data-ar="تقرير الإدارة">Board Report</button>
+       <button class="nav-btn" onclick="location.href='login.html'" data-en="Login" data-ar="دخول">Login</button>
+       <button class="nav-btn" onclick="location.href='admin.html'" id="nav-admin-link" style="display:none;" data-en="Admin" data-ar="إدارة">Admin</button>
      </nav> 
+     <div class="lang-switch">
+        <button class="lang-btn" onclick="setLang('ar')">AR</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
   </div>
  
  </header> 

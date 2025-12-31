@@ -408,3 +408,55 @@ body.ar .reports-table th, body.ar .reports-table td { text-align: right; }
 .reports-table th { color: #a0c4ff; font-weight: 600; }
 .status-open { color: #ff4444; }
 .status-closed { color: #00c851; }
+
+/* ================= RESPONSIVE NAVIGATION CONTROL ================= */
+@media (min-width: 769px) {
+    /* Desktop: Show Main Nav, Hide Hamburger (Default) */
+    .main-nav {
+        display: flex !important;
+        align-items: center;
+        gap: 5px;
+    }
+    .hamburger-btn {
+        display: none !important;
+    }
+    
+    /* Exception: Dashboard pages (Board) rely on Hamburger/Sidebar */
+    body.complex-dashboard .hamburger-btn {
+        display: flex !important;
+    }
+    
+    /* Show Header Language Switch on Desktop */
+    .header-right .lang-switch {
+        display: flex !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile: Hide Main Nav, Show Hamburger */
+    .main-nav {
+        display: none !important;
+    }
+    .hamburger-btn {
+        display: flex !important;
+    }
+    
+    /* Hide Header Language Switch on Mobile (Use Sidebar instead) */
+    .header-right .lang-switch {
+        display: none !important;
+    }
+    
+    /* Adjust Header layout for Mobile */
+    .main-header {
+        padding: 10px 5%;
+    }
+    .header-left .logo {
+        height: 40px;
+    }
+    .company-text h1 {
+        font-size: 1rem;
+    }
+    .company-text p {
+        font-size: 0.65rem;
+    }
+}
