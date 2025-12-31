@@ -38,7 +38,7 @@ async function renderOneDrive(){
     const cfg = window.OD_CONFIG;
     if (!cfg || !cfg.enabled){ setInfo('آخر تحديث: ربط ون درايف غير مفعل'); return; }
     if (!window.msal){ setInfo('آخر تحديث: حمّل MSAL'); return; }
-    setInfo('جاري التحقق من ون درايف...');
+    // setInfo('جاري التحقق من ون درايف...');
     const token = await ensureAuth(cfg);
     const item = await getDriveItem(token, cfg);
     const name = item.name;
