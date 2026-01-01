@@ -297,6 +297,7 @@ body.ar .sidebar-logo {
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .nav-item:hover {
