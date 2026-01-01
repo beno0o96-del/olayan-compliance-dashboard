@@ -280,6 +280,30 @@
             <!-- Modal Body -->
             <div style="padding:30px;">
                 
+                <!-- Operational Info (Email, OPS, Cost Center) -->
+                <div style="background:rgba(255,255,255,0.05); border-radius:12px; padding:15px; margin-bottom:25px; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; border:1px solid rgba(255,255,255,0.1);">
+                    <div>
+                        <div style="color:#94a3b8; font-size:0.8rem; margin-bottom:4px;">مدير التشغيل (OPS)</div>
+                        <div id="modal-ops" style="font-weight:bold; color:#e2e8f0;">-</div>
+                    </div>
+                    <div>
+                        <div style="color:#94a3b8; font-size:0.8rem; margin-bottom:4px;">البريد الإلكتروني</div>
+                        <div id="modal-email" style="font-size:0.9rem; color:#60a5fa; word-break:break-all;">-</div>
+                    </div>
+                    <div>
+                        <div style="color:#94a3b8; font-size:0.8rem; margin-bottom:4px;">مركز التكلفة (Cost Center)</div>
+                        <div id="modal-cost" style="font-family:monospace; color:#cbd5e1;">-</div>
+                    </div>
+                     <div>
+                        <div style="color:#94a3b8; font-size:0.8rem; margin-bottom:4px;">مؤشر الأداء (KPI)</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span id="modal-kpi-val" style="font-weight:bold; color:#fbbf24;">-</span>
+                            <span style="color:#64748b; font-size:0.8rem;">/</span>
+                            <span id="modal-kpi-target" style="color:#94a3b8; font-size:0.8rem;">Target: -</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- KPI Cards -->
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:15px; margin-bottom:30px;">
                     <div class="kpi-box" style="background:rgba(59, 130, 246, 0.1); padding:15px; border-radius:12px; border:1px solid rgba(59, 130, 246, 0.3); text-align:center;">
@@ -372,9 +396,23 @@
                 
                 // Deduplicate branches if needed
                 const uniqueBranches = [...new Set(branchesRaw.map(b => typeof b === 'string' ? b : b.name))];
+                
+                // Add manually added branches if not in the list
+                // Sometimes branches are added manually in admin but not in 'admin_employees' list
+                // So we should merge uniqueBranches with branchesRaw objects that might be manual
+                branchesRaw.forEach(b => {
+                    const name = typeof b === 'string' ? b : b.name;
+                    if(name && !uniqueBranches.includes(name)) {
+                        uniqueBranches.push(name);
+                    }
+                });
 
                 uniqueBranches.forEach(branchName => {
                     if(!branchName || branchName === 'Unknown Branch') return;
+
+                    // Check visibility from source data
+                    const sourceObj = branchesRaw.find(b => (typeof b === 'string' ? b : b.name) === branchName);
+                    if(sourceObj && sourceObj.hidden) return; // Skip hidden branches
 
                     // Aggregate Data
                     const bKey = norm(branchName);
@@ -390,23 +428,28 @@
                     const licInfo = licenses.find(l => norm(l.branch).includes(bKey) || bKey.includes(norm(l.branch))) || {};
 
                     // Brand Logic
-                    let brand = 'Olayan';
+                    let brand = sourceObj?.brand || 'Olayan';
                     const lowerName = branchName.toLowerCase();
-                    if(lowerName.includes('bk') || lowerName.includes('king') || lowerName.includes('برجر')) brand = 'Burger King';
-                    else if(lowerName.includes('texas') || lowerName.includes('chicken') || lowerName.includes('تكساس')) brand = 'Texas Chicken';
-                    else if(lowerName.includes('bww') || lowerName.includes('buffalo') || lowerName.includes('بافلو')) brand = 'Buffalo Wild Wings';
+                    if(brand === 'Olayan') { // Try to guess if not set
+                         if(lowerName.includes('bk') || lowerName.includes('king') || lowerName.includes('برجر')) brand = 'Burger King';
+                         else if(lowerName.includes('texas') || lowerName.includes('chicken') || lowerName.includes('تكساس')) brand = 'Texas Chicken';
+                         else if(lowerName.includes('bww') || lowerName.includes('buffalo') || lowerName.includes('بافلو')) brand = 'Buffalo Wild Wings';
+                    }
 
                     // Create Card
                     const div = document.createElement('div');
                     div.className = 'opening-card';
                     div.style.cursor = 'pointer';
-                    div.onclick = () => openBranchModal(branchName, brand, empCount, branchViolations, licInfo);
+                    // Pass full source object to modal
+                    div.onclick = () => openBranchModal(branchName, brand, empCount, branchViolations, licInfo, sourceObj);
                     
+                    const logoHtml = sourceObj?.logo ? `<div class="brand-logo-circle"><img src="${sourceObj.logo}" class="brand-logo-img"></div>` : `<div class="brand-logo-circle">📌</div>`;
+
                     div.innerHTML = `
                         <div class="opening-content">
                             <span class="opening-status status-now-open">نشط</span>
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                                <div class="brand-logo-circle">📌</div>
+                                ${logoHtml}
                                 <span style="color:var(--text-muted);">${brand}</span>
                             </div>
                             <div class="opening-location">${branchName}</div>
@@ -423,13 +466,32 @@
             }
         });
 
-        function openBranchModal(name, brand, empCount, violations, lic) {
+        function openBranchModal(name, brand, empCount, violations, lic, details) {
             const modal = document.getElementById('branch-modal');
             
             // Set Header
             document.getElementById('modal-title').textContent = name;
             document.getElementById('modal-subtitle').textContent = brand;
             
+            // Set Logo if available
+            const logoContainer = document.getElementById('modal-logo');
+            if(details && details.logo) {
+                logoContainer.innerHTML = `<img src="${details.logo}" style="width:100%; height:100%; object-fit:cover;">`;
+            } else {
+                 // Reset to default if no logo
+                 logoContainer.innerHTML = `<img src="olayan-logo.png" style="width:80%; height:80%; object-fit:contain;">`;
+            }
+
+            // Set Operational Details
+            document.getElementById('modal-ops').textContent = details?.ops1 || 'غير محدد';
+            document.getElementById('modal-email').textContent = details?.email || '-';
+            document.getElementById('modal-cost').textContent = details?.cost_center || '-';
+            
+            const kpiVal = details?.kpi_value || 0;
+            const kpiTarget = details?.kpi_target || 0;
+            document.getElementById('modal-kpi-val').textContent = kpiVal;
+            document.getElementById('modal-kpi-target').textContent = `Target: ${kpiTarget}`;
+
             // Set KPIs
             document.getElementById('modal-emp-count').textContent = empCount;
             document.getElementById('modal-vio-count').textContent = violations.length;
@@ -500,34 +562,6 @@
             const modal = document.getElementById('branch-modal');
             if(e.target === modal) modal.style.display = 'none';
         }
-    </script>
-</body>
-</html>
-                    const type = item.type || 'basic';
-                    const brand = item.brand || 'Olayan';
-                    const logo = item.logo || '';
-                    
-                    const div = document.createElement('div');
-                    div.className = 'opening-card';
-                    div.innerHTML = `
-                        <div class="opening-content">
-                            <span class="opening-status ${type==='opening' ? 'status-opening-soon' : 'status-now-open'}">${type==='opening'?'قريباً':'مفتوح'}</span>
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                                <div class="brand-logo-circle">${logo ? `<img src="${logo}" class="brand-logo-img">` : '📌'}</div>
-                                <span style="color:var(--text-muted);">${brand}</span>
-                            </div>
-                            <div class="opening-location">${name}</div>
-                            <div style="color:var(--text-muted); font-size:0.9rem;">
-                                ✅ يعمل حالياً
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } else if (container) {
-                container.innerHTML = '<p style="color:#aaa; grid-column: 1/-1; padding: 20px;">لا توجد بيانات فروع حالياً. يرجى التحديث من لوحة التحكم.</p>';
-            }
-        });
     </script>
 </body>
 </html>

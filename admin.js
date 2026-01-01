@@ -1617,7 +1617,19 @@ async function saveBranch(){
     const logo = await readLogoFile(logoFile);
     if(!name) return;
     const kpiScore = kpiTarget>0 ? Math.round((kpiValue / kpiTarget) * 100) : 0;
-    const item = { name, type, brand, email, cost_center: cost, ops1: ops, kpi_target: kpiTarget, kpi_value: kpiValue, kpi_score: kpiScore, logo };
+    const item = { 
+        name, 
+        type, 
+        brand, 
+        email, 
+        cost_center: cost, 
+        ops1: ops, 
+        kpi_target: kpiTarget, 
+        kpi_value: kpiValue, 
+        kpi_score: kpiScore, 
+        logo,
+        hidden: false // Default to visible
+    };
     const data = getBranchesData();
     if(branchEditIndex>=0){
         data[branchEditIndex] = { ...data[branchEditIndex], ...item };
@@ -1639,6 +1651,8 @@ function renderBranchesTable(){
         const logoCell = b.logo ? `<img src="${b.logo}" alt="" style="width:28px;height:28px;border-radius:50%;">` : '';
         const typeText = b.type==='opening' ? 'افتتاح' : 'أساسي';
         const kpi = typeof b.kpi_score==='number' ? `${b.kpi_score}%` : '';
+        const isHidden = !!b.hidden;
+        
         tr.innerHTML = `
             <td>${b.name||''}</td>
             <td>${typeText}</td>
@@ -1649,10 +1663,26 @@ function renderBranchesTable(){
             <td>${kpi}</td>
             <td>${logoCell}</td>
             <td>
+                <label class="switch" style="font-size: 12px;">
+                    <input type="checkbox" ${!isHidden ? 'checked' : ''} data-act="toggle-vis">
+                    <span class="slider round"></span>
+                </label>
+                <span style="font-size:0.8rem; margin-right:5px; color:${!isHidden?'#4ade80':'#94a3b8'}">${!isHidden?'ظاهر':'مخفي'}</span>
+            </td>
+            <td>
                 <button class="btn btn-secondary" data-act="edit">تعديل</button>
                 <button class="btn btn-danger" data-act="delete">حذف</button>
             </td>
         `;
+        
+        // Visibility Toggle
+        tr.querySelector('[data-act="toggle-vis"]').onchange = (e) => {
+            const arr = getBranchesData();
+            arr[idx].hidden = !e.target.checked;
+            setBranchesData(arr);
+            renderBranchesTable();
+        };
+
         tr.querySelector('[data-act="edit"]').onclick=()=>{
             branchEditIndex = idx;
             document.getElementById('br-name').value = b.name||'';
@@ -1667,10 +1697,12 @@ function renderBranchesTable(){
             if(top) top.scrollIntoView({ behavior:'smooth', block:'center' });
         };
         tr.querySelector('[data-act="delete"]').onclick=()=>{
-            const arr = getBranchesData();
-            arr.splice(idx,1);
-            setBranchesData(arr);
-            renderBranchesTable();
+            if(confirm('هل أنت متأكد من حذف هذا الفرع؟')) {
+                const arr = getBranchesData();
+                arr.splice(idx,1);
+                setBranchesData(arr);
+                renderBranchesTable();
+            }
         };
         tbody.appendChild(tr);
     });
