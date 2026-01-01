@@ -10,10 +10,27 @@
         // Initialize enhanced license features
         init: function() {
             console.log('Initializing Enhanced License Manager...');
-            this.addQRCodeInputs();
-            this.enhanceRemainingDaysCalculation();
-            this.addQRCodeScanner();
-            this.setupAutoCalculation();
+            
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    this.initializeFeatures();
+                });
+            } else {
+                this.initializeFeatures();
+            }
+        },
+        
+        initializeFeatures: function() {
+            try {
+                this.addQRCodeInputs();
+                this.enhanceRemainingDaysCalculation();
+                this.addQRCodeScanner();
+                this.setupAutoCalculation();
+                console.log('Enhanced License Manager initialized successfully');
+            } catch (error) {
+                console.error('Error initializing Enhanced License Manager:', error);
+            }
         },
         
         // Add QR code input fields to license modal
