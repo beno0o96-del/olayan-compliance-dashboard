@@ -739,8 +739,9 @@
     <script>
         // Data Loading Logic
         document.addEventListener('DOMContentLoaded', () => {
-            // Load Employees
-            const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+            // Load Employees using safeParse locally
+            const safeParse = (k, d) => { try { return JSON.parse(localStorage.getItem(k)||JSON.stringify(d)); } catch(e){ return d; } };
+            const employees = safeParse('admin_employees', []);
             
             // Calculate Stats
             const total = employees.length || 150; // Mock 150 if empty

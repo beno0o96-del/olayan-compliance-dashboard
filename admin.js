@@ -1,16 +1,303 @@
 // UTILS
 function hash(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(b=>{ const a=Array.from(new Uint8Array(b)); return a.map(x=>x.toString(16).padStart(2,'0')).join(''); }); }
+
+function safeParse(key, defaultVal) {
+    try {
+        const item = localStorage.getItem(key);
+        if (!item) return defaultVal;
+        return JSON.parse(item);
+    } catch (e) {
+        console.error(`Error parsing ${key} from localStorage:`, e);
+        return defaultVal;
+    }
+}
+
+const ADMIN_MESSAGES = {
+    ar: {
+        error_pass_reset: 'يرجى التواصل مع الدعم الفني لإعادة تعيين كلمة المرور.',
+        success_generated: 'تم توليد 50 موظف بنجاح!',
+        error_upload_cloud: 'فشل رفع الملف إلى السحابة',
+        success_save_emp: 'تم حفظ بيانات الموظف (سحابياً ومحلياً)',
+        error_token_missing: 'يرجى إدخال GitHub Token في لوحة CMS أولاً.',
+        success_merge_github: 'تم الدمج من GitHub: مضاف {added}، محدث {updated}، الإجمالي {total}',
+        error_file_not_found: 'لم يتم العثور على ملف employees_data.json في المستودع',
+        error_import_github: 'فشل الاستيراد من GitHub',
+        success_publish_github: 'تم نشر ملف الموظفين إلى GitHub JSON بنجاح',
+        error_publish_github: 'فشل النشر إلى GitHub',
+        error_file_empty: 'الملف فارغ',
+        success_update_excel: 'تم تحديث الموظفين من Excel بنجاح',
+        error_read_excel: 'خطأ في قراءة ملف Excel',
+        info_no_data_export: 'لا توجد بيانات للتصدير',
+        info_no_violations: 'لا توجد بيانات مخالفات مخصصة',
+        error_user_exists: 'اسم المستخدم موجود بالفعل!',
+        success_user_added: 'تم إضافة المستخدم بنجاح',
+        info_reply_soon: 'سيتم فتح نافذة الرد قريباً',
+        error_token_required: 'يرجى إدخال Token!',
+        success_branch_saved: 'تم حفظ بيانات الفرع (مع الصور)',
+        error_sheetjs_missing: 'مكتبة SheetJS غير محملة. تأكد من الاتصال بالإنترنت.',
+        success_file_processed: 'تم معالجة الملف وحفظ البيانات بنجاح!',
+        success_json_imported: 'تم استيراد ملف JSON بنجاح!',
+        error_json_read: 'خطأ في قراءة ملف JSON: ',
+        info_export_default: 'لا توجد بيانات مخصصة لتصديرها (يتم استخدام الافتراضي).',
+        success_data_cleared: 'تم مسح البيانات.',
+        info_no_raw_rows: '⚠️ لا توجد بيانات تفصيلية (Raw Rows) لهذا العام. يرجى إعادة رفع ملف Excel محدث.',
+        info_nav_violations: '🤖 قمت بنقلك إلى صفحة إدارة المخالفات بناءً على طلبك.',
+        info_nav_employees: '🤖 تفضل، هذه صفحة الموظفين. يمكنك البحث مباشرة.',
+        success_ai_plan: '🤖 تم إضافة خطة مقترحة في قسم التوصيات.',
+        error_ai_unknown: '🤖 عذراً، لم أفهم الأمر تماماً. جرب: "أظهر المخالفات"، "تقرير استراتيجي"، "ابحث عن موظف".',
+        success_services_saved: 'تم حفظ بيانات الخدمات بنجاح!',
+        error_json_format: 'خطأ في صيغة JSON: ',
+        success_custom_cleared: 'تم مسح البيانات المخصصة.',
+        success_board_saved: 'تم حفظ بيانات اللوحة بنجاح!',
+        error_format_json: 'Cannot format invalid JSON',
+        success_history_cleared: 'تم مسح السجل والبيانات المرتبطة.',
+        success_branches_processed: 'تم معالجة {count} فرع بنجاح!',
+        error_brand_name: 'يرجى إدخال اسم العلامة التجارية',
+        success_brand_added: 'تم إضافة العلامة التجارية بنجاح',
+        error_branch_name: 'يرجى إدخال اسم الفرع',
+        success_license_saved: 'تم حفظ الترخيص والملفات بنجاح',
+        success_costs_saved: 'تم حفظ التكاليف بنجاح!',
+        
+        confirm_reset: 'سيتم مسح البيانات الحالية وتوليد بيانات عشوائية جديدة. هل أنت متأكد؟',
+        confirm_delete_user: 'هل أنت متأكد من حذف هذا المستخدم؟',
+        confirm_restore_default: 'هل أنت متأكد من استعادة القيم الافتراضية؟',
+        confirm_delete_complaint: 'هل أنت متأكد من حذف هذه الشكوى؟',
+        confirm_delete_branch: 'هل أنت متأكد من حذف هذا الفرع؟',
+        confirm_delete_violation: 'حذف هذه المخالفة؟',
+        confirm_file_structure: 'هيكل الملف يبدو مختلفاً. هل أنت متأكد من الاستمرار؟',
+        confirm_clear_violations: 'هل أنت متأكد من مسح جميع بيانات المخالفات المخصصة والعودة للوضع الافتراضي؟',
+        confirm_clear_custom: 'هل تريد مسح البيانات المخصصة؟',
+        confirm_clear_history: 'هل أنت متأكد من حذف سجل جميع الملفات المرفوعة؟ سيتم إعادة ضبط البيانات.',
+        confirm_delete_file_history: 'حذف الملف "{name}" من السجل؟',
+        confirm_delete_record: 'هل أنت متأكد من حذف هذا السجل؟',
+        confirm_delete_permit: 'هل أنت متأكد من حذف هذا التصريح؟',
+        confirm_clear_licenses: 'هل أنت متأكد من مسح جميع بيانات التراخيص؟',
+        ai_insight_all_years: '💡 <strong>تحليل سنوي شامل:</strong> يوضح الرسم البياني أعلاه إجمالي المخالفات لكل سنة.',
+        ai_insight_general: '💡 <strong>تحليل عام {year}:</strong> يوضح الرسم البياني أعلاه اتجاه المخالفات الشهري لعام {year}.',
+        ai_ops_excellent: '✅ <strong>كفاءة ممتازة:</strong> يتم إغلاق {rate}% من المخالفات في الوقت المناسب.',
+        ai_ops_improve: '⚠️ <strong>تحتاج تحسين:</strong> معدل الإغلاق {rate}%، يوصى بتسريع إجراءات المعالجة.',
+        ai_ops_critical: '🚨 <strong>وضع حرج:</strong> معدل الإغلاق {rate}% فقط! يجب مراجعة فريق العمليات فوراً.',
+        ai_risk_high: '🚨 <strong>مخاطر عالية:</strong> إجمالي الغرامات ({amount}) يتجاوز الحد الآمن. المناطق الأكثر تأثراً: {region}.',
+        ai_risk_med: '⚠️ <strong>مخاطر متوسطة:</strong> الغرامات ({amount}) تتطلب مراقبة دقيقة لتقليل الهدر المالي.',
+        ai_risk_stable: '✅ <strong>وضع مستقر:</strong> الغرامات ({amount}) ضمن الحدود المقبولة.',
+        ai_hr_analysis: '🔍 <strong>تحليل القوى العاملة:</strong> الفرع "{branch}" يسجل أعلى معدل مخالفات ({count}). قد يكون هناك نقص في التدريب أو عدد الموظفين.',
+        ai_hr_stable: '✅ <strong>استقرار عام:</strong> لا توجد فروع تسجل شذوذاً كبيراً في عدد المخالفات مقارنة بحجم القوى العاملة.',
+        ai_rec_strategy: '💡 التوصية الاستراتيجية: التركيز على معالجة مخالفات "{type}" لأنها الأكثر تكراراً، وتكثيف التدريب في المنطقة "{region}".',
+        
+        page_dashboard: 'الرئيسية',
+        page_users: 'الأعضاء',
+        page_employees: 'الموظفين',
+        page_cms: 'إعدادات البيانات (CMS)',
+        page_services: 'الشكاوى والطلبات',
+        page_media: 'وسائط',
+        page_branches: 'الفروع',
+        page_pages: 'صفحات',
+        page_comments: 'تعليقات',
+        page_appearance: 'مظهر',
+        page_plugins: 'إضافات',
+        page_tools: 'أدوات',
+        page_settings: 'الإعدادات',
+        page_email: 'ايميل',
+        page_violations: 'إدارة المخالفات',
+        page_tasks: 'إدارة المهام',
+        page_licenses: 'إدارة التراخيص والتصاريح',
+        page_master_upload: 'إدارة البيانات (Master)',
+        page_advanced_data: 'البيانات المتقدمة',
+        page_analytics: 'التحليل الاستراتيجي (AI)',
+        
+        login_enter_data: 'أدخل اسم ورقم',
+        login_saved: 'تم الحفظ بنجاح! يمكنك تسجيل الدخول الآن.',
+        login_success_default: 'تم تسجيل الدخول (Default)...',
+        login_no_users: 'لا يوجد مستخدمين. قم بالإعداد أولاً.',
+        login_success: 'تم تسجيل الدخول...',
+        login_invalid: 'بيانات غير صحيحة',
+        msg_preparing_publish: 'جاري تجهيز البيانات للنشر...',
+        msg_publish_success: '✅ تم تحديث البيانات في المستودع (board_data.json)',
+        msg_publish_fail: '❌ فشل النشر إلى GitHub. تحقق من الـ Token أو الصلاحيات.',
+        msg_publish_error: '❌ حدث خطأ أثناء تجهيز البيانات للنشر.'
+    },
+    en: {
+        error_pass_reset: 'Please contact technical support to reset your password.',
+        success_generated: 'Generated 50 employees successfully!',
+        error_upload_cloud: 'Failed to upload file to cloud',
+        success_save_emp: 'Employee data saved (Cloud & Local)',
+        error_token_missing: 'Please enter GitHub Token in CMS panel first.',
+        success_merge_github: 'Merged from GitHub: Added {added}, Updated {updated}, Total {total}',
+        error_file_not_found: 'employees_data.json not found in repository',
+        error_import_github: 'Failed to import from GitHub',
+        success_publish_github: 'Published employees to GitHub JSON successfully',
+        error_publish_github: 'Failed to publish to GitHub',
+        error_file_empty: 'File is empty',
+        success_update_excel: 'Employees updated from Excel successfully',
+        error_read_excel: 'Error reading Excel file',
+        info_no_data_export: 'No data to export',
+        info_no_violations: 'No custom violations data',
+        error_user_exists: 'Username already exists!',
+        success_user_added: 'User added successfully',
+        info_reply_soon: 'Reply window will open soon',
+        error_token_required: 'Please enter Token!',
+        success_branch_saved: 'Branch data saved (with images)',
+        error_sheetjs_missing: 'SheetJS library not loaded. Check internet connection.',
+        success_file_processed: 'File processed and data saved successfully!',
+        success_json_imported: 'JSON file imported successfully!',
+        error_json_read: 'Error reading JSON file: ',
+        info_export_default: 'No custom data to export (using default).',
+        success_data_cleared: 'Data cleared.',
+        info_no_raw_rows: '⚠️ No raw rows for this year. Please re-upload updated Excel file.',
+        info_nav_violations: '🤖 I took you to the Violations page as requested.',
+        info_nav_employees: '🤖 Here is the Employees page. You can search directly.',
+        success_ai_plan: '🤖 A proposed plan has been added to Recommendations.',
+        error_ai_unknown: '🤖 Sorry, I didn\'t understand. Try: "Show violations", "Strategic report", "Search employee".',
+        success_services_saved: 'Services data saved successfully!',
+        error_json_format: 'JSON Format Error: ',
+        success_custom_cleared: 'Custom data cleared.',
+        success_board_saved: 'Board data saved successfully!',
+        error_format_json: 'Cannot format invalid JSON',
+        success_history_cleared: 'History and related data cleared.',
+        success_branches_processed: 'Processed {count} branches successfully!',
+        error_brand_name: 'Please enter brand name',
+        success_brand_added: 'Brand added successfully',
+        error_branch_name: 'Please enter branch name',
+        success_license_saved: 'License and files saved successfully',
+        success_costs_saved: 'Costs saved successfully!',
+        
+        confirm_reset: 'Current data will be cleared and random data generated. Are you sure?',
+        confirm_delete_user: 'Are you sure you want to delete this user?',
+        confirm_restore_default: 'Are you sure you want to restore default values?',
+        confirm_delete_complaint: 'Are you sure you want to delete this complaint?',
+        confirm_delete_branch: 'Are you sure you want to delete this branch?',
+        confirm_delete_violation: 'Delete this violation?',
+        confirm_file_structure: 'File structure seems different. Are you sure to continue?',
+        confirm_clear_violations: 'Are you sure to clear all custom violations data and reset to default?',
+        confirm_clear_custom: 'Do you want to clear custom data?',
+        confirm_clear_history: 'Are you sure to clear all upload history? Data will be reset.',
+        confirm_delete_file_history: 'Delete file "{name}" from history?',
+        confirm_delete_record: 'Are you sure to delete this record?',
+        confirm_delete_permit: 'Are you sure to delete this permit?',
+        confirm_clear_licenses: 'Are you sure to clear all licenses data?',
+        ai_insight_all_years: '💡 <strong>Comprehensive Annual Analysis:</strong> The chart above shows total violations for each year.',
+        ai_insight_general: '💡 <strong>General Analysis {year}:</strong> The chart above shows monthly violation trends for {year}.',
+        ai_ops_excellent: '✅ <strong>Excellent Efficiency:</strong> {rate}% of violations are closed on time.',
+        ai_ops_improve: '⚠️ <strong>Needs Improvement:</strong> Closure rate is {rate}%, recommended to speed up processing.',
+        ai_ops_critical: '🚨 <strong>Critical Status:</strong> Closure rate is only {rate}%! Operations team review needed immediately.',
+        ai_risk_high: '🚨 <strong>High Risk:</strong> Total fines ({amount}) exceed safe limits. Most affected regions: {region}.',
+        ai_risk_med: '⚠️ <strong>Medium Risk:</strong> Fines ({amount}) require close monitoring to reduce financial waste.',
+        ai_risk_stable: '✅ <strong>Stable Status:</strong> Fines ({amount}) are within acceptable limits.',
+        ai_hr_analysis: '🔍 <strong>Workforce Analysis:</strong> Branch "{branch}" has the highest violation rate ({count}). May indicate lack of training or staff.',
+        ai_hr_stable: '✅ <strong>General Stability:</strong> No branches show significant anomalies in violation counts relative to workforce.',
+        ai_rec_strategy: '💡 Strategic Recommendation: Focus on addressing "{type}" violations as they are most frequent, and intensify training in "{region}" region.',
+        
+        page_dashboard: 'Dashboard',
+        page_users: 'Users',
+        page_employees: 'Employees',
+        page_cms: 'Data Settings (CMS)',
+        page_services: 'Complaints & Requests',
+        page_media: 'Media',
+        page_branches: 'Branches',
+        page_pages: 'Pages',
+        page_comments: 'Comments',
+        page_appearance: 'Appearance',
+        page_plugins: 'Plugins',
+        page_tools: 'Tools',
+        page_settings: 'Settings',
+        page_email: 'Email',
+        page_violations: 'Violations Management',
+        page_tasks: 'Tasks Management',
+        page_licenses: 'Licenses & Permits',
+        page_master_upload: 'Master Data Management',
+        page_advanced_data: 'Advanced Data',
+        page_analytics: 'Strategic Analysis (AI)',
+        
+        login_enter_data: 'Enter name and number',
+        login_saved: 'Saved successfully! You can login now.',
+        login_success_default: 'Logged in (Default)...',
+        login_no_users: 'No users found. Setup first.',
+        login_success: 'Logged in...',
+        login_invalid: 'Invalid credentials',
+        msg_preparing_publish: 'Preparing data for publishing...',
+        msg_publish_success: '✅ Data updated in repository (board_data.json)',
+        msg_publish_fail: '❌ Failed to publish to GitHub. Check Token or permissions.',
+        msg_publish_error: '❌ Error preparing data for publishing.'
+    }
+};
+
+function getMsg(key, params = {}) {
+    const lang = localStorage.getItem('admin_lang') || 'ar';
+    let msg = ADMIN_MESSAGES[lang][key] || ADMIN_MESSAGES['en'][key] || key;
+    Object.keys(params).forEach(k => {
+        msg = msg.replace(`{${k}}`, params[k]);
+    });
+    return msg;
+}
+
+function toggleSectionContent(contentId, headerElement) {
+    const content = document.getElementById(contentId);
+    const icon = headerElement.querySelector('.toggle-icon');
+    
+    if (content.style.maxHeight) {
+        // Close
+        content.style.maxHeight = null;
+        content.style.opacity = '0';
+        icon.style.transform = 'rotate(0deg)';
+        content.style.padding = '0'; // Remove padding when closed to be fully hidden
+        content.style.border = 'none';
+    } else {
+        // Open
+        content.style.display = 'block'; // Ensure it's block before calculating height
+        content.style.padding = '10px 0'; // Restore padding
+        // Set max-height to scrollHeight to allow transition
+        content.style.maxHeight = content.scrollHeight + 100 + "px"; // +100 for safety
+        content.style.opacity = '1';
+        icon.style.transform = 'rotate(180deg)';
+    }
+}
 function setMsg(t){ const m=document.getElementById('msg'); if(m) m.textContent=t; }
+
+// Toast Notification
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    let icon = '✓';
+    if (type === 'error') icon = '✕';
+    if (type === 'info') icon = 'ℹ';
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">
+            <div class="toast-title">${type === 'success' ? 'تم بنجاح' : (type === 'error' ? 'خطأ' : 'تنبيه')}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 400); // Wait for transition
+    }, 3000);
+}
 
 // AUTH
 async function setup(){ 
     const u=document.getElementById('username').value.trim(); 
     const p=document.getElementById('pin').value.trim(); 
-    if(!u||!p){ setMsg('أدخل اسم ورقم'); return; } 
+    if(!u||!p){ setMsg(getMsg('login_enter_data')); return; } 
     const h=await hash(u+':'+p); 
     localStorage.setItem('admin_hash',h); 
     localStorage.setItem('admin_root_user', u); // Save root username
-    setMsg('تم الحفظ بنجاح! يمكنك تسجيل الدخول الآن.'); 
+    setMsg(getMsg('login_saved')); 
 }
 
 function togglePassword() {
@@ -35,7 +322,7 @@ async function login(){
     if (u === 'admin' && p === '123456') {
         localStorage.setItem('is_admin','true'); 
         localStorage.setItem('current_admin_user', JSON.stringify({ username: 'admin', role: 'Super Admin' })); 
-        setMsg('تم تسجيل الدخول (Default)...');
+        setMsg(getMsg('login_success_default'));
         setTimeout(() => checkLogin(), 500);
         return;
     }
@@ -44,10 +331,10 @@ async function login(){
     const savedHash=localStorage.getItem('admin_hash'); 
     
     // Check Secondary Users
-    const users = JSON.parse(localStorage.getItem('admin_users') || '[]');
+    const users = safeParse('admin_users', []);
     const foundUser = users.find(user => user.username === u && user.pin === p); // Simple check for secondary
 
-    if(!savedHash && !foundUser){ setMsg('لا يوجد مستخدمين. قم بالإعداد أولاً.'); return; } 
+    if(!savedHash && !foundUser){ setMsg(getMsg('login_no_users')); return; } 
 
     let isAuthenticated = false;
     let currentUser = null;
@@ -68,10 +355,10 @@ async function login(){
     if(isAuthenticated){ 
         localStorage.setItem('is_admin','true'); 
         localStorage.setItem('current_admin_user', JSON.stringify(currentUser)); 
-        setMsg('تم تسجيل الدخول...');
+        setMsg(getMsg('login_success'));
         setTimeout(() => checkLogin(), 500);
     } else { 
-        setMsg('بيانات غير صحيحة'); 
+        setMsg(getMsg('login_invalid')); 
     } 
 }
 
@@ -82,9 +369,7 @@ function logout(){
 }
 
 function forgotPassword() {
-    alert(document.documentElement.lang === 'ar' ? 
-        'يرجى التواصل مع الدعم الفني لإعادة تعيين كلمة المرور.' : 
-        'Please contact technical support to reset your password.');
+    showToast(getMsg('error_pass_reset'), 'info');
 }
 
 // INIT
@@ -197,7 +482,7 @@ function checkLogin() {
         try {
             const userStr = localStorage.getItem('current_admin_user');
             if (userStr) {
-                const user = JSON.parse(userStr);
+                const user = safeParse('current_admin_user', { username: 'Admin' }); // Use safeParse
                 const nameEl = document.getElementById('admin-user-name');
                 if(nameEl) nameEl.textContent = user.username;
             }
@@ -278,29 +563,10 @@ function showSection(sectionId) {
     }
 
     // Update Header Title
-    const titles = {
-        'dashboard': 'الرئيسية',
-        'users': 'الأعضاء',
-        'employees': 'الموظفين',
-        'cms': 'إعدادات البيانات (CMS)',
-        'services': 'الشكاوى والطلبات',
-        'media': 'وسائط',
-        'branches': 'الفروع',
-        'pages': 'صفحات',
-        'comments': 'تعليقات',
-        'appearance': 'مظهر',
-        'plugins': 'إضافات',
-        'tools': 'أدوات',
-        'settings': 'الإعدادات',
-        'email': 'ايميل',
-        'violations': 'إدارة المخالفات',
-        'tasks': 'إدارة المهام',
-        'licenses': 'إدارة التراخيص والتصاريح',
-        'advanced-data': 'إدارة البيانات المتقدمة',
-        'master-upload': 'إدارة البيانات المركزية'
-    };
+    const titleKey = 'page_' + sectionId.replace(/-/g, '_');
+    const pageTitle = getMsg(titleKey);
     const titleEl = document.getElementById('page-title');
-    if(titleEl && titles[sectionId]) titleEl.textContent = titles[sectionId];
+    if(titleEl) titleEl.textContent = pageTitle || sectionId;
 
     // Section Specific Loaders
     if(sectionId === 'services') {
@@ -539,7 +805,7 @@ function extractBranchesFromData(employees) {
     localStorage.setItem('admin_branches', JSON.stringify(rawBranches));
 
     // 2. Update rich branches data (admin_branches_data) for UI
-    let richData = JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
+    let richData = safeParse('admin_branches_data', []);
     const existingNames = new Set(richData.map(b => typeof b === 'string' ? b : b.name));
     
     let addedCount = 0;
@@ -569,7 +835,7 @@ function extractBranchesFromData(employees) {
 }
 
 function generateRandomEmployees() {
-    if (!confirm('سيتم مسح البيانات الحالية وتوليد بيانات عشوائية جديدة. هل أنت متأكد؟')) return;
+    if (!confirm(getMsg('confirm_reset'))) return;
 
     const names = ["محمد علي", "فهد السالم", "خالد العتيبي", "سعيد القحطاني", "عمر الدوسري", "ياسر الشمري", "أحمد الحربي", "عبدالله العنزي", "تركي المطيري", "سلطان المالكي"];
     const branches = ["الرياض - العليا", "الرياض - الملز", "جدة - التحلية", "الدمام - الكورنيش", "مكة - العزيزية", "المدينة - الدائري", "الطائف - شهار", "أبها - الحزام"];
@@ -605,14 +871,14 @@ function generateRandomEmployees() {
 
     localStorage.setItem('admin_employees', JSON.stringify(employees));
     loadEmployees();
-    alert('تم توليد 50 موظف بنجاح!');
+    showToast(getMsg('success_generated'), 'success');
 }
 
 function loadEmployees(filterText = "") {
     const tbody = document.getElementById('employees-table-body');
     if (!tbody) return;
 
-    let employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    let employees = safeParse('admin_employees', []);
     
     // Auto-generate if empty (and no CSV loaded yet)
     if (employees.length === 0) {
@@ -673,7 +939,7 @@ function loadEmployees(filterText = "") {
 }
 
 function viewEmployee(iqama) {
-    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const employees = safeParse('admin_employees', []);
     const emp = employees.find(e=>e.iqama===iqama);
     if(!emp) return;
     const initials = (emp.name||'').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
@@ -717,8 +983,88 @@ function viewEmployee(iqama) {
     set('emp-ref', emp.ref);
     set('emp-iqama', emp.iqama);
     set('emp-name', emp.name);
+    set('emp-phone', emp.phone);
     set('emp-band', emp.brand);
     set('emp-cost', emp.cost_center);
+
+    // Iqama Image Logic
+    const chkIqama = document.getElementById('chk-iqama-img');
+    const divIqama = document.getElementById('div-iqama-img');
+    const viewIqama = document.getElementById('view-iqama-img');
+    
+    if(chkIqama && divIqama) {
+        chkIqama.checked = !!emp.iqama_file;
+        divIqama.style.display = (emp.iqama_file || chkIqama.checked) ? 'block' : 'none';
+        
+        chkIqama.onchange = (e) => {
+            divIqama.style.display = e.target.checked ? 'block' : 'none';
+        };
+        
+        if(emp.iqama_file) {
+            viewIqama.innerHTML = `
+                <div style="margin-top:5px; border:1px solid #334155; padding:5px; border-radius:4px; text-align:center;">
+                    <img src="${emp.iqama_file}" style="max-width:100%; max-height:150px; border-radius:4px; cursor:pointer;" onclick="window.open('${emp.iqama_file}')">
+                    <br>
+                    <a href="${emp.iqama_file}" target="_blank" style="color:#60a5fa; font-size:0.8rem; display:inline-block; margin-top:4px;">[فتح الصورة كاملة]</a>
+                </div>`;
+        } else {
+            viewIqama.innerHTML = '';
+        }
+        document.getElementById('emp-iqama-file').value = ''; // Reset file input
+    }
+
+    // Health Card Image Logic
+    const chkHealth = document.getElementById('chk-health-img');
+    const divHealth = document.getElementById('div-health-img');
+    const viewHealth = document.getElementById('view-health-img');
+    
+    if(chkHealth && divHealth) {
+        chkHealth.checked = !!emp.health_file;
+        divHealth.style.display = (emp.health_file || chkHealth.checked) ? 'block' : 'none';
+        
+        chkHealth.onchange = (e) => {
+            divHealth.style.display = e.target.checked ? 'block' : 'none';
+        };
+        
+        if(emp.health_file) {
+            viewHealth.innerHTML = `
+                <div style="margin-top:5px; border:1px solid #334155; padding:5px; border-radius:4px; text-align:center;">
+                    <img src="${emp.health_file}" style="max-width:100%; max-height:150px; border-radius:4px; cursor:pointer;" onclick="window.open('${emp.health_file}')">
+                    <br>
+                    <a href="${emp.health_file}" target="_blank" style="color:#10b981; font-size:0.8rem; display:inline-block; margin-top:4px;">[فتح الصورة كاملة]</a>
+                </div>`;
+        } else {
+            viewHealth.innerHTML = '';
+        }
+        document.getElementById('emp-health-file').value = ''; // Reset file input
+    }
+
+    // Airport Permit Card Image Logic
+    const chkPermit = document.getElementById('chk-airport-permit-img');
+    const divPermit = document.getElementById('div-airport-permit-img');
+    const viewPermit = document.getElementById('view-airport-permit-img');
+    
+    if(chkPermit && divPermit) {
+        chkPermit.checked = !!emp.airport_permit_file;
+        divPermit.style.display = (emp.airport_permit_file || chkPermit.checked) ? 'block' : 'none';
+        
+        chkPermit.onchange = (e) => {
+            divPermit.style.display = e.target.checked ? 'block' : 'none';
+        };
+        
+        if(emp.airport_permit_file) {
+            viewPermit.innerHTML = `
+                <div style="margin-top:5px; border:1px solid #334155; padding:5px; border-radius:4px; text-align:center;">
+                    <img src="${emp.airport_permit_file}" style="max-width:100%; max-height:150px; border-radius:4px; cursor:pointer;" onclick="window.open('${emp.airport_permit_file}')">
+                    <br>
+                    <a href="${emp.airport_permit_file}" target="_blank" style="color:#f59e0b; font-size:0.8rem; display:inline-block; margin-top:4px;">[فتح الصورة كاملة]</a>
+                </div>`;
+        } else {
+            viewPermit.innerHTML = '';
+        }
+        document.getElementById('emp-airport-permit-file').value = ''; // Reset file input
+    }
+
     set('emp-ops1', emp.ops1);
     set('emp-hire', emp.hire_date);
     set('emp-tede', emp.training_end);
@@ -729,6 +1075,9 @@ function viewEmployee(iqama) {
     set('emp-city', emp.city);
     set('emp-region', emp.region);
     set('emp-remarks', emp.remarks);
+    set('emp-airport-permit-number', emp.airport_permit_number);
+    set('emp-airport-permit-expiry', emp.airport_permit_expiry);
+    set('emp-airport-permit-status', emp.airport_permit_status);
     
     // Days left
     const daysLeft = (dateStr)=>{
@@ -741,21 +1090,27 @@ function viewEmployee(iqama) {
     };
     set('emp-days-train', daysLeft(emp.training_end));
     set('emp-days-health', daysLeft(emp.health_expiry));
+    set('emp-airport-permit-days', daysLeft(emp.airport_permit_expiry));
 
     // Badge Logic
     const updateBadge = (bid, val) => {
         const el = document.getElementById(bid);
         if(!el) return;
         const v = (val||'').toLowerCase();
-        if(v.includes('valid') || v.includes('ساري') || v.includes('active')) {
-            el.textContent = 'Valid';
+        if(v.includes('valid') || v.includes('ساري') || v.includes('active') || v.includes('فعال') || v.includes('نشط')) {
+            el.textContent = 'Active';
             el.style.background = 'rgba(16, 185, 129, 0.2)';
             el.style.color = '#10b981';
             el.style.display = 'block';
-        } else if(v.includes('expired') || v.includes('منتهي')) {
-            el.textContent = 'Expired';
+        } else if(v.includes('expired') || v.includes('منتهي') || v.includes('مفقود') || v.includes('ملغي')) {
+            el.textContent = 'Alert';
             el.style.background = 'rgba(225, 29, 72, 0.2)';
             el.style.color = '#e11d48';
+            el.style.display = 'block';
+        } else if(v.includes('مسلم')) {
+            el.textContent = 'Handed';
+            el.style.background = 'rgba(59, 130, 246, 0.2)';
+            el.style.color = '#3b82f6';
             el.style.display = 'block';
         } else {
             el.style.display = 'none';
@@ -763,11 +1118,14 @@ function viewEmployee(iqama) {
     };
     updateBadge('badge-status1', emp.status1);
     updateBadge('badge-status2', emp.status2);
+    updateBadge('badge-airport-permit-status', emp.airport_permit_status);
     
     const s1 = document.getElementById('emp-status1');
     const s2 = document.getElementById('emp-status2');
+    const sPermit = document.getElementById('emp-airport-permit-status');
     if(s1) s1.oninput = (e)=>updateBadge('badge-status1', e.target.value);
     if(s2) s2.oninput = (e)=>updateBadge('badge-status2', e.target.value);
+    if(sPermit) sPermit.oninput = (e)=>updateBadge('badge-airport-permit-status', e.target.value);
 
     if(m) m.style.display = 'flex';
 }
@@ -789,7 +1147,7 @@ function sortEmployees(key) {
 }
 
 function exportEmployees() {
-    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const employees = safeParse('admin_employees', []);
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM for Arabic support
     csvContent += "الاسم,رقم الإقامة,العلامة التجارية,الفرع,المنطقة,انتهاء الصحية,تدريب 1,تدريب 2\n";
 
@@ -959,7 +1317,7 @@ function autoImportEmployeesFromGitHub(){
             if(mode==='replace'){
                 localStorage.setItem('admin_employees', JSON.stringify(incoming));
             } else {
-                const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+                const existing = safeParse('admin_employees', []);
                 const { merged } = mergeEmployees(existing, incoming);
                 localStorage.setItem('admin_employees', JSON.stringify(merged));
             }
@@ -989,29 +1347,84 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(saveBtn) saveBtn.onclick = saveEmployeeChanges;
 });
 
+// --- Helper for Firebase Storage Upload ---
+async function uploadFileToFirebase(file, path) {
+    if (!file) return null;
+    if (typeof firebase === 'undefined') return null;
+    
+    try {
+        const storageRef = firebase.storage().ref();
+        const fileRef = storageRef.child(path + '/' + Date.now() + '_' + file.name);
+        await fileRef.put(file);
+        return await fileRef.getDownloadURL();
+    } catch (error) {
+        console.error("Firebase Upload Error:", error);
+        showToast(getMsg('error_upload_cloud'), 'error');
+        return null;
+    }
+}
+
 async function saveEmployeeChanges(){
     const modal = document.getElementById('employee-modal');
     const newIqama = document.getElementById('emp-iqama').value.trim();
     const originalIqama = modal?.dataset.originalIqama; // Get original ID
 
-    let employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    let employees = safeParse('admin_employees', []);
     
     // Find by original ID if available, otherwise try new ID (for safety)
     const idx = employees.findIndex(e => e.iqama === (originalIqama || newIqama));
     
     if(idx===-1) return;
 
+    // Helper to read file as Base64 (Legacy/Offline support)
     const readPhoto = (file)=>new Promise(res=>{
         if(!file) return res(null);
         const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file);
     });
+
     const photoFile = document.getElementById('emp-photo')?.files?.[0] || null;
-    const photo = await readPhoto(photoFile);
+    let photoUrl = employees[idx].photo;
+    
+    // Upload Photo if new file selected
+    if(photoFile) {
+        // Try Firebase first
+        const fbUrl = await uploadFileToFirebase(photoFile, 'employees/photos');
+        if(fbUrl) photoUrl = fbUrl;
+        else photoUrl = await readPhoto(photoFile); // Fallback to Base64
+    }
+
+    const iqamaFileIn = document.getElementById('emp-iqama-file')?.files?.[0] || null;
+    let iqamaUrl = employees[idx].iqama_file;
+    
+    if(iqamaFileIn) {
+        const fbUrl = await uploadFileToFirebase(iqamaFileIn, 'employees/iqama');
+        if(fbUrl) iqamaUrl = fbUrl;
+        else iqamaUrl = await readPhoto(iqamaFileIn);
+    }
+
+    const healthFileIn = document.getElementById('emp-health-file')?.files?.[0] || null;
+    let healthUrl = employees[idx].health_file;
+
+    if(healthFileIn) {
+        const fbUrl = await uploadFileToFirebase(healthFileIn, 'employees/health');
+        if(fbUrl) healthUrl = fbUrl;
+        else healthUrl = await readPhoto(healthFileIn);
+    }
+
+    const permitFileIn = document.getElementById('emp-airport-permit-file')?.files?.[0] || null;
+    let permitUrl = employees[idx].airport_permit_file;
+
+    if(permitFileIn) {
+        const fbUrl = await uploadFileToFirebase(permitFileIn, 'employees/permits');
+        if(fbUrl) permitUrl = fbUrl;
+        else permitUrl = await readPhoto(permitFileIn);
+    }
 
     employees[idx] = {
         ...employees[idx],
         iqama: newIqama, // Update ID to new value
         name: document.getElementById('emp-name')?.value?.trim() || employees[idx].name,
+        phone: document.getElementById('emp-phone')?.value?.trim() || employees[idx].phone,
         sap_id: document.getElementById('emp-sap')?.value?.trim() || employees[idx].sap_id,
         brand: document.getElementById('emp-band')?.value?.trim() || employees[idx].brand,
         cost_center: document.getElementById('emp-cost')?.value?.trim() || employees[idx].cost_center,
@@ -1025,13 +1438,32 @@ async function saveEmployeeChanges(){
         ops1: document.getElementById('emp-ops1')?.value?.trim() || employees[idx].ops1,
         ref: document.getElementById('emp-ref')?.value?.trim() || employees[idx].ref,
         remarks: document.getElementById('emp-remarks')?.value?.trim() || employees[idx].remarks,
-        photo: photo || employees[idx].photo
+        airport_permit_number: document.getElementById('emp-airport-permit-number')?.value?.trim() || employees[idx].airport_permit_number,
+        airport_permit_expiry: document.getElementById('emp-airport-permit-expiry')?.value?.trim() || employees[idx].airport_permit_expiry,
+        airport_permit_status: document.getElementById('emp-airport-permit-status')?.value?.trim() || employees[idx].airport_permit_status,
+        airport_permit_file: permitUrl,
+        photo: photoUrl,
+        iqama_file: iqamaUrl,
+        health_file: healthUrl
     };
+    
+    // Save to Firestore if available
+    if (typeof firebase !== 'undefined') {
+        try {
+            const db = firebase.firestore();
+            // Use IQAMA as document ID for easy lookup
+            await db.collection('employees').doc(newIqama).set(employees[idx]);
+            console.log("Saved to Firestore");
+        } catch (e) {
+            console.error("Firestore Save Error", e);
+        }
+    }
+
     localStorage.setItem('admin_employees', JSON.stringify(employees));
     if(modal) modal.style.display='none';
     loadEmployees();
     setLastUpdateSource('manual');
-    alert('تم حفظ بيانات الموظف');
+    showToast(getMsg('success_save_emp'), 'success');
 }
 
 function importEmployeesFromJSON(){
@@ -1039,7 +1471,7 @@ function importEmployeesFromJSON(){
     const repo = 'olayan-compliance-dashboard';
     const path = 'employees_data.json';
     const token = localStorage.getItem('gh_token') || '';
-    if(!token){ alert('يرجى إدخال GitHub Token في لوحة CMS أولاً.'); return; }
+    if(!token){ showToast(getMsg('error_token_missing'), 'error'); return; }
     fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
     }).then(r=>r.json()).then(json=>{
@@ -1052,27 +1484,27 @@ function importEmployeesFromJSON(){
                 localStorage.setItem('admin_employees', JSON.stringify(incoming));
                 stats.total = incoming.length;
             } else {
-                const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+                const existing = safeParse('admin_employees', []);
                 const res = mergeEmployees(existing, incoming);
                 localStorage.setItem('admin_employees', JSON.stringify(res.merged));
                 stats = res.stats;
             }
             loadEmployees();
             setLastUpdateSource('github_json');
-            alert(`تم الدمج من GitHub: مضاف ${stats.added}، محدث ${stats.updated}، الإجمالي ${stats.total}`);
+            showToast(getMsg('success_merge_github', {added: stats.added, updated: stats.updated, total: stats.total}), 'success');
         } else {
-            alert('لم يتم العثور على ملف employees_data.json في المستودع');
+            showToast(getMsg('error_file_not_found'), 'error');
         }
-    }).catch(()=>alert('فشل الاستيراد من GitHub'));
+    }).catch(()=>showToast(getMsg('error_import_github'), 'error'));
 }
 
 function publishEmployeesJSON(){
-    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const employees = safeParse('admin_employees', []);
     const owner = 'beno0o96-del';
     const repo = 'olayan-compliance-dashboard';
     const path = 'employees_data.json';
     const token = localStorage.getItem('gh_token') || '';
-    if(!token){ alert('يرجى إدخال GitHub Token في لوحة CMS أولاً.'); return; }
+    if(!token){ showToast(getMsg('error_token_missing'), 'error'); return; }
     const contentB64 = btoa(unescape(encodeURIComponent(JSON.stringify(employees, null, 2))));
     // Get current SHA if file exists
     fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
@@ -1088,7 +1520,7 @@ function publishEmployeesJSON(){
             headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
             body: JSON.stringify(body)
         });
-    }).then(r=>r.json()).then(()=>alert('تم نشر ملف الموظفين إلى GitHub JSON بنجاح')).catch(()=>alert('فشل النشر إلى GitHub'));
+    }).then(r=>r.json()).then(()=>showToast(getMsg('success_publish_github'), 'success')).catch(()=>showToast(getMsg('error_publish_github'), 'error'));
 }
 
 function handleEmployeesExcelUpload(e){
@@ -1105,7 +1537,7 @@ function handleEmployeesExcelUpload(e){
             
             // Smart Header Detection
             const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            if (!rawData || rawData.length === 0) { alert('الملف فارغ'); return; }
+            if (!rawData || rawData.length === 0) { showToast(getMsg('error_file_empty'), 'error'); return; }
 
             let headerRowIndex = 0;
             const keywords = ['name', 'iqama', 'id', 'branch', 'الاسم', 'الهوية', 'الفرع', 'cost center'];
@@ -1123,24 +1555,24 @@ function handleEmployeesExcelUpload(e){
             // Parse with correct header
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
             
-            if(jsonData.length === 0){ alert('الملف فارغ'); return; }
+            if(jsonData.length === 0){ showToast(getMsg('error_file_empty'), 'error'); return; }
             
             processEmployeesDataInternal(jsonData);
             
             setLastUpdateSource('manual'); // Mark as manual/excel upload
-            alert(`تم تحديث الموظفين من Excel بنجاح`);
+            showToast(getMsg('success_update_excel'), 'success');
             
         } catch(err){
             console.error(err);
-            alert('خطأ في قراءة ملف Excel');
+            showToast(getMsg('error_read_excel'), 'error');
         }
     };
     reader.readAsArrayBuffer(file);
 }
 
 function exportEmployeesToExcel(){
-    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-    if(employees.length === 0){ alert('لا توجد بيانات للتصدير'); return; }
+    const employees = safeParse('admin_employees', []);
+    if(employees.length === 0){ showToast(getMsg('info_no_data_export'), 'info'); return; }
     
     // Map to nice headers
     const data = employees.map(e => ({
@@ -1167,7 +1599,7 @@ function exportEmployeesToExcel(){
 
 function exportViolationsToExcel(){
     const localData = localStorage.getItem('violations_data_override');
-    if (!localData) { alert('لا توجد بيانات مخالفات مخصصة'); return; }
+    if (!localData) { showToast(getMsg('info_no_violations'), 'info'); return; }
     
     // We don't store raw rows for violations currently, only aggregated stats in the current implementation of processViolationsData.
     // Wait, processViolationsData saves aggregates. If the user wants to EXPORT the raw data back, we can't if we didn't save it.
@@ -1206,7 +1638,7 @@ function exportViolationsToExcel(){
 }
 
 function downloadEmployeesJSON(){
-    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+    const employees = safeParse('admin_employees', []);
     const blob = new Blob([JSON.stringify(employees, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1222,7 +1654,7 @@ function loadUsers() {
     const tbody = document.getElementById('users-table-body');
     if (!tbody) return;
 
-    const users = JSON.parse(localStorage.getItem('admin_users') || '[]');
+    const users = safeParse('admin_users', []);
     const rootUser = localStorage.getItem('admin_root_user') || 'Admin';
     
     tbody.innerHTML = '';
@@ -1266,11 +1698,11 @@ function openAddUserModal() {
 }
 
 function addUser(username, pin, role) {
-    const users = JSON.parse(localStorage.getItem('admin_users') || '[]');
+    const users = safeParse('admin_users', []);
     
     // Check duplicate
     if (users.find(u => u.username === username)) {
-        alert('اسم المستخدم موجود بالفعل!');
+        showToast(getMsg('error_user_exists'), 'error');
         return;
     }
 
@@ -1283,13 +1715,13 @@ function addUser(username, pin, role) {
 
     localStorage.setItem('admin_users', JSON.stringify(users));
     loadUsers();
-    alert('تم إضافة المستخدم بنجاح');
+    showToast(getMsg('success_user_added'), 'success');
 }
 
 function deleteUser(index) {
-    if(!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
+    if(!confirm(getMsg('confirm_delete_user'))) return;
     
-    const users = JSON.parse(localStorage.getItem('admin_users') || '[]');
+    const users = safeParse('admin_users', []);
     users.splice(index, 1);
     localStorage.setItem('admin_users', JSON.stringify(users));
     loadUsers();
@@ -1374,7 +1806,7 @@ function saveCMSData() {
 }
 
 function resetCMSData() {
-    if(confirm('هل أنت متأكد من استعادة القيم الافتراضية؟')) {
+    if(confirm(getMsg('confirm_restore_default'))) {
         localStorage.removeItem('board_overrides');
         location.reload();
     }
@@ -1413,7 +1845,7 @@ function loadComplaints() {
     const list = document.getElementById('complaints-list');
     if(!list) return;
     
-    const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+    const complaints = safeParse('complaints', []);
     list.innerHTML = '';
 
     if(complaints.length === 0) {
@@ -1437,7 +1869,7 @@ function loadComplaints() {
             <div style="font-size:0.9rem; color:var(--primary-color); margin-bottom:5px;">${c.contact}</div>
             <p style="background:#f9f9f9; padding:10px; border-radius:5px; margin-bottom:10px; color:#333;">${c.text}</p>
             <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="alert('سيتم فتح نافذة الرد قريباً')" class="btn btn-secondary" style="padding:5px 15px; font-size:0.8rem;">رد</button>
+                <button onclick="showToast(getMsg('info_reply_soon'), 'info')" class="btn btn-secondary" style="padding:5px 15px; font-size:0.8rem;">رد</button>
                 <button onclick="deleteComplaint(${c.id})" class="btn btn-danger" style="padding:5px 15px; font-size:0.8rem;">حذف</button>
             </div>
         `;
@@ -1446,8 +1878,8 @@ function loadComplaints() {
 }
 
 function deleteComplaint(id) {
-    if(!confirm('هل أنت متأكد من حذف هذه الشكوى؟')) return;
-    let complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+    if(!confirm(getMsg('confirm_delete_complaint'))) return;
+    let complaints = safeParse('complaints', []);
     complaints = complaints.filter(c => c.id !== id);
     localStorage.setItem('complaints', JSON.stringify(complaints));
     loadComplaints();
@@ -1458,13 +1890,13 @@ function saveTokenAndPublish() {
     const tokenInput = document.getElementById('gh-token').value.trim();
     const token = tokenInput || localStorage.getItem('gh_token');
     if(!token){
-        alert('يرجى إدخال Token!');
+        showToast(getMsg('error_token_required'), 'error');
         return;
     }
     localStorage.setItem('gh_token', token);
     const msgEl = document.getElementById('save-msg');
     const setMsg = (t) => { if (msgEl) { msgEl.textContent = t; } };
-    setMsg('جاري تجهيز البيانات للنشر...');
+    setMsg(getMsg('msg_preparing_publish'));
 
     try {
         const val = (id) => {
@@ -1556,16 +1988,16 @@ function saveTokenAndPublish() {
                 return resp.json();
             })
             .then(() => {
-                setMsg('✅ تم تحديث البيانات في المستودع (board_data.json)');
+                setMsg(getMsg('msg_publish_success'));
                 setTimeout(() => setMsg(''), 4000);
             })
             .catch(err => {
                 console.error(err);
-                setMsg('❌ فشل النشر إلى GitHub. تحقق من الـ Token أو الصلاحيات.');
+                setMsg(getMsg('msg_publish_fail'));
             });
     } catch (e) {
         console.error(e);
-        setMsg('❌ حدث خطأ أثناء تجهيز البيانات للنشر.');
+        setMsg(getMsg('msg_publish_error'));
     }
 }
 
@@ -1573,7 +2005,7 @@ let branchEditIndex = -1;
 
 function getBranchesData(){
     try{
-        return JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
+        return safeParse('admin_branches_data', []);
     }catch(e){
         return [];
     }
@@ -1617,10 +2049,24 @@ async function saveBranch(){
     const ops = document.getElementById('br-ops')?.value?.trim() || '';
     const kpiTarget = parseFloat(document.getElementById('br-kpi-target')?.value || '0') || 0;
     const kpiValue = parseFloat(document.getElementById('br-kpi-value')?.value || '0') || 0;
+    
+    // Logo Upload Logic
     const logoFile = document.getElementById('br-logo')?.files?.[0] || null;
-    const logo = await readLogoFile(logoFile);
+    let logoUrl = null;
+
+    if (logoFile) {
+        const fbUrl = await uploadFileToFirebase(logoFile, 'branches/logos');
+        if(fbUrl) logoUrl = fbUrl;
+        else logoUrl = await readLogoFile(logoFile); // Fallback
+    }
+
     if(!name) return;
     const kpiScore = kpiTarget>0 ? Math.round((kpiValue / kpiTarget) * 100) : 0;
+    
+    // Get existing data to preserve old logo if not changed
+    const data = getBranchesData();
+    let oldLogo = branchEditIndex >= 0 ? data[branchEditIndex].logo : null;
+
     const item = { 
         name, 
         type, 
@@ -1631,10 +2077,10 @@ async function saveBranch(){
         kpi_target: kpiTarget, 
         kpi_value: kpiValue, 
         kpi_score: kpiScore, 
-        logo,
+        logo: logoUrl || oldLogo,
         hidden: false // Default to visible
     };
-    const data = getBranchesData();
+    
     if(branchEditIndex>=0){
         data[branchEditIndex] = { ...data[branchEditIndex], ...item };
     }else{
@@ -1643,6 +2089,7 @@ async function saveBranch(){
     setBranchesData(data);
     renderBranchesTable();
     clearBranchForm();
+    showToast(getMsg('success_branch_saved'), 'success');
 }
 
 function renderBranchesTable(){
@@ -1701,7 +2148,7 @@ function renderBranchesTable(){
             if(top) top.scrollIntoView({ behavior:'smooth', block:'center' });
         };
         tr.querySelector('[data-act="delete"]').onclick=()=>{
-            if(confirm('هل أنت متأكد من حذف هذا الفرع؟')) {
+            if(confirm(getMsg('confirm_delete_branch'))) {
                 const arr = getBranchesData();
                 arr.splice(idx,1);
                 setBranchesData(arr);
@@ -1710,6 +2157,11 @@ function renderBranchesTable(){
         };
         tbody.appendChild(tr);
     });
+
+    const totalEl = document.getElementById('br-count-total');
+    if(totalEl) {
+        totalEl.textContent = `إجمالي الفروع: ${data.length}`;
+    }
 }
 
 function exportBranchesJSON(){
@@ -1871,7 +2323,7 @@ function loadViolationsStats() {
 }
 
 async function handleViolationsExcelUpload(e) {
-    if(typeof XLSX === 'undefined'){ alert('مكتبة SheetJS غير محملة. تأكد من الاتصال بالإنترنت.'); return; }
+    if(typeof XLSX === 'undefined'){ showToast(getMsg('error_sheetjs_missing'), 'error'); return; }
     const file = e.target.files[0];
     if (!file) return;
 
@@ -1888,7 +2340,7 @@ async function handleViolationsExcelUpload(e) {
         
         // Smart Header Detection
         const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        if (!rawData || rawData.length === 0) { alert('الملف فارغ!'); return; }
+        if (!rawData || rawData.length === 0) { showToast(getMsg('error_file_empty'), 'error'); return; }
 
         let headerRowIndex = 0;
         // Keywords for Violations
@@ -1917,7 +2369,7 @@ async function handleViolationsExcelUpload(e) {
 // --- MASTER DATA & VIOLATIONS LOGIC ---
 
 async function handleMasterExcelUpload(e) {
-    if(typeof XLSX === 'undefined'){ alert('مكتبة SheetJS غير محملة.'); return; }
+    if(typeof XLSX === 'undefined'){ showToast(getMsg('error_sheetjs_missing'), 'error'); return; }
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -2076,6 +2528,114 @@ function detectDataType(sheetName, rows) {
 }
 
 
+function processViolationsData(jsonData, isManual, sourceFile) {
+    // Process and normalize data
+    const newViolations = jsonData.map((row, idx) => {
+        // ... (existing mapping logic)
+        return {
+            id: Date.now() + '_' + idx,
+            branch: find(row, 'branch', 'الفرع') || 'Unknown',
+            region: find(row, 'region', 'المنطقة') || 'Unknown',
+            type: find(row, 'violation', 'type', 'المخالفة', 'نوع') || 'Unknown',
+            amount: parseFloat(find(row, 'amount', 'fine', 'الغرامة', 'المبلغ')) || 0,
+            date: find(row, 'date', 'التاريخ') || new Date().toISOString().split('T')[0],
+            status: find(row, 'status', 'الحالة') || 'Open',
+            source_file: sourceFile || 'manual_upload',
+            hidden: false
+        };
+    });
+
+    // Merge logic...
+    let allViolations = safeParse('admin_violations_raw', []);
+    allViolations = allViolations.concat(newViolations);
+    localStorage.setItem('admin_violations_raw', JSON.stringify(allViolations));
+    
+    recomputeViolationsFromRaw();
+}
+
+function renderViolationsEditor() {
+    const tableContainer = document.querySelector('#violations-content > div:nth-child(2)'); // Adjust selector if needed
+    // Actually, we need to locate where to put the table or if it exists.
+    // The user screenshot showed a table.
+    // Let's create a container for it if not exists in admin.html logic.
+    // Wait, the user added "Violations" section but it only had "Import" and "JSON".
+    // We need to ADD the table to the HTML first or render it dynamically.
+    // Based on user request "add slide menu", I already added the menu.
+    // Now I need to make sure the table exists to be toggled.
+    
+    // Let's inject the table into #violations-content if it doesn't exist.
+    const container = document.getElementById('violations-content');
+    if(!container) return;
+
+    let tableWrapper = document.getElementById('vio-table-wrapper');
+    if (!tableWrapper) {
+        tableWrapper = document.createElement('div');
+        tableWrapper.id = 'vio-table-wrapper';
+        tableWrapper.className = 'table-container';
+        tableWrapper.style.maxHeight = '600px';
+        tableWrapper.style.overflowY = 'auto';
+        tableWrapper.style.marginTop = '20px';
+        
+        tableWrapper.innerHTML = `
+            <div style="margin-bottom: 10px; display:flex; justify-content:space-between;">
+                <input type="text" id="vio-search" placeholder="بحث في المخالفات..." class="form-control" style="width:300px;">
+                <button class="btn btn-danger" onclick="clearViolationsData()">🗑️ مسح الكل</button>
+            </div>
+            <table class="data-table" id="violations-editor-table" style="width:100%;">
+                <thead style="position: sticky; top: 0; background: #1e293b; z-index: 10;">
+                    <tr>
+                        <th class="actions-col">إجراءات</th>
+                        <th class="status-col">الحالة</th>
+                        <th class="date-col">التاريخ</th>
+                        <th class="amount-col">المبلغ</th>
+                        <th class="type-col">نوع المخالفة</th>
+                        <th class="region-col">المنطقة</th>
+                        <th class="branch-col">الفرع</th>
+                    </tr>
+                </thead>
+                <tbody id="violations-table-body"></tbody>
+            </table>
+            <div id="vio-count-total" style="margin-top:10px; color:#94a3b8;"></div>
+        `;
+        container.appendChild(tableWrapper);
+        
+        // Add search listener
+        document.getElementById('vio-search').addEventListener('input', renderViolationsEditor);
+    }
+
+    const tbody = document.getElementById('violations-table-body');
+    const search = document.getElementById('vio-search').value.toLowerCase();
+    const rows = safeParse('admin_violations_raw', []);
+    
+    const filtered = rows.filter(r => 
+        !r.hidden && 
+        (String(r.branch||'').toLowerCase().includes(search) || 
+         String(r.type||'').toLowerCase().includes(search) ||
+         String(r.region||'').toLowerCase().includes(search))
+    );
+
+    tbody.innerHTML = '';
+    filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="actions-col">
+                <button class="btn btn-sm btn-danger" onclick="deleteViolation('${r.id}')">🗑️</button>
+            </td>
+            <td class="status-col">
+                <span class="badge ${String(r.status||'').toLowerCase()==='closed'?'valid':'expired'}">${r.status}</span>
+            </td>
+            <td class="date-col">${r.date}</td>
+            <td class="amount-col">${r.amount}</td>
+            <td class="type-col">${r.type}</td>
+            <td class="region-col">${r.region}</td>
+            <td class="branch-col">${r.branch}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    document.getElementById('vio-count-total').textContent = `إجمالي المخالفات: ${filtered.length}`;
+}
+
 function processEmployeesDataInternal(jsonData) {
     const employees = jsonData.map((row, index) => {
         const branchRaw = find(row, 'cost center', 'cost_center', 'الفرع') || '';
@@ -2113,7 +2673,7 @@ function processEmployeesDataInternal(jsonData) {
     if(mode === 'replace'){
         localStorage.setItem('admin_employees', JSON.stringify(employees));
     } else {
-        const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+        const existing = safeParse('admin_employees', []);
         const res = mergeEmployees(existing, employees);
         localStorage.setItem('admin_employees', JSON.stringify(res.merged));
     }
@@ -2124,7 +2684,7 @@ function processEmployeesDataInternal(jsonData) {
 
 function processViolationsData(rows, silent = false, sourceFileName = '') {
     if (!rows || rows.length === 0) {
-        if(!silent) alert('الملف فارغ!');
+        if(!silent) showToast('الملف فارغ!', 'error');
         return;
     }
 
@@ -2174,15 +2734,16 @@ function processViolationsData(rows, silent = false, sourceFileName = '') {
             amount: parseFloat(rawAmount.toString().replace(/[^\d.-]/g, '')) || 0,
             status: status,
             date: date,
-            source_file: sourceFileName || ''
+            source_file: sourceFileName || 'manual_upload',
+            hidden: false
         };
     });
 
-    const existing = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const existing = safeParse('admin_violations_raw', []);
     const merged = existing.concat(rawViolations);
     localStorage.setItem('admin_violations_raw', JSON.stringify(merged));
     recomputeViolationsFromRaw();
-    if(!silent) alert('تم معالجة الملف وحفظ البيانات بنجاح!');
+    if(!silent) showToast(getMsg('success_file_processed'), 'success');
 }
 
 function calculateViolationsStats(rows) {
@@ -2230,7 +2791,7 @@ function renderViolationsEditor() {
     const tbody = document.getElementById('violations-editor-body');
     if(!tbody) return;
     
-    const rowsAll = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const rowsAll = safeParse('admin_violations_raw', []);
     const enabled = getEnabledSourceNames();
     const rows = rowsAll.filter(r => !r.source_file || enabled.includes(r.source_file));
     const pagination = document.getElementById('vio-pagination');
@@ -2247,9 +2808,9 @@ function renderViolationsEditor() {
 
     const search = document.getElementById('vio-search')?.value.toLowerCase() || '';
     const filtered = rows.filter(r => 
-        r.branch.toLowerCase().includes(search) || 
-        r.region.toLowerCase().includes(search) ||
-        r.type.toLowerCase().includes(search)
+        String(r.branch||'').toLowerCase().includes(search) || 
+        String(r.region||'').toLowerCase().includes(search) ||
+        String(r.type||'').toLowerCase().includes(search)
     );
 
     // Calculate Pagination
@@ -2298,7 +2859,7 @@ function renderViolationsEditor() {
 }
 
 window.updateViolation = function(id, field, value) {
-    const rows = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const rows = safeParse('admin_violations_raw', []);
     const idx = rows.findIndex(r => r.id === id);
     if(idx !== -1) {
         if(field === 'amount') value = parseFloat(value) || 0;
@@ -2308,8 +2869,152 @@ window.updateViolation = function(id, field, value) {
     }
 };
 
+function toggleColumnMenu(menuId) {
+    const menu = document.getElementById(menuId);
+    if (!menu) return;
+
+    if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+        return;
+    }
+
+    // Populate menu if empty
+    if (menu.innerHTML.trim() === '' || menu.children.length === 0) {
+        let cols = [];
+        let tableId = '';
+
+        if (menuId === 'emp-col-menu') {
+            tableId = 'employees-table';
+            cols = [
+                { id: 'emp', label: 'الموظف' },
+                { id: 'iqama', label: 'الهوية' },
+                { id: 'brand', label: 'العلامة' },
+                { id: 'branch', label: 'الفرع' },
+                { id: 'region', label: 'المنطقة' },
+                { id: 'health', label: 'الصحة' },
+                { id: 'training', label: 'التدريب' },
+                { id: 'view', label: 'عرض' }
+            ];
+        } else if (menuId === 'lic-col-menu') {
+            tableId = 'licenses-table';
+            cols = [
+                { id: 'branch', label: 'الفرع' },
+                { id: 'region', label: 'المنطقة' },
+                { id: 'brand', label: 'العلامة' },
+                { id: 'store', label: 'البلدية' },
+                { id: 'civil', label: 'الدفاع' },
+                { id: 'p24', label: 'تصريح 24' },
+                { id: 'delivery', label: 'توصيل' },
+                { id: 'status', label: 'الحالة' }
+            ];
+        } else if (menuId === 'vio-col-menu') {
+            // Violations table is dynamic, but we know the standard columns
+            // Assuming the violations editor table
+            // Actually the request was for "Violations" page, but let's assume the editor table in admin
+            // Wait, the user asked for "Violations" but the screenshot showed the editor table.
+            // Let's implement for the editor table logic if possible, or skip if complex.
+            // For now, let's implement the logic for the "Violations Editor" table columns.
+            // But wait, the violations table in admin.html (the editor) is generated in `renderViolationsEditor`.
+            // We need to support hiding columns there too.
+            // Let's stick to Emp and Lic first as per explicit request logic for now, 
+            // but the user DID circle the violations table headers.
+            // So we need to support it.
+            
+            // For Violations Editor Table
+            tableId = 'violations-editor-table'; // We need to add this ID to the table in JS
+            cols = [
+                { id: 'branch', label: 'الفرع' },
+                { id: 'region', label: 'المنطقة' },
+                { id: 'type', label: 'نوع المخالفة' },
+                { id: 'amount', label: 'المبلغ' },
+                { id: 'date', label: 'التاريخ' },
+                { id: 'status', label: 'الحالة' },
+                { id: 'actions', label: 'إجراءات' }
+            ];
+        }
+
+        cols.forEach(col => {
+            const div = document.createElement('div');
+            div.style.marginBottom = '5px';
+            div.innerHTML = `
+                <label style="color:#cbd5e1; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" checked onchange="toggleTableColumn('${tableId}', '${col.id}', this.checked)">
+                    ${col.label}
+                </label>
+            `;
+            menu.appendChild(div);
+        });
+    }
+
+    menu.style.display = 'block';
+    
+    // Close when clicking outside
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target) && !e.target.closest('button')) {
+            menu.style.display = 'none';
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 0);
+}
+
+function toggleTableColumn(tableId, colId, show) {
+    // Handling dynamic tables (Violations Editor)
+    if(tableId === 'violations-editor-table') {
+        const styleId = `style-hide-${tableId}-${colId}`;
+        let style = document.getElementById(styleId);
+        if(!style) {
+            style = document.createElement('style');
+            style.id = styleId;
+            document.head.appendChild(style);
+        }
+        
+        // We use :nth-child based on column index. 
+        // This is fragile if columns change order.
+        // Better approach: Add classes to cells in render function.
+        // Let's assume we will update render function.
+        // For now, let's use a class based approach if possible.
+        
+        if(!show) {
+            style.innerHTML = `.${colId}-col { display: none !important; }`;
+        } else {
+            style.innerHTML = '';
+        }
+        return;
+    }
+
+    // Standard Static Tables (Employees, Licenses)
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    // Hide Header
+    const th = table.querySelector(`th[data-col="${colId}"]`);
+    if (th) th.style.display = show ? '' : 'none';
+
+    // Hide Cells
+    // We need to know the index.
+    if(th) {
+        const index = Array.from(th.parentNode.children).indexOf(th) + 1;
+        const styleId = `style-hide-${tableId}-${colId}`;
+        let style = document.getElementById(styleId);
+        
+        if (!style) {
+            style = document.createElement('style');
+            style.id = styleId;
+            document.head.appendChild(style);
+        }
+
+        if (!show) {
+            // Hide the Nth column in this specific table
+            style.innerHTML = `#${tableId} td:nth-child(${index}), #${tableId} th:nth-child(${index}) { display: none; }`;
+        } else {
+            style.innerHTML = '';
+        }
+    }
+}
+
 function recomputeViolationsFromRaw() {
-    const rows = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const rows = safeParse('admin_violations_raw', []);
     const enabled = getEnabledSourceNames();
     
     // Filter active files AND non-hidden violations
@@ -2320,11 +3025,12 @@ function recomputeViolationsFromRaw() {
     
     calculateViolationsStats(activeRows);
     renderViolationsEditor();
+    if(typeof loadViolationsStats === 'function') loadViolationsStats();
 }
 
 window.deleteViolation = function(id) {
-    if(!confirm('حذف هذه المخالفة؟')) return;
-    let rows = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    if(!confirm(getMsg('confirm_delete_violation'))) return;
+    let rows = safeParse('admin_violations_raw', []);
     rows = rows.filter(r => r.id !== id);
     localStorage.setItem('admin_violations_raw', JSON.stringify(rows));
     recomputeViolationsFromRaw();
@@ -2347,13 +3053,13 @@ function handleViolationsJsonUpload(e) {
             const json = JSON.parse(e.target.result);
             // Basic validation
             if (!json.summary) {
-                if(!confirm('هيكل الملف يبدو مختلفاً. هل أنت متأكد من الاستمرار؟')) return;
+                if(!confirm(getMsg('confirm_file_structure'))) return;
             }
             localStorage.setItem('violations_data_override', JSON.stringify(json));
             loadViolationsStats();
-            alert('تم استيراد ملف JSON بنجاح!');
+            showToast(getMsg('success_json_imported'), 'success');
         } catch (err) {
-            alert('خطأ في قراءة ملف JSON: ' + err.message);
+            showToast(getMsg('error_json_read') + err.message, 'error');
         }
     };
     reader.readAsText(file);
@@ -2362,7 +3068,7 @@ function handleViolationsJsonUpload(e) {
 function downloadViolationsJSON() {
     const localData = localStorage.getItem('violations_data_override');
     if (!localData) {
-        alert('لا توجد بيانات مخصصة لتصديرها (يتم استخدام الافتراضي).');
+        showToast(getMsg('info_export_default'), 'info');
         return;
     }
     
@@ -2378,10 +3084,10 @@ function downloadViolationsJSON() {
 }
 
 function clearViolationsData() {
-    if (confirm('هل أنت متأكد من مسح جميع بيانات المخالفات المخصصة والعودة للوضع الافتراضي؟')) {
+    if (confirm(getMsg('confirm_clear_violations'))) {
         localStorage.removeItem('violations_data_override');
         loadViolationsStats();
-        alert('تم مسح البيانات.');
+        showToast(getMsg('success_data_cleared'), 'success');
     }
 }
 
@@ -2397,9 +3103,9 @@ function generateStrategicReport() {
     }
 
     // 1. Gather Data
-    const violationsData = JSON.parse(localStorage.getItem('violations_data_override') || '{}');
-    const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-    const branches = JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
+    const violationsData = safeParse('violations_data_override', {});
+    const employees = safeParse('admin_employees', []);
+    const branches = safeParse('admin_branches_data', []);
     
     // Simulate Processing Delay
     setTimeout(() => {
@@ -2417,7 +3123,7 @@ function generateStrategicReport() {
             filteredTrendData = (violationsData.yearly_trend || []).map(y => ({ month: y.year, count: y.count }));
 
             const divEff = document.getElementById('insight-efficiency');
-            if(divEff) divEff.innerHTML = '💡 <strong>تحليل سنوي شامل:</strong> يوضح الرسم البياني أعلاه إجمالي المخالفات لكل سنة.';
+            if(divEff) divEff.innerHTML = getMsg('ai_insight_all_years');
 
         } else {
             // Case: Specific Year
@@ -2446,11 +3152,11 @@ function generateStrategicReport() {
                 // Fallback if no raw rows (old data format): Just show empty or warning
                 filteredRiskData = [];
                 filteredTrendData = [];
-                alert('⚠️ لا توجد بيانات تفصيلية (Raw Rows) لهذا العام. يرجى إعادة رفع ملف Excel محدث.');
+                showToast(getMsg('info_no_raw_rows'), 'info');
             }
             
             const divEff = document.getElementById('insight-efficiency');
-            if(divEff) divEff.innerHTML = `💡 <strong>تحليل عام ${yearFilter}:</strong> يوضح الرسم البياني أعلاه اتجاه المخالفات الشهري لعام ${yearFilter}.`;
+            if(divEff) divEff.innerHTML = getMsg('ai_insight_general', {year: yearFilter});
         }
 
     // 2. AI Processing (Simulated Logic)
@@ -2461,9 +3167,9 @@ function generateStrategicReport() {
     const closureRate = totalVio > 0 ? Math.round((closedVio / totalVio) * 100) : 0;
     
     let opsInsight = '';
-    if(closureRate > 80) opsInsight = `✅ <strong>كفاءة ممتازة:</strong> يتم إغلاق ${closureRate}% من المخالفات في الوقت المناسب.`;
-    else if(closureRate > 50) opsInsight = `⚠️ <strong>تحتاج تحسين:</strong> معدل الإغلاق ${closureRate}%، يوصى بتسريع إجراءات المعالجة.`;
-    else opsInsight = `🚨 <strong>وضع حرج:</strong> معدل الإغلاق ${closureRate}% فقط! يجب مراجعة فريق العمليات فوراً.`;
+    if(closureRate > 80) opsInsight = getMsg('ai_ops_excellent', {rate: closureRate});
+    else if(closureRate > 50) opsInsight = getMsg('ai_ops_improve', {rate: closureRate});
+    else opsInsight = getMsg('ai_ops_critical', {rate: closureRate});
     
     const divOps = document.getElementById('ai-insight-ops');
     if(divOps) divOps.innerHTML = opsInsight;
@@ -2471,9 +3177,10 @@ function generateStrategicReport() {
     // Insight 2: Financial Risk
     const totalAmount = violationsData.summary?.total_amount || 0;
     let riskInsight = '';
-    if(totalAmount > 100000) riskInsight = `🚨 <strong>مخاطر عالية:</strong> إجمالي الغرامات (${totalAmount.toLocaleString()}) يتجاوز الحد الآمن. المناطق الأكثر تأثراً: ${violationsData.regions?.[0]?.name || 'غير محدد'}.`;
-    else if(totalAmount > 50000) riskInsight = `⚠️ <strong>مخاطر متوسطة:</strong> الغرامات (${totalAmount.toLocaleString()}) تتطلب مراقبة دقيقة لتقليل الهدر المالي.`;
-    else riskInsight = `✅ <strong>وضع مستقر:</strong> الغرامات (${totalAmount.toLocaleString()}) ضمن الحدود المقبولة.`;
+    const regionName = violationsData.regions?.[0]?.name || 'Unknown';
+    if(totalAmount > 100000) riskInsight = getMsg('ai_risk_high', {amount: totalAmount.toLocaleString(), region: regionName});
+    else if(totalAmount > 50000) riskInsight = getMsg('ai_risk_med', {amount: totalAmount.toLocaleString()});
+    else riskInsight = getMsg('ai_risk_stable', {amount: totalAmount.toLocaleString()});
     
     const divRisk = document.getElementById('ai-insight-risk');
     if(divRisk) divRisk.innerHTML = riskInsight;
@@ -2482,9 +3189,9 @@ function generateStrategicReport() {
     const topRiskBranch = violationsData.top_branches_frequency?.[0];
     let hrInsight = 'جاري تحليل البيانات...';
     if(topRiskBranch) {
-        hrInsight = `🔍 <strong>تحليل القوى العاملة:</strong> الفرع "${topRiskBranch.branch}" يسجل أعلى معدل مخالفات (${topRiskBranch.count}). قد يكون هناك نقص في التدريب أو عدد الموظفين.`;
+        hrInsight = getMsg('ai_hr_analysis', {branch: topRiskBranch.branch, count: topRiskBranch.count});
     } else {
-        hrInsight = `✅ <strong>استقرار عام:</strong> لا توجد فروع تسجل شذوذاً كبيراً في عدد المخالفات مقارنة بحجم القوى العاملة.`;
+        hrInsight = getMsg('ai_hr_stable');
     }
     const divHr = document.getElementById('ai-insight-hr');
     if(divHr) divHr.innerHTML = hrInsight;
@@ -2493,7 +3200,8 @@ function generateStrategicReport() {
     const commonType = violationsData.common_types?.[0]?.type || 'غير محدد';
     const divRec = document.getElementById('ai-recommendation');
     if(divRec) {
-        divRec.textContent = `💡 التوصية الاستراتيجية: التركيز على معالجة مخالفات "${commonType}" لأنها الأكثر تكراراً، وتكثيف التدريب في المنطقة "${violationsData.regions?.[0]?.name || 'الغربية'}".`;
+        const recRegion = violationsData.regions?.[0]?.name || 'Western';
+        divRec.textContent = getMsg('ai_rec_strategy', {type: commonType, region: recRegion});
     }
 
     // 3. Render Charts
@@ -2588,11 +3296,11 @@ function processAICommand() {
     // Simulate AI Parsing
     if(cmd.includes('مخالفات') || cmd.includes('violation')) {
         showSection('violations');
-        alert('🤖 قمت بنقلك إلى صفحة إدارة المخالفات بناءً على طلبك.');
+        showToast(getMsg('info_nav_violations'), 'info');
     } else if(cmd.includes('موظف') || cmd.includes('employee')) {
         showSection('employees');
         document.getElementById('emp-search').focus();
-        alert('🤖 تفضل، هذه صفحة الموظفين. يمكنك البحث مباشرة.');
+        showToast(getMsg('info_nav_employees'), 'info');
     } else if(cmd.includes('تقرير') || cmd.includes('report')) {
         generateStrategicReport();
     } else if(cmd.includes('خطة') || cmd.includes('plan')) {
@@ -2604,10 +3312,10 @@ function processAICommand() {
                     <div class="rec-content"><strong>تم إنشاء خطة مقترحة:</strong> 1. تدريب مكثف (الأسبوع 1) - 2. تدقيق داخلي (الأسبوع 2) - 3. مراجعة النتائج.</div>
                 </div>
             `;
-            alert('🤖 تم إضافة خطة مقترحة في قسم التوصيات.');
+            showToast(getMsg('success_ai_plan'), 'success');
         }
     } else {
-        alert('🤖 عذراً، لم أفهم الأمر تماماً. جرب: "أظهر المخالفات"، "تقرير استراتيجي"، "ابحث عن موظف".');
+        showToast(getMsg('error_ai_unknown'), 'error');
     }
     
     input.value = '';
@@ -2617,7 +3325,7 @@ function processAICommand() {
 
 function renderTasksSummary() {
     const tbody = document.getElementById('admin-tasks-body');
-    const tasks = JSON.parse(localStorage.getItem('admin_tasks') || '[]');
+    const tasks = safeParse('admin_tasks', []);
     
     // Update Stats
     const pending = tasks.filter(t => t.status === 'pending').length;
@@ -2688,10 +3396,10 @@ function saveServicesJson() {
     try {
         const json = JSON.parse(editor.value);
         localStorage.setItem('services_data_override', JSON.stringify(json));
-        alert('تم حفظ بيانات الخدمات بنجاح!');
+        showToast(getMsg('success_services_saved'), 'success');
         loadComplaints(); // Refresh if needed
     } catch (e) {
-        alert('خطأ في صيغة JSON: ' + e.message);
+        showToast(getMsg('error_json_format') + e.message, 'error');
     }
 }
 
@@ -2718,17 +3426,17 @@ function saveBoardJson() {
     try {
         const val = editor.value.trim();
         if (!val || val.startsWith('//')) {
-             if(confirm('هل تريد مسح البيانات المخصصة؟')) {
+             if(confirm(getMsg('confirm_clear_custom'))) {
                  localStorage.removeItem('board_overrides');
-                 alert('تم مسح البيانات المخصصة.');
+                 showToast(getMsg('success_custom_cleared'), 'success');
              }
              return;
         }
         const json = JSON.parse(val);
         localStorage.setItem('board_overrides', JSON.stringify(json));
-        alert('تم حفظ بيانات اللوحة بنجاح!');
+        showToast(getMsg('success_board_saved'), 'success');
     } catch (e) {
-        alert('خطأ في صيغة JSON: ' + e.message);
+        showToast(getMsg('error_json_format') + e.message, 'error');
     }
 }
 
@@ -2739,12 +3447,12 @@ function formatBoardJson() {
         const json = JSON.parse(editor.value);
         editor.value = JSON.stringify(json, null, 4);
     } catch (e) {
-        alert('Cannot format invalid JSON');
+        showToast(getMsg('error_format_json'), 'error');
     }
 }
 
 function getUploadHistory(){
-    try{ return JSON.parse(localStorage.getItem('admin_upload_history') || '[]'); }catch(e){ return []; }
+    return safeParse('admin_upload_history', []);
 }
 function setUploadHistory(arr){
     localStorage.setItem('admin_upload_history', JSON.stringify(arr));
@@ -2778,7 +3486,7 @@ function renderUploadFilesList(){
         clearBtn.style.fontSize = '0.8rem';
         clearBtn.style.padding = '4px 10px';
         clearBtn.onclick = () => {
-            if(confirm('هل أنت متأكد من حذف سجل جميع الملفات المرفوعة؟ سيتم إعادة ضبط البيانات.')) {
+            if(confirm(getMsg('confirm_clear_history'))) {
                 setUploadHistory([]);
                 localStorage.removeItem('admin_violations_raw');
                 localStorage.removeItem('violations_data_override');
@@ -2788,7 +3496,7 @@ function renderUploadFilesList(){
                 recomputeViolationsFromRaw(); 
                 renderUploadFilesList();
                 renderViolationsEditor();
-                alert('تم مسح السجل والبيانات المرتبطة.');
+                showToast(getMsg('success_history_cleared'), 'success');
             }
         };
         headerActions.appendChild(clearBtn);
@@ -2862,11 +3570,11 @@ function renderUploadFilesList(){
         delBtn.style.cursor = 'pointer';
         delBtn.title = 'حذف الملف';
         delBtn.onclick = () => {
-            if(confirm(`حذف الملف "${h.name}" من السجل؟`)) {
+            if(confirm(getMsg('confirm_delete_file_history', {name: h.name}))) {
                 const hist3 = getUploadHistory().filter(x => x.name !== h.name);
                 setUploadHistory(hist3);
                 // Also remove data associated with this file from raw storage
-                const raw = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+                const raw = safeParse('admin_violations_raw', []);
                 const newRaw = raw.filter(r => r.source_file !== h.name);
                 localStorage.setItem('admin_violations_raw', JSON.stringify(newRaw));
                 
@@ -2887,18 +3595,11 @@ function renderUploadFilesList(){
 function getEnabledSourceNames(){
     return getUploadHistory().filter(h=>h.enabled).map(h=>h.name);
 }
-function recomputeViolationsFromRaw(){
-    const raw = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
-    const enabled = getEnabledSourceNames();
-    const filtered = raw.filter(r => !r.source_file || enabled.includes(r.source_file));
-    calculateViolationsStats(filtered);
-    loadViolationsStats();
-}
 
 // --- LICENSES & PERMITS LOGIC ---
 
 function handleLicensesExcelUpload(e) {
-    if(typeof XLSX === 'undefined'){ alert('مكتبة SheetJS غير محملة.'); return; }
+    if(typeof XLSX === 'undefined'){ showToast('مكتبة SheetJS غير محملة.', 'error'); return; }
     const file = e.target.files[0];
     if(!file) return;
 
@@ -2914,7 +3615,7 @@ function handleLicensesExcelUpload(e) {
         // 1. Get all data as array of arrays to find header row
         const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
-        if (!rawData || rawData.length === 0) { alert('الملف فارغ!'); return; }
+        if (!rawData || rawData.length === 0) { showToast('الملف فارغ!', 'error'); return; }
 
         // 2. Find Header Row (look for keywords like "Branch", "Restaurant", "Store License")
         let headerRowIndex = 0;
@@ -2942,7 +3643,7 @@ function handleLicensesExcelUpload(e) {
 }
 
 function processLicensesData(rows) {
-    if (!rows || rows.length === 0) { alert('الملف فارغ!'); return; }
+    if (!rows || rows.length === 0) { showToast('الملف فارغ!', 'error'); return; }
 
     // Parse Rows
     const licenses = rows.map(row => {
@@ -2990,7 +3691,7 @@ function processLicensesData(rows) {
     }).filter(l => l.branch && l.branch !== 'Unknown' && l.branch !== 'Branch' && l.branch !== 'Restaurant'); // Filter header repeats or empty
 
     // Merge with existing costs if any
-    const existing = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    const existing = safeParse('admin_licenses', []);
     const costMap = {};
     existing.forEach(e => {
         if(e.cost) costMap[e.branch] = e.cost;
@@ -3002,7 +3703,7 @@ function processLicensesData(rows) {
 
     localStorage.setItem('admin_licenses', JSON.stringify(licenses));
     renderLicensesTable();
-    alert(`تم معالجة ${licenses.length} فرع بنجاح!`);
+    showToast(getMsg('success_branches_processed', {count: licenses.length}), 'success');
 }
 
 function downloadLicensesTemplate() {
@@ -3038,12 +3739,13 @@ function downloadLicensesTemplate() {
 }
 
 let licenseEditIndex = -1;
+let currentAdsPermits = []; // Global array to hold permits for the current modal
 
 function renderLicensesTable() {
     const tbody = document.getElementById('licenses-table-body');
     if(!tbody) return;
 
-    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    const data = safeParse('admin_licenses', []);
     tbody.innerHTML = '';
 
     if(data.length === 0) {
@@ -3056,11 +3758,22 @@ function renderLicensesTable() {
         
         // Status Colors
         const getStatusColor = (s) => {
-            const st = (s||'').toLowerCase();
+            const st = String(s||'').toLowerCase();
             if(st.includes('valid') || st.includes('ساري')) return 'color:#10b981; font-weight:bold;'; // Green
             if(st.includes('near') || st.includes('expiring')) return 'color:#f59e0b; font-weight:bold;'; // Orange
             if(st.includes('expired') || st.includes('منتهي')) return 'color:#ef4444; font-weight:bold;'; // Red
             return '';
+        };
+
+        // Helper to display remaining days in table
+        const getDaysRemainingHtml = (dateStr) => {
+             const msg = calculateDaysRemaining(dateStr);
+             if(!msg) return '';
+             let color = '#10b981'; // Green
+             if(msg.includes('منتهي')) color = '#ef4444'; // Red
+             else if(msg.includes('ينتهي اليوم')) color = '#f59e0b'; // Orange
+             
+             return `<div style="font-size:0.75rem; color:${color}; margin-top:2px;">${msg}</div>`;
         };
 
         const isHidden = !!item.hidden;
@@ -3069,6 +3782,7 @@ function renderLicensesTable() {
             <td>
                 ${item.branch}<br>
                 <span style="font-size:0.75rem; color:#64748b;">${item.brand || '-'} | ${item.region || '-'}</span>
+                ${item.unified_code ? `<br><span style="font-size:0.7rem; color:#fbbf24; border:1px solid #fbbf24; padding:1px 4px; border-radius:3px;">${item.unified_code}</span>` : ''}
             </td>
             <td>
                 <input type="number" class="form-control" style="width:80px; padding:2px 5px;" 
@@ -3078,13 +3792,25 @@ function renderLicensesTable() {
             <td style="${getStatusColor(item.store_license.status)}">
                 ${item.store_license.status} <br>
                 <small style="color:#666; font-weight:normal;">${item.store_license.exp_g || ''}</small>
+                ${getDaysRemainingHtml(item.store_license.exp_g)}
+                ${item.store_license.file ? `<a href="${item.store_license.file}" target="_blank" style="text-decoration:none; font-size:1.1rem;" title="عرض الرخصة">📄</a>` : ''}
             </td>
             <td style="${getStatusColor(item.civil_defense.status)}">
                 ${item.civil_defense.status} <br>
                 <small style="color:#666; font-weight:normal;">${item.civil_defense.exp_g || ''}</small>
+                ${getDaysRemainingHtml(item.civil_defense.exp_g)}
+                ${item.civil_defense.file ? `<a href="${item.civil_defense.file}" target="_blank" style="text-decoration:none; font-size:1.1rem;" title="عرض الرخصة">📄</a>` : ''}
             </td>
-            <td>${item.permit_24.status}</td>
-            <td>${item.permit_hd.status}</td>
+            <td>
+                ${item.permit_24.status}
+                ${item.permit_24.exp_g ? `<br><small style="color:#666; font-weight:normal;">${item.permit_24.exp_g}</small>` : ''}
+                ${getDaysRemainingHtml(item.permit_24.exp_g)}
+            </td>
+            <td>
+                ${item.permit_hd.status}
+                ${item.permit_hd.exp_g ? `<br><small style="color:#666; font-weight:normal;">${item.permit_hd.exp_g}</small>` : ''}
+                ${getDaysRemainingHtml(item.permit_hd.exp_g)}
+            </td>
             <td>
                 <label class="switch" style="font-size: 12px;">
                     <input type="checkbox" ${!isHidden ? 'checked' : ''} onchange="toggleLicenseVisibility(${index}, this.checked)">
@@ -3102,7 +3828,7 @@ function renderLicensesTable() {
 }
 
 function updateLicenseCost(index, value) {
-    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    const data = safeParse('admin_licenses', []);
     if(data[index]) {
         data[index].cost = parseFloat(value) || 0;
         localStorage.setItem('admin_licenses', JSON.stringify(data));
@@ -3110,7 +3836,7 @@ function updateLicenseCost(index, value) {
 }
 
 function toggleLicenseVisibility(index, isVisible) {
-    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    const data = safeParse('admin_licenses', []);
     if(data[index]) {
         data[index].hidden = !isVisible;
         localStorage.setItem('admin_licenses', JSON.stringify(data));
@@ -3119,8 +3845,8 @@ function toggleLicenseVisibility(index, isVisible) {
 }
 
 function deleteLicense(index) {
-    if(confirm('هل أنت متأكد من حذف هذا السجل؟')) {
-        const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    if(confirm(getMsg('confirm_delete_record'))) {
+        const data = safeParse('admin_licenses', []);
         data.splice(index, 1);
         localStorage.setItem('admin_licenses', JSON.stringify(data));
         renderLicensesTable();
@@ -3137,6 +3863,7 @@ function openLicenseModal(index = -1) {
         document.getElementById('lic-branch').value = '';
         document.getElementById('lic-region').value = 'Western';
         document.getElementById('lic-brand').value = 'BK';
+        document.getElementById('lic-unified-code').value = '';
         document.getElementById('lic-cost').value = '';
         document.getElementById('lic-hidden').checked = false; 
         
@@ -3151,30 +3878,52 @@ function openLicenseModal(index = -1) {
         document.getElementById('lic-civil-status').value = 'Valid';
         document.getElementById('lic-civil-date').value = '';
         
-        document.getElementById('lic-p24').value = 'N/A';
+        document.getElementById('lic-p24-exist').checked = false;
+        document.getElementById('div-p24-details').style.display = 'none';
         document.getElementById('lic-p24-num').value = '';
+        document.getElementById('lic-p24-date').value = '';
+        document.getElementById('lic-p24-cost').value = '';
         
-        document.getElementById('lic-phd').value = 'N/A';
+        document.getElementById('lic-phd-exist').checked = false;
+        document.getElementById('div-phd-details').style.display = 'none';
         document.getElementById('lic-phd-num').value = '';
+        document.getElementById('lic-phd-date').value = '';
+        document.getElementById('lic-phd-cost').value = '';
 
-        document.getElementById('lic-ads-num').value = '';
-        document.getElementById('lic-ads-date').value = '';
+        document.getElementById('lic-out-exist').checked = false;
+        document.getElementById('div-out-details').style.display = 'none';
+        document.getElementById('lic-out-num').value = '';
+        document.getElementById('lic-out-date').value = '';
+        document.getElementById('lic-out-area').value = '';
+        document.getElementById('lic-out-cost').value = '';
+
+        currentAdsPermits = [];
 
     } else {
         // Edit Mode
-        const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+        const data = safeParse('admin_licenses', []);
         const item = data[index];
         if(!item) return;
 
         document.getElementById('lic-branch').value = item.branch || '';
         document.getElementById('lic-region').value = item.region || 'Western';
         document.getElementById('lic-brand').value = item.brand || 'BK';
+        document.getElementById('lic-unified-code').value = item.unified_code || '';
         document.getElementById('lic-cost').value = item.cost || '';
         document.getElementById('lic-hidden').checked = !!item.hidden;
 
         document.getElementById('lic-store-num').value = item.store_license?.number || '';
         document.getElementById('lic-store-status').value = item.store_license?.status || 'Valid';
         document.getElementById('lic-store-date').value = item.store_license?.exp_g || '';
+        document.getElementById('lic-store-file').value = '';
+        const storeFile = item.store_license?.file;
+        if(storeFile) {
+            document.getElementById('lic-store-file-view').innerHTML = `
+                <a href="${storeFile}" target="_blank" style="color:#60a5fa; font-size:0.9rem;">📄 عرض الملف المرفق الحالي</a>
+            `;
+        } else {
+            document.getElementById('lic-store-file-view').innerHTML = '';
+        }
         
         const hasVertical = item.store_license?.has_vertical || 'No';
         document.getElementById('lic-has-vertical').value = hasVertical;
@@ -3184,43 +3933,296 @@ function openLicenseModal(index = -1) {
         document.getElementById('lic-civil-status').value = item.civil_defense?.status || 'Valid';
         document.getElementById('lic-civil-date').value = item.civil_defense?.exp_g || '';
 
-        document.getElementById('lic-p24').value = item.permit_24?.status || 'N/A';
+        // 24 Hours Permit
+        const hasP24 = !!item.permit_24?.exists;
+        document.getElementById('lic-p24-exist').checked = hasP24;
+        document.getElementById('div-p24-details').style.display = hasP24 ? 'block' : 'none';
         document.getElementById('lic-p24-num').value = item.permit_24?.number || '';
+        document.getElementById('lic-p24-date').value = item.permit_24?.exp_g || '';
+        document.getElementById('lic-p24-cost').value = item.permit_24?.cost || '';
 
-        document.getElementById('lic-phd').value = item.permit_hd?.status || 'N/A';
+        // Home Delivery Permit
+        const hasPhd = !!item.permit_hd?.exists;
+        document.getElementById('lic-phd-exist').checked = hasPhd;
+        document.getElementById('div-phd-details').style.display = hasPhd ? 'block' : 'none';
         document.getElementById('lic-phd-num').value = item.permit_hd?.number || '';
+        document.getElementById('lic-phd-date').value = item.permit_hd?.exp_g || '';
+        document.getElementById('lic-phd-cost').value = item.permit_hd?.cost || '';
 
-        document.getElementById('lic-ads-num').value = item.ads_permit?.number || '';
-        document.getElementById('lic-ads-date').value = item.ads_permit?.exp_g || '';
+        // Outdoor Seating Permit
+        const hasOut = !!item.permit_out?.exists;
+        document.getElementById('lic-out-exist').checked = hasOut;
+        document.getElementById('div-out-details').style.display = hasOut ? 'grid' : 'none';
+        document.getElementById('lic-out-num').value = item.permit_out?.number || '';
+        document.getElementById('lic-out-date').value = item.permit_out?.exp_g || '';
+        document.getElementById('lic-out-area').value = item.permit_out?.area || '';
+        document.getElementById('lic-out-cost').value = item.permit_out?.cost || '';
+
+        // Load Ads Permits
+        currentAdsPermits = item.ads_permits || [];
+        // Migration: If old single object exists, convert to array
+        if(!item.ads_permits && item.ads_permit && item.ads_permit.exists) {
+            currentAdsPermits.push({
+                number: item.ads_permit.number,
+                exp_g: item.ads_permit.exp_g,
+                height: item.ads_permit.height,
+                width: item.ads_permit.width,
+                img: item.ads_permit.img,
+                cost: 0, 
+                duration: '365'
+            });
+        }
     }
 
-    // Add event listener for unipole toggle
+    // Update Days Remaining Displays
+    updateDaysDisplay('lic-store-date', 'lic-store-days-left');
+    updateDaysDisplay('lic-civil-date', 'lic-civil-days-left');
+    updateDaysDisplay('lic-p24-date', 'lic-p24-days-left');
+    updateDaysDisplay('lic-phd-date', 'lic-phd-days-left');
+    updateDaysDisplay('lic-out-date', 'lic-out-days-left');
+    updateDaysDisplay('new-ads-date', 'new-ads-days-left');
+
+    renderAdsPermitsList();
+    hideAddPermitForm();
+
+    // Listeners
     document.getElementById('lic-has-vertical').onchange = (e) => {
         document.getElementById('div-unipole-img').style.display = e.target.value === 'Yes' ? 'block' : 'none';
     };
+    
+    document.getElementById('lic-p24-exist').onchange = (e) => {
+        document.getElementById('div-p24-details').style.display = e.target.checked ? 'block' : 'none';
+    };
+
+    document.getElementById('lic-phd-exist').onchange = (e) => {
+        document.getElementById('div-phd-details').style.display = e.target.checked ? 'block' : 'none';
+    };
+
+    document.getElementById('lic-out-exist').onchange = (e) => {
+        document.getElementById('div-out-details').style.display = e.target.checked ? 'grid' : 'none';
+    };
+
+    // Preview for Ads Permit Image
+    const adsFileInput = document.getElementById('new-ads-file');
+    if(adsFileInput) {
+        adsFileInput.addEventListener('change', async (e) => {
+            const preview = document.getElementById('new-ads-preview');
+            if(e.target.files && e.target.files[0]) {
+                const base64 = await readFileAsBase64(e.target.files[0]);
+                preview.src = base64;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
+
+    // Load brands
+    loadBrands();
+    setTimeout(() => {
+        if(index === -1) {
+            document.getElementById('lic-brand').value = 'BK';
+        } else {
+            const data = safeParse('admin_licenses', []);
+            if(data[index]) document.getElementById('lic-brand').value = data[index].brand || 'BK';
+        }
+    }, 50);
 
     modal.style.display = 'flex';
 }
 
+function loadBrands() {
+    const defaultBrands = [
+        { code: 'BK', name: 'Burger King' },
+        { code: 'TC', name: 'Texas Chicken' },
+        { code: 'BWW', name: 'Buffalo Wild Wings' }
+    ];
+    const storedBrands = safeParse('admin_brands', []);
+    const allBrands = [...defaultBrands, ...storedBrands];
+    
+    const select = document.getElementById('lic-brand');
+    if(!select) return;
+    
+    const currentVal = select.value;
+    select.innerHTML = allBrands.map(b => `<option value="${b.code}">${b.name}</option>`).join('');
+    
+    // Try to preserve selection if it exists
+    if(currentVal && allBrands.find(b => b.code === currentVal)) {
+        select.value = currentVal;
+    }
+}
+
+function addNewBrand() {
+    const modal = document.getElementById('brand-modal');
+    if(modal) {
+        document.getElementById('new-brand-name').value = '';
+        modal.style.display = 'flex';
+        setTimeout(() => document.getElementById('new-brand-name').focus(), 100);
+    }
+}
+
+function saveNewBrand() {
+    const nameInput = document.getElementById('new-brand-name');
+    const name = nameInput.value.trim();
+    
+    if(!name) {
+        showToast(getMsg('error_brand_name'), 'error');
+        return;
+    }
+    
+    // Generate simple code
+    let code = name.length > 2 ? name.substring(0,3).toUpperCase() : name.toUpperCase();
+    code = code + Math.floor(Math.random() * 1000);
+
+    const storedBrands = safeParse('admin_brands', []);
+    storedBrands.push({ code: code, name: name });
+    localStorage.setItem('admin_brands', JSON.stringify(storedBrands));
+    
+    loadBrands();
+    
+    const select = document.getElementById('lic-brand');
+    if(select) select.value = code;
+    
+    document.getElementById('brand-modal').style.display = 'none';
+    showToast(getMsg('success_brand_added'), 'success');
+}
+
+function showAddPermitForm() {
+    document.getElementById('div-add-permit-form').style.display = 'block';
+    // Clear form
+    document.getElementById('new-ads-id').value = '';
+    document.getElementById('new-ads-num').value = '';
+    document.getElementById('new-ads-date').value = '';
+    const daysEl = document.getElementById('new-ads-days-left');
+    if(daysEl) daysEl.textContent = ''; // Clear days display
+    document.getElementById('new-ads-duration').value = '365';
+    document.getElementById('new-ads-cost').value = '';
+    document.getElementById('new-ads-file').value = '';
+    document.getElementById('new-ads-h').value = '';
+    document.getElementById('new-ads-w').value = '';
+}
+
+function hideAddPermitForm() {
+    document.getElementById('div-add-permit-form').style.display = 'none';
+}
+
+async function addPermitToList() {
+    const num = document.getElementById('new-ads-num').value;
+    const date = document.getElementById('new-ads-date').value;
+    const duration = document.getElementById('new-ads-duration').value;
+    const cost = document.getElementById('new-ads-cost').value;
+    const h = document.getElementById('new-ads-h').value;
+    const w = document.getElementById('new-ads-w').value;
+    
+    let img = '';
+    const fileInput = document.getElementById('new-ads-file');
+    if(fileInput.files && fileInput.files[0]) {
+        img = await readFileAsBase64(fileInput.files[0]);
+    }
+
+    const newPermit = {
+        id: Date.now().toString(), // Simple ID
+        number: num,
+        exp_g: date,
+        duration: duration,
+        cost: cost,
+        height: h,
+        width: w,
+        img: img
+    };
+
+    currentAdsPermits.push(newPermit);
+    renderAdsPermitsList();
+    hideAddPermitForm();
+}
+
+function deletePermit(index) {
+    if(confirm(getMsg('confirm_delete_permit'))) {
+        currentAdsPermits.splice(index, 1);
+        renderAdsPermitsList();
+    }
+}
+
+function renderAdsPermitsList() {
+    const container = document.getElementById('ads-permits-list');
+    if(!container) return;
+    
+    if(currentAdsPermits.length === 0) {
+        container.innerHTML = '<div style="color:#64748b; text-align:center; padding:10px;">لا توجد تصاريح مضافة</div>';
+        return;
+    }
+
+    container.innerHTML = currentAdsPermits.map((p, idx) => {
+        const remaining = calculateDaysRemaining(p.exp_g);
+        let color = '#94a3b8';
+        if(remaining && remaining.includes('منتهي')) color = '#ef4444';
+        else if(remaining && remaining.includes('ينتهي اليوم')) color = '#f59e0b';
+        else if(remaining) color = '#4ade80';
+
+        return `
+        <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; border:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-weight:bold; color:#fbbf24;">تصريح #${p.number || 'N/A'}</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">
+                    انتهاء: ${p.exp_g || '-'} | المدة: ${p.duration || '-'} يوم | التكلفة: ${p.cost || 0} ر.س
+                </div>
+                ${remaining ? `<div style="font-size:0.75rem; color:${color}; margin-top:2px;">${remaining}</div>` : ''}
+                <div style="font-size:0.8rem; color:#94a3b8;">
+                    الأبعاد: ${p.width || '-'}x${p.height || '-'} cm
+                </div>
+            </div>
+            <div style="display:flex; gap:5px;">
+                ${p.img ? `<button onclick="window.open('${p.img}')" class="btn btn-secondary" style="padding:2px 8px;" title="عرض الصورة">🖼️</button>` : ''}
+                <button onclick="deletePermit(${idx})" class="btn btn-danger" style="padding:2px 8px;">🗑️</button>
+            </div>
+        </div>
+    `}).join('');
+}
+
 async function saveLicense() {
     const branch = document.getElementById('lic-branch').value.trim();
-    if(!branch) { alert('يرجى إدخال اسم الفرع'); return; }
+    if(!branch) { showToast(getMsg('error_branch_name'), 'error'); return; }
 
-    // Handle File Upload (Mock implementation - usually needs FileReader)
-    let unipoleImg = '';
+    const data = safeParse('admin_licenses', []);
+    const existingItem = licenseEditIndex >= 0 ? data[licenseEditIndex] : null;
+
+    // --- Unipole Image ---
+    let unipoleImg = existingItem?.store_license?.unipole_img || '';
     const fileInput = document.getElementById('lic-unipole-file');
     if(fileInput.files && fileInput.files[0]) {
-        unipoleImg = await readFileAsBase64(fileInput.files[0]);
-    } else if (licenseEditIndex >= 0) {
-        // Keep existing image if not changed
-        const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
-        unipoleImg = data[licenseEditIndex]?.store_license?.unipole_img || '';
+        const fbUrl = await uploadFileToFirebase(fileInput.files[0], 'licenses/unipole');
+        if(fbUrl) unipoleImg = fbUrl;
+        else unipoleImg = await readFileAsBase64(fileInput.files[0]);
     }
+
+    // --- Store License File ---
+    let storeFile = existingItem?.store_license?.file || '';
+    const storeFileInput = document.getElementById('lic-store-file');
+    if(storeFileInput.files && storeFileInput.files[0]) {
+        const fbUrl = await uploadFileToFirebase(storeFileInput.files[0], 'licenses/store');
+        if(fbUrl) storeFile = fbUrl;
+        else storeFile = await readFileAsBase64(storeFileInput.files[0]);
+    }
+
+    // --- Civil Defense File ---
+    let civilFile = existingItem?.civil_defense?.file || '';
+    const civilFileInput = document.getElementById('lic-civil-file');
+    if(civilFileInput.files && civilFileInput.files[0]) {
+        const fbUrl = await uploadFileToFirebase(civilFileInput.files[0], 'licenses/civil');
+        if(fbUrl) civilFile = fbUrl;
+        else civilFile = await readFileAsBase64(civilFileInput.files[0]);
+    }
+
+    // --- Ads Permits Images (Loop through new ones) ---
+    // Note: This logic assumes currentAdsPermits already has image URLs or Base64
+    // Ideally, when adding an ad permit, we should upload the image immediately.
+    // Let's keep it as is for now, but ensure future ad permits use upload logic.
 
     const item = {
         branch: branch,
         region: document.getElementById('lic-region').value,
         brand: document.getElementById('lic-brand').value,
+        unified_code: document.getElementById('lic-unified-code').value,
         cost: parseFloat(document.getElementById('lic-cost').value) || 0,
         hidden: document.getElementById('lic-hidden').checked,
         store_license: {
@@ -3228,29 +4230,37 @@ async function saveLicense() {
             status: document.getElementById('lic-store-status').value,
             exp_g: document.getElementById('lic-store-date').value,
             has_vertical: document.getElementById('lic-has-vertical').value,
-            unipole_img: unipoleImg
+            unipole_img: unipoleImg,
+            file: storeFile
         },
         civil_defense: {
             number: document.getElementById('lic-civil-num').value,
             status: document.getElementById('lic-civil-status').value,
             exp_g: document.getElementById('lic-civil-date').value,
+            file: civilFile
         },
         permit_24: { 
-            status: document.getElementById('lic-p24').value,
-            number: document.getElementById('lic-p24-num').value
+            exists: document.getElementById('lic-p24-exist').checked,
+            number: document.getElementById('lic-p24-num').value,
+            exp_g: document.getElementById('lic-p24-date').value,
+            cost: document.getElementById('lic-p24-cost').value
         },
         permit_hd: { 
-            status: document.getElementById('lic-phd').value,
-            number: document.getElementById('lic-phd-num').value
+            exists: document.getElementById('lic-phd-exist').checked,
+            number: document.getElementById('lic-phd-num').value,
+            exp_g: document.getElementById('lic-phd-date').value,
+            cost: document.getElementById('lic-phd-cost').value
         },
-        ads_permit: {
-            number: document.getElementById('lic-ads-num').value,
-            exp_g: document.getElementById('lic-ads-date').value
-        }
+        permit_out: {
+            exists: document.getElementById('lic-out-exist').checked,
+            number: document.getElementById('lic-out-num').value,
+            exp_g: document.getElementById('lic-out-date').value,
+            area: document.getElementById('lic-out-area').value,
+            cost: document.getElementById('lic-out-cost').value
+        },
+        ads_permits: currentAdsPermits // Save the array of ads permits
     };
 
-    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
-    
     if(licenseEditIndex >= 0) {
         data[licenseEditIndex] = item;
     } else {
@@ -3258,8 +4268,18 @@ async function saveLicense() {
     }
 
     localStorage.setItem('admin_licenses', JSON.stringify(data));
+    
+    // Backup to Firestore
+    if (typeof firebase !== 'undefined') {
+        try {
+            const db = firebase.firestore();
+            await db.collection('licenses').doc(branch + '_' + Date.now()).set(item);
+        } catch(e) { console.error("Firestore Backup Error", e); }
+    }
+
     document.getElementById('license-modal').style.display = 'none';
     renderLicensesTable();
+    showToast(getMsg('success_license_saved'), 'success');
 }
 
 function readFileAsBase64(file) {
@@ -3273,20 +4293,22 @@ function readFileAsBase64(file) {
 
 function saveBranchCosts() {
     // Costs are saved on change, but this provides visual feedback
-    alert('تم حفظ التكاليف بنجاح!');
+    showToast(getMsg('success_costs_saved'), 'success');
     
     // Also update board KPIs if needed (Optional)
     // We could sum costs and update a CMS field
-    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    const data = safeParse('admin_licenses', []);
     const totalCost = data.reduce((sum, item) => sum + (item.cost || 0), 0);
     console.log('Total Operational Cost:', totalCost);
 }
 
 function clearLicensesData() {
-    if(confirm('هل أنت متأكد من مسح جميع بيانات التراخيص؟')) {
+    if(confirm(getMsg('confirm_clear_licenses'))) {
         localStorage.removeItem('admin_licenses');
         renderLicensesTable();
-        alert('تم مسح البيانات.');
+        // Reset full code / reload to ensure state is clear
+        location.reload(); 
+        showToast(getMsg('success_data_cleared'), 'success');
     }
 }
 
@@ -3302,18 +4324,154 @@ function toggleLicensesVisibility() {
 }
 
 function loadLicensesConfig() {
-    const showDashboard = localStorage.getItem('config_show_licenses_dashboard') === 'true';
-    const showPublic = localStorage.getItem('config_show_licenses_public') === 'true';
+    // Default to true if not set
+    const showDashboard = localStorage.getItem('config_show_licenses_dashboard') !== 'false';
+    const showPublic = localStorage.getItem('config_show_licenses_public') !== 'false';
     
     const chkDash = document.getElementById('chk-show-licenses-dashboard');
     const chkPub = document.getElementById('chk-show-licenses-public');
     
     if(chkDash) chkDash.checked = showDashboard;
     if(chkPub) chkPub.checked = showPublic;
+    
+    // Ensure initial values are saved if missing
+    if (localStorage.getItem('config_show_licenses_dashboard') === null) localStorage.setItem('config_show_licenses_dashboard', 'true');
+    if (localStorage.getItem('config_show_licenses_public') === null) localStorage.setItem('config_show_licenses_public', 'true');
 }
 
 // Initial Render for Licenses
 document.addEventListener('DOMContentLoaded', () => {
     renderLicensesTable();
     loadLicensesConfig();
+    loadBrands();
+
+    // Attach listeners for Days Remaining calculation
+    const dateFields = [
+        { in: 'lic-store-date', out: 'lic-store-days-left' },
+        { in: 'lic-civil-date', out: 'lic-civil-days-left' },
+        { in: 'lic-p24-date', out: 'lic-p24-days-left' },
+        { in: 'lic-phd-date', out: 'lic-phd-days-left' },
+        { in: 'lic-out-date', out: 'lic-out-days-left' },
+        { in: 'new-ads-date', out: 'new-ads-days-left' }
+    ];
+
+    dateFields.forEach(f => {
+        const el = document.getElementById(f.in);
+        if (el) {
+            el.addEventListener('input', () => updateDaysDisplay(f.in, f.out));
+            el.addEventListener('change', () => updateDaysDisplay(f.in, f.out));
+        }
+    });
+    // Enable Paste on File Inputs
+    enablePasteForFileInputs();
 });
+
+function enablePasteForFileInputs() {
+    const fileInputs = [
+        'lic-store-file',
+        'lic-unipole-file',
+        'lic-civil-file',
+        'new-ads-file',
+        'emp-iqama-file',
+        'emp-health-file',
+        'emp-airport-permit-file'
+    ];
+
+    fileInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return;
+
+        // Add visual hint
+        const label = input.previousElementSibling;
+        if(label && label.tagName === 'LABEL') {
+            const span = document.createElement('span');
+            span.innerHTML = ' <small style="color:#60a5fa; cursor:pointer;">(Paste Image Enabled 📋)</small>';
+            span.onclick = () => {
+                input.focus();
+                showToast('اضغط Ctrl+V للصق الصورة', 'info');
+            };
+            label.appendChild(span);
+        }
+
+        // Handle Paste
+        input.addEventListener('paste', (e) => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf("image") !== -1) {
+                    const blob = items[i].getAsFile();
+                    const dt = new DataTransfer();
+                    dt.items.add(blob);
+                    input.files = dt.files;
+                    
+                    // Trigger preview if exists
+                    // We need to simulate change event
+                    const event = new Event('change', { bubbles: true });
+                    input.dispatchEvent(event);
+                    
+                    showToast('تم لصق الصورة بنجاح! 📸', 'success');
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+
+        // Allow container paste (optional, if user clicks near input)
+        const parent = input.parentElement;
+        if(parent) {
+             parent.addEventListener('paste', (e) => {
+                 // Only if input is not focused (to avoid double paste if we added listener to input)
+                 if(document.activeElement !== input) {
+                    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf("image") !== -1) {
+                            const blob = items[i].getAsFile();
+                            const dt = new DataTransfer();
+                            dt.items.add(blob);
+                            input.files = dt.files;
+                            const event = new Event('change', { bubbles: true });
+                            input.dispatchEvent(event);
+                            showToast('تم لصق الصورة بنجاح! 📸', 'success');
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                 }
+             });
+        }
+    });
+}
+
+function calculateDaysRemaining(dateVal) {
+    if (!dateVal) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateVal);
+    target.setHours(0, 0, 0, 0);
+    
+    if (isNaN(target.getTime())) return '';
+
+    const diffTime = target - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 0) {
+        return `متبقي: ${diffDays} يوم`;
+    } else if (diffDays === 0) {
+        return `ينتهي اليوم`;
+    } else {
+        return `منتهي منذ ${Math.abs(diffDays)} يوم`;
+    }
+}
+
+function updateDaysDisplay(inputId, displayId) {
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(displayId);
+    if (input && display) {
+        const val = input.value;
+        const msg = calculateDaysRemaining(val);
+        display.textContent = msg;
+        
+        if (msg.includes('منتهي')) display.style.color = '#ef4444';
+        else if (msg.includes('ينتهي اليوم')) display.style.color = '#f59e0b';
+        else display.style.color = '#4ade80';
+    }
+}

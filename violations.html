@@ -295,13 +295,13 @@
         }
         // Load Violations for Table
         document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('list-types'); // Using the types list container for now
-            // Or if there is a main table, we should find it. 
-            // Looking at previous Read, there isn't a big table, just "types-list".
-            // Let's inject a proper table if possible or just populate the list.
+            const container = document.getElementById('list-types'); 
             
-            const rawData = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
-            const statsData = JSON.parse(localStorage.getItem('violations_data_override') || '{}');
+            // Define safeParse locally
+            const safeParse = (k, d) => { try { return JSON.parse(localStorage.getItem(k)||JSON.stringify(d)); } catch(e){ return d; } };
+            
+            const rawData = safeParse('admin_violations_raw', []);
+            const statsData = safeParse('violations_data_override', {});
             
             // Render Types List (Common Violations)
             if(container && statsData.common_types) {

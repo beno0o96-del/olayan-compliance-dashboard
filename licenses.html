@@ -294,22 +294,26 @@
                     originalRender(); 
                 } else {
                     // Fallback if admin.js logic isn't available or fails
-                    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
-                    renderTableFallback(data);
-                }
+                // Define safeParse locally if not available
+                const safeParse = (k, d) => { try { return JSON.parse(localStorage.getItem(k)||JSON.stringify(d)); } catch(e){ return d; } };
+                const data = safeParse('admin_licenses', []);
+                renderTableFallback(data);
+            }
 
-                // 2. Update Dashboard Charts & KPIs
-                updateDashboardStats();
-            };
+            // 2. Update Dashboard Charts & KPIs
+            updateDashboardStats();
+        };
 
-            // Initial Load
-            setTimeout(window.renderLicensesTable, 100);
-        });
+        // Initial Load
+        setTimeout(window.renderLicensesTable, 100);
+    });
 
-        function updateDashboardStats() {
-            const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
-            
-            if (data.length === 0) {
+    function updateDashboardStats() {
+        // Define safeParse locally if not available
+        const safeParse = (k, d) => { try { return JSON.parse(localStorage.getItem(k)||JSON.stringify(d)); } catch(e){ return d; } };
+        const data = safeParse('admin_licenses', []);
+        
+        if (data.length === 0) {
                 // Zero out KPIs
                 document.getElementById('kpi-total').textContent = '0';
                 document.getElementById('kpi-store-exp').textContent = '0';

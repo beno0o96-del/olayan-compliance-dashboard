@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('Global Error:', msg, url, line, col, error);
+            // alert('Error: ' + msg + '\nLine: ' + line); // Optional: Alert user
+            return false;
+        };
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم النظام | Olayan Admin</title>
@@ -8,29 +15,98 @@
     <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
     <!-- SheetJS for Excel Import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
-    <script src="admin.js?v=5" defer></script>
     <!-- app.js is needed for data fetching logic if we want to sync with board data -->
     <script src="app.js?v=7" defer></script>
+    <style>
+        /* Toast Notification System */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(15, 23, 42, 0.95);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Tajawal', sans-serif;
+            border: 1px solid rgba(255,255,255,0.1);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            min-width: 320px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon { background: #10b981; color: #fff; }
+        .toast-error .toast-icon { background: #ef4444; color: #fff; }
+        .toast-info .toast-icon { background: #3b82f6; color: #fff; }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+            color: #fff;
+        }
+        
+        .toast-message {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+    </style>
 </head>
 <body class="admin-body ar">
-
+    <div id="toast-container"></div>
+    
     <!-- LOGIN SCREEN -->
     <div id="login-section" class="login-wrapper">
         <div class="login-box">
-            <img src="olayan-logo.png" alt="Olayan Logo" style="height: 60px; margin-bottom: 20px;">
-            <h2 id="login-title">Admin Login</h2>
+            <img src="olayan-logo.png" alt="Olayan Logo" class="login-logo">
+            <h2 id="login-title" class="login-title">Admin Login</h2>
             
-            <div class="form-group text-right">
+            <div class="form-group">
                 <label id="lbl-user" for="username">Username</label>
                 <input type="text" id="username" class="form-control" placeholder="Enter Username">
             </div>
-            <div class="form-group text-right">
+            
+            <div class="form-group">
                 <label id="lbl-pass" for="pin">Password</label>
                 <div style="position: relative;">
-                    <input type="password" id="pin" class="form-control" placeholder="Enter Password" style="padding-right: 40px;">
-                    <!-- SVG Eye Icon (Watermark Style) -->
+                    <input type="password" id="pin" class="form-control" placeholder="Enter Password">
                     <span id="toggle-password" class="eye-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
@@ -38,15 +114,15 @@
                 </div>
             </div>
             
-            <button id="login" class="btn btn-primary" style="width: 100%; justify-content: center;">Sign In</button>
+            <button id="login" class="btn btn-primary" style="width: 100%;">Sign In</button>
             
-            <a href="#" class="forgot-pass" id="forgot-pass-link" style="display: block; margin-top: 20px; color: #64748b; text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
+            <a href="#" class="forgot-pass" id="forgot-pass-link">Forgot Password?</a>
 
-            <p id="msg" style="margin-top: 20px; color: #ff6b6b; font-size: 0.9rem;"></p>
+            <p id="msg" style="margin-top: 20px; color: var(--danger); font-size: 0.9rem;"></p>
 
-            <div class="lang-switch" style="margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
-                <button class="btn btn-secondary" id="login-lang-en" style="border-radius: 15px; padding: 5px 15px;">English</button>
-                <button class="btn btn-secondary" id="login-lang-ar" style="border-radius: 15px; padding: 5px 15px;">العربية</button>
+            <div class="lang-switch" style="margin-top: 25px; display: flex; justify-content: center; gap: 10px;">
+                <button class="btn btn-glass" id="login-lang-en" style="font-size: 0.8rem; padding: 6px 15px; border-radius: 20px;">English</button>
+                <button class="btn btn-glass" id="login-lang-ar" style="font-size: 0.8rem; padding: 6px 15px; border-radius: 20px;">العربية</button>
             </div>
         </div>
     </div>
@@ -158,26 +234,26 @@
                         <div onclick="showSection('settings'); return false;" class="nav-item" id="nav-settings">
                             <i>⚙️</i> الإعدادات العامة
                         </div>
-                        <div onclick="showSection('media'); return false;" class="nav-item" id="nav-media" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
-                            <i>🖼️</i> الوسائط (قريباً)
+                        <div onclick="showSection('media'); return false;" class="nav-item" id="nav-media">
+                            <i>🖼️</i> الوسائط
                         </div>
-                        <div onclick="showSection('pages'); return false;" class="nav-item" id="nav-pages" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
-                            <i>📄</i> الصفحات (قريباً)
+                        <div onclick="showSection('pages'); return false;" class="nav-item" id="nav-pages">
+                            <i>📄</i> الصفحات
                         </div>
-                        <div onclick="showSection('comments'); return false;" class="nav-item" id="nav-comments" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
-                            <i>💬</i> التعليقات (قريباً)
+                        <div onclick="showSection('comments'); return false;" class="nav-item" id="nav-comments">
+                            <i>💬</i> التعليقات
                         </div>
-                        <div onclick="showSection('appearance'); return false;" class="nav-item" id="nav-appearance" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
+                        <div onclick="showSection('appearance'); return false;" class="nav-item" id="nav-appearance">
                             <i>🎨</i> المظهر
                         </div>
-                        <div onclick="showSection('plugins'); return false;" class="nav-item" id="nav-plugins" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
-                            <i>🧩</i> الإضافات (قريباً)
+                        <div onclick="showSection('plugins'); return false;" class="nav-item" id="nav-plugins">
+                            <i>🧩</i> الإضافات
                         </div>
-                        <div onclick="showSection('tools'); return false;" class="nav-item" id="nav-tools" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
-                            <i>🛠️</i> الأدوات (قريباً)
+                        <div onclick="showSection('tools'); return false;" class="nav-item" id="nav-tools">
+                            <i>🛠️</i> الأدوات
                         </div>
-                        <div onclick="showSection('email'); return false;" class="nav-item" id="nav-email" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
-                            <i>✉️</i> البريد (قريباً)
+                        <div onclick="showSection('email'); return false;" class="nav-item" id="nav-email">
+                            <i>✉️</i> البريد
                         </div>
                     </div>
                 </div>
@@ -610,80 +686,92 @@
                 <div id="section-branches" class="d-none">
                     <div class="card-section">
                         <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
-                            <span class="section-title" id="branches-title">فروع</span>
+                            <span class="section-title" id="branches-title">إدارة الفروع والـ KPIs</span>
                             <a href="branches.html" target="_blank" class="btn btn-secondary" id="btn-open-branches">فتح صفحة الفروع ↗</a>
                         </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                            <div>
-                                <label id="lbl-branch-name" style="display:block; color:#666; font-size:0.85rem;">اسم الفرع</label>
-                                <input id="br-name" class="form-control" type="text">
-                            </div>
-                            <div>
-                                <label id="lbl-branch-type" style="display:block; color:#666; font-size:0.85rem;">النوع</label>
-                                <select id="br-type" class="form-control">
-                                    <option value="basic" id="opt-type-basic">أساسي</option>
-                                    <option value="opening" id="opt-type-opening">افتتاح</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label id="lbl-branch-brand" style="display:block; color:#666; font-size:0.85rem;">العلامة التجارية</label>
-                                <input id="br-brand" class="form-control" type="text" placeholder="BK / TC / BWW">
-                            </div>
-                            <div>
-                                <label id="lbl-branch-email" style="display:block; color:#666; font-size:0.85rem;">الايميل</label>
-                                <input id="br-email" class="form-control" type="email">
-                            </div>
-                            <div>
-                                <label id="lbl-branch-cost" style="display:block; color:#666; font-size:0.85rem;">Cost Center</label>
-                                <input id="br-cost" class="form-control" type="text">
-                            </div>
-                            <div>
-                                <label id="lbl-branch-ops" style="display:block; color:#666; font-size:0.85rem;">OPS1</label>
-                                <input id="br-ops" class="form-control" type="text">
-                            </div>
-                            <div>
-                                <label id="lbl-branch-logo" style="display:block; color:#666; font-size:0.85rem;">شعار العلامة</label>
-                                <input id="br-logo" class="form-control" type="file" accept="image/*">
-                            </div>
-                            <div>
-                                <label id="lbl-branch-kpi-target" style="display:block; color:#666; font-size:0.85rem;">هدف KPI</label>
-                                <input id="br-kpi-target" class="form-control" type="number" step="0.01">
-                            </div>
-                            <div>
-                                <label id="lbl-branch-kpi-value" style="display:block; color:#666; font-size:0.85rem;">قيمة KPI</label>
-                                <input id="br-kpi-value" class="form-control" type="number" step="0.01">
-                            </div>
+
+                        <!-- Section Toggle -->
+                        <div class="section-toggle" onclick="toggleSectionContent('branches-content', this)" style="cursor:pointer; display:flex; align-items:center; gap:5px; margin-bottom:15px; user-select:none;">
+                            <span class="toggle-icon" style="transition:transform 0.3s;">▼</span>
+                            <span style="font-weight:bold; color:#4facfe;">عرض/إخفاء التفاصيل</span>
                         </div>
-                        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-                            <button class="btn btn-primary" id="btn-branch-save">حفظ الفرع</button>
-                            <button class="btn btn-secondary" id="btn-branch-new">فرع جديد</button>
-                            <button class="btn btn-secondary" id="btn-branch-export">تصدير JSON</button>
-                            <input type="file" id="br-json-file" accept="application/json" style="display:none;">
-                            <button class="btn btn-secondary" id="btn-branch-import">استيراد JSON</button>
-                            <button class="btn btn-secondary" id="btn-branch-import-text">استيراد من نص</button>
-                        </div>
-                        <div style="margin-top:8px;">
-                            <label style="display:block; color:#666; font-size:0.85rem;">لصق قائمة (الاسم TAB مركز التكلفة TAB الايميل)</label>
-                            <textarea id="br-bulk-text" class="form-control" rows="4" placeholder="الاسم\t6120... - BK - فرع\tbk.example@olayanfood.com"></textarea>
-                        </div>
-                        <div style="margin-top:16px; overflow:auto;">
-                            <table class="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>اسم الفرع</th>
-                                        <th>النوع</th>
-                                        <th>العلامة</th>
-                                        <th>الايميل</th>
-                                        <th>Cost Center</th>
-                                        <th>OPS1</th>
-                                        <th>KPI%</th>
-                                        <th>الشعار</th>
-                                        <th>الحالة</th>
-                                        <th>إجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="branches-table-body"></tbody>
-                            </table>
+
+                        <div id="branches-content" style="transition:all 0.3s ease-out; overflow:hidden;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div>
+                                    <label id="lbl-branch-name" style="display:block; color:#666; font-size:0.85rem;">اسم الفرع</label>
+                                    <input id="br-name" class="form-control" type="text">
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-type" style="display:block; color:#666; font-size:0.85rem;">النوع</label>
+                                    <select id="br-type" class="form-control">
+                                        <option value="basic" id="opt-type-basic">أساسي</option>
+                                        <option value="opening" id="opt-type-opening">افتتاح</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-brand" style="display:block; color:#666; font-size:0.85rem;">العلامة التجارية</label>
+                                    <input id="br-brand" class="form-control" type="text" placeholder="BK / TC / BWW">
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-email" style="display:block; color:#666; font-size:0.85rem;">الايميل</label>
+                                    <input id="br-email" class="form-control" type="email">
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-cost" style="display:block; color:#666; font-size:0.85rem;">Cost Center</label>
+                                    <input id="br-cost" class="form-control" type="text">
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-ops" style="display:block; color:#666; font-size:0.85rem;">OPS1</label>
+                                    <input id="br-ops" class="form-control" type="text">
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-logo" style="display:block; color:#666; font-size:0.85rem;">شعار العلامة</label>
+                                    <input id="br-logo" class="form-control" type="file" accept="image/*">
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-kpi-target" style="display:block; color:#666; font-size:0.85rem;">هدف KPI</label>
+                                    <input id="br-kpi-target" class="form-control" type="number" step="0.01">
+                                </div>
+                                <div>
+                                    <label id="lbl-branch-kpi-value" style="display:block; color:#666; font-size:0.85rem;">قيمة KPI</label>
+                                    <input id="br-kpi-value" class="form-control" type="number" step="0.01">
+                                </div>
+                            </div>
+                            <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+                                <button class="btn btn-primary" id="btn-branch-save">حفظ الفرع</button>
+                                <button class="btn btn-secondary" id="btn-branch-new">فرع جديد</button>
+                                <button class="btn btn-secondary" id="btn-branch-export">تصدير JSON</button>
+                                <input type="file" id="br-json-file" accept="application/json" style="display:none;">
+                                <button class="btn btn-secondary" id="btn-branch-import">استيراد JSON</button>
+                                <button class="btn btn-secondary" id="btn-branch-import-text">استيراد من نص</button>
+                            </div>
+                            <div style="margin-top:8px;">
+                                <label style="display:block; color:#666; font-size:0.85rem;">لصق قائمة (الاسم TAB مركز التكلفة TAB الايميل)</label>
+                                <textarea id="br-bulk-text" class="form-control" rows="4" placeholder="الاسم\t6120... - BK - فرع\tbk.example@olayanfood.com"></textarea>
+                            </div>
+                            <div style="margin-top:16px; overflow:auto;">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم الفرع</th>
+                                            <th>النوع</th>
+                                            <th>العلامة</th>
+                                            <th>الايميل</th>
+                                            <th>Cost Center</th>
+                                            <th>OPS1</th>
+                                            <th>KPI%</th>
+                                            <th>الشعار</th>
+                                            <th>الحالة</th>
+                                            <th>إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="branches-table-body"></tbody>
+                                </table>
+                            </div>
+                            <div id="br-count-total" style="margin-top: 20px; text-align: left; color: #94a3b8; font-size: 0.9rem;">
+                                إجمالي الفروع: 0
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -696,40 +784,59 @@
                             <a href="violations.html" target="_blank" class="btn btn-secondary">فتح لوحة المخالفات ↗</a>
                         </div>
                         
-                        <div style="background: rgba(79,172,254,0.05); border: 1px solid rgba(79,172,254,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                            <h4 style="margin-top: 0; color: #4facfe;">استيراد البيانات (Excel / CSV)</h4>
-                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">
-                                قم برفع ملف Excel يحتوي على بيانات المخالفات. النظام سيقوم تلقائياً بحساب الإحصائيات (الإجمالي، المبالغ، المناطق، الأكثر تكراراً).
-                            </p>
-                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                                <input type="file" id="vio-excel-file" accept=".xlsx, .xls, .csv" style="display: none;">
-                                <button class="btn btn-primary" onclick="document.getElementById('vio-excel-file').click()">📂 رفع ملف Excel</button>
-                                <span id="vio-file-name" style="color: #666; font-size: 0.9rem;"></span>
-                            </div>
-                            <div style="margin-top: 15px; font-size: 0.85rem; color: #888;">
-                                <strong>الأعمدة المطلوبة (الترتيب غير مهم، ابحث عن الأسماء):</strong><br>
-                                Branch (الفرع), Region (المنطقة), Violation (المخالفة), Amount (الغرامة), Status (الحالة: Open/Closed), Date (التاريخ)
-                            </div>
+                        <!-- Section Toggle -->
+                        <div class="section-toggle" onclick="toggleSectionContent('violations-content', this)" style="cursor:pointer; display:flex; align-items:center; gap:5px; margin-bottom:15px; user-select:none;">
+                            <span class="toggle-icon" style="transition:transform 0.3s;">▼</span>
+                            <span style="font-weight:bold; color:#4facfe;">عرض/إخفاء التفاصيل</span>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <!-- JSON Management -->
-                            <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
-                                <h4 style="margin-top: 0; color: #555;">إدارة ملف JSON</h4>
-                                <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <button class="btn btn-secondary" onclick="document.getElementById('vio-json-file').click()">استيراد JSON جاهز</button>
-                                    <input type="file" id="vio-json-file" accept=".json" style="display: none;">
-                                    
-                                    <button class="btn btn-secondary" onclick="downloadViolationsJSON()">تصدير البيانات الحالية (JSON)</button>
-                                    <button class="btn btn-danger" onclick="clearViolationsData()">🗑️ مسح جميع البيانات</button>
+                        <div id="violations-content" style="transition:all 0.3s ease-out; overflow:hidden;">
+                            <!-- Column Toggle for Violations -->
+                            <div class="column-toggle-wrapper" style="margin-bottom: 15px; position: relative;">
+                                <button class="btn btn-secondary" onclick="toggleColumnMenu('vio-col-menu')" style="display: flex; align-items: center; gap: 5px;">
+                                    <span>👁️ إظهار/إخفاء الأعمدة</span>
+                                    <span style="font-size: 0.8em;">▼</span>
+                                </button>
+                                <div id="vio-col-menu" class="column-menu" style="display: none; position: absolute; top: 100%; right: 0; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; z-index: 100; min-width: 200px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                                    <!-- Checkboxes will be injected here via JS -->
                                 </div>
                             </div>
 
-                            <!-- Current Stats Preview -->
-                            <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
-                                <h4 style="margin-top: 0; color: #555;">حالة البيانات الحالية</h4>
-                                <div id="vio-stats-preview" style="font-size: 0.9rem; color: #333;">
-                                    جاري التحميل...
+                            <div style="background: rgba(79,172,254,0.05); border: 1px solid rgba(79,172,254,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                                <h4 style="margin-top: 0; color: #4facfe;">استيراد البيانات (Excel / CSV)</h4>
+                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">
+                                    قم برفع ملف Excel يحتوي على بيانات المخالفات. النظام سيقوم تلقائياً بحساب الإحصائيات (الإجمالي، المبالغ، المناطق، الأكثر تكراراً).
+                                </p>
+                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                    <input type="file" id="vio-excel-file" accept=".xlsx, .xls, .csv" style="display: none;">
+                                    <button class="btn btn-primary" onclick="document.getElementById('vio-excel-file').click()">📂 رفع ملف Excel</button>
+                                    <span id="vio-file-name" style="color: #666; font-size: 0.9rem;"></span>
+                                </div>
+                                <div style="margin-top: 15px; font-size: 0.85rem; color: #888;">
+                                    <strong>الأعمدة المطلوبة (الترتيب غير مهم، ابحث عن الأسماء):</strong><br>
+                                    Branch (الفرع), Region (المنطقة), Violation (المخالفة), Amount (الغرامة), Status (الحالة: Open/Closed), Date (التاريخ)
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <!-- JSON Management -->
+                                <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+                                    <h4 style="margin-top: 0; color: #555;">إدارة ملف JSON</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                                        <button class="btn btn-secondary" onclick="document.getElementById('vio-json-file').click()">استيراد JSON جاهز</button>
+                                        <input type="file" id="vio-json-file" accept=".json" style="display: none;">
+                                        
+                                        <button class="btn btn-secondary" onclick="downloadViolationsJSON()">تصدير البيانات الحالية (JSON)</button>
+                                        <button class="btn btn-danger" onclick="clearViolationsData()">🗑️ مسح جميع البيانات</button>
+                                    </div>
+                                </div>
+
+                                <!-- Current Stats Preview -->
+                                <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+                                    <h4 style="margin-top: 0; color: #555;">حالة البيانات الحالية</h4>
+                                    <div id="vio-stats-preview" style="font-size: 0.9rem; color: #333;">
+                                        جاري التحميل...
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -834,17 +941,28 @@
                         </div>
                         
                         <div style="overflow-x: auto; margin-top: 15px;">
-                            <table class="data-table" style="width: 100%; min-width: 1000px;">
+                            <!-- Column Toggle for Employees -->
+                            <div class="column-toggle-wrapper" style="margin-bottom: 15px; position: relative;">
+                                <button class="btn btn-secondary" onclick="toggleColumnMenu('emp-col-menu')" style="display: flex; align-items: center; gap: 5px;">
+                                    <span>👁️ إظهار/إخفاء الأعمدة</span>
+                                    <span style="font-size: 0.8em;">▼</span>
+                                </button>
+                                <div id="emp-col-menu" class="column-menu" style="display: none; position: absolute; top: 100%; right: 0; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; z-index: 100; min-width: 200px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                                    <!-- Checkboxes will be injected here via JS -->
+                                </div>
+                            </div>
+
+                            <table class="data-table" id="employees-table" style="width: 100%; min-width: 1000px;">
                                 <thead>
                                     <tr style="background: #0f172a;">
-                                        <th id="th-emp">الموظف</th>
-                                        <th id="th-iqama">رقم الهوية/الإقامة</th>
-                                        <th id="th-brand">العلامة التجارية</th>
-                                        <th id="th-branch">الفرع</th>
-                                        <th id="th-region">المنطقة</th>
-                                        <th id="th-health">الشهادة الصحية</th>
-                                        <th id="th-training">حالة التدريب</th>
-                                        <th id="th-view">عرض</th>
+                                        <th id="th-emp" data-col="emp">الموظف</th>
+                                        <th id="th-iqama" data-col="iqama">رقم الهوية/الإقامة</th>
+                                        <th id="th-brand" data-col="brand">العلامة التجارية</th>
+                                        <th id="th-branch" data-col="branch">الفرع</th>
+                                        <th id="th-region" data-col="region">المنطقة</th>
+                                        <th id="th-health" data-col="health">الشهادة الصحية</th>
+                                        <th id="th-training" data-col="training">حالة التدريب</th>
+                                        <th id="th-view" data-col="view">عرض</th>
                                     </tr>
                                 </thead>
                                 <tbody id="employees-table-body">
@@ -852,8 +970,9 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div id="emp-pagination" style="margin-top: 20px; text-align: left; color: #94a3b8; font-size: 0.9rem;">
-                            عرض 50 من أصل 1200 موظف
+                        <div id="emp-pagination" style="margin-top: 20px; display:flex; justify-content:space-between; align-items:center; color: #94a3b8; font-size: 0.9rem;">
+                            <div id="emp-count-total">إجمالي العدد: 0</div>
+                            <div id="emp-page-info">عرض 0 من أصل 0 موظف</div>
                         </div>
                     </div>
                 </div>
@@ -1166,106 +1285,164 @@
     </div>
 
             <div id="employee-modal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:9999;">
-        <div style="background:#0b0e2b; color:#fff; width:92%; max-width:900px; border-radius:16px; overflow:hidden;">
-            <div id="emp-banner" style="height:140px; background:#0b0e2b;"></div>
+        <div style="background:#0b0e2b; color:#fff; width:92%; max-width:800px; border-radius:16px; overflow:hidden; max-height:95vh; overflow-y:auto;">
+            <div id="emp-banner" style="height:120px; background:#0b0e2b;"></div>
             <div style="padding:20px;">
-                <div style="display:flex; align-items:center; gap:15px; margin-top:-70px;">
-                    <div style="position:relative; width:96px; height:96px;">
-                        <div id="emp-avatar" style="width:96px; height:96px; border-radius:14px; background:#4facfe; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.6rem; overflow:hidden;">A</div>
-                        <button id="btn-change-photo" class="btn btn-secondary" style="position:absolute; bottom:-10px; inset-inline-start:0; transform:translateY(50%); padding:4px 8px; font-size:0.75rem;">تغيير الصورة</button>
+                <div style="display:flex; align-items:center; gap:15px; margin-top:-60px;">
+                    <div style="position:relative; width:80px; height:80px;">
+                        <div id="emp-avatar" style="width:80px; height:80px; border-radius:14px; background:#4facfe; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.4rem; overflow:hidden;">A</div>
+                        <button id="btn-change-photo" class="btn btn-secondary" style="position:absolute; bottom:-10px; inset-inline-start:0; transform:translateY(50%); padding:2px 6px; font-size:0.7rem;">تغيير الصورة</button>
                         <input id="emp-photo" type="file" accept="image/*" style="display:none;">
                     </div>
                     <div>
-                        <div id="emp-name-display" style="font-size:1.4rem; font-weight:700;"></div>
+                        <div id="emp-name-display" style="font-size:1.2rem; font-weight:700;"></div>
                         <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
-                            <div id="emp-role-display" style="color:#4facfe; font-size:0.95rem; font-weight:bold;"></div>
-                            <div id="emp-id-display" style="color:#94a3b8; font-size:0.85rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;"></div>
+                            <div id="emp-role-display" style="color:#4facfe; font-size:0.9rem; font-weight:bold;"></div>
+                            <div id="emp-id-display" style="color:#94a3b8; font-size:0.8rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;"></div>
                         </div>
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
                     <div>
-                        <label id="lbl-sap" style="display:block; color:#b0bec5; font-size:0.85rem;">SAP ID</label>
-                        <input id="emp-sap" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                        <label id="lbl-sap" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">SAP ID</label>
+                        <input id="emp-sap" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
                     </div>
                     <div>
-                        <label id="lbl-ref" style="display:block; color:#b0bec5; font-size:0.85rem;">REF#</label>
-                        <input id="emp-ref" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                        <label id="lbl-ref" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">REF#</label>
+                        <input id="emp-ref" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
                     </div>
                     <div>
-                        <label id="lbl-iqama" style="display:block; color:#b0bec5; font-size:0.85rem;">ID#</label>
-                        <input id="emp-iqama" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                        <label id="lbl-iqama" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">ID#</label>
+                        <input id="emp-iqama" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
                     </div>
                     <div>
-                        <label id="lbl-name" style="display:block; color:#b0bec5; font-size:0.85rem;">Name</label>
-                        <input id="emp-name" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                        <label id="lbl-name" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Name</label>
+                        <input id="emp-name" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
                     </div>
                     <div>
-                        <label id="lbl-band" style="display:block; color:#b0bec5; font-size:0.85rem;">Band</label>
-                        <input id="emp-band" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-cost" style="display:block; color:#b0bec5; font-size:0.85rem;">Cost center</label>
-                        <input id="emp-cost" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-ops1" style="display:block; color:#b0bec5; font-size:0.85rem;">Ops</label>
-                        <input id="emp-ops1" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-hire" style="display:block; color:#b0bec5; font-size:0.85rem;">Hire date</label>
-                        <input id="emp-hire" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-tede" style="display:block; color:#b0bec5; font-size:0.85rem;">T. E. D.E</label>
-                        <input id="emp-tede" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-train-end" style="display:block; color:#b0bec5; font-size:0.85rem;">Training END Date</label>
-                        <input id="emp-train-end" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <label id="lbl-status1" style="display:block; color:#b0bec5; font-size:0.85rem;">Status1</label>
-                            <span id="badge-status1" style="font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:bold; display:none;"></span>
-                        </div>
-                        <input id="emp-status1" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-days-train" style="display:block; color:#b0bec5; font-size:0.85rem;">Days Left - T.E.D.E</label>
-                        <input id="emp-days-train" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-health" style="display:block; color:#b0bec5; font-size:0.85rem;">Health card expired Date</label>
-                        <input id="emp-health" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <label id="lbl-status2" style="display:block; color:#b0bec5; font-size:0.85rem;">Status2</label>
-                            <span id="badge-status2" style="font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:bold; display:none;"></span>
-                        </div>
-                        <input id="emp-status2" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-days-health" style="display:block; color:#b0bec5; font-size:0.85rem;">Days Left - Health card</label>
-                        <input id="emp-days-health" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-city" style="display:block; color:#b0bec5; font-size:0.85rem;">city</label>
-                        <input id="emp-city" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
-                    </div>
-                    <div>
-                        <label id="lbl-region" style="display:block; color:#b0bec5; font-size:0.85rem;">Region</label>
-                        <input id="emp-region" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                        <label id="lbl-phone" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Phone Number</label>
+                        <input id="emp-phone" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
                     </div>
                     <div style="grid-column: span 2;">
-                        <label id="lbl-remarks" style="display:block; color:#b0bec5; font-size:0.85rem;">Remarks</label>
-                        <input id="emp-remarks" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff;">
+                        <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; color:#b0bec5; font-size:0.8rem; margin-bottom:5px;">
+                            <input type="checkbox" id="chk-iqama-img" style="width:14px; height:14px;">
+                            <span>Upload ID/Iqama Image (صورة الهوية/الإقامة)</span>
+                        </label>
+                        <div id="div-iqama-img" style="display:none; margin-top:5px;">
+                            <input id="emp-iqama-file" type="file" accept="image/*" class="form-control" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px; font-size:0.8rem;">
+                            <div id="view-iqama-img" style="margin-top:5px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label id="lbl-band" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Band</label>
+                        <input id="emp-band" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-cost" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Cost center</label>
+                        <input id="emp-cost" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-ops1" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Ops</label>
+                        <input id="emp-ops1" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-hire" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Hire date</label>
+                        <input id="emp-hire" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-tede" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">T. E. D.E</label>
+                        <input id="emp-tede" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-train-end" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Training END Date</label>
+                        <input id="emp-train-end" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label id="lbl-status1" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Status1</label>
+                            <span id="badge-status1" style="font-size:0.75rem; padding:1px 6px; border-radius:4px; font-weight:bold; display:none;"></span>
+                        </div>
+                        <input id="emp-status1" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-days-train" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Days Left - T.E.D.E</label>
+                        <input id="emp-days-train" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-health" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Health card expired Date</label>
+                        <input id="emp-health" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label id="lbl-status2" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Status2</label>
+                            <span id="badge-status2" style="font-size:0.75rem; padding:1px 6px; border-radius:4px; font-weight:bold; display:none;"></span>
+                        </div>
+                        <input id="emp-status2" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-days-health" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Days Left - Health card</label>
+                        <input id="emp-days-health" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; color:#b0bec5; font-size:0.8rem; margin-bottom:5px;">
+                            <input type="checkbox" id="chk-health-img" style="width:14px; height:14px;">
+                            <span>Upload Health Card Image (صورة الكرت الصحي)</span>
+                        </label>
+                        <div id="div-health-img" style="display:none; margin-top:5px;">
+                            <input id="emp-health-file" type="file" accept="image/*" class="form-control" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px; font-size:0.8rem;">
+                            <div id="view-health-img" style="margin-top:5px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- AIRPORT PERMIT CARD SECTION -->
+                    <div style="grid-column: span 2; border-top: 1px solid #334155; margin: 10px 0; padding-top: 10px;">
+                        <span style="color: #4facfe; font-size: 0.9rem; font-weight: bold;">Airport Permit Card (كرت تصريح مطار)</span>
+                    </div>
+                    <div>
+                        <label id="lbl-airport-permit-number" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Permit Number (رقم التصريح)</label>
+                        <input id="emp-airport-permit-number" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-airport-permit-expiry" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Expiry Date (تاريخ انتهاء)</label>
+                        <input id="emp-airport-permit-expiry" class="form-control" type="date" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label id="lbl-airport-permit-status" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Status (الحالة)</label>
+                            <span id="badge-airport-permit-status" style="font-size:0.75rem; padding:1px 6px; border-radius:4px; font-weight:bold; display:none;"></span>
+                        </div>
+                        <input id="emp-airport-permit-status" class="form-control" type="text" placeholder="فعال, نشط, مفقود, ملغي, مسلم" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-airport-permit-days" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Remaining Days (الايام المتبقية)</label>
+                        <input id="emp-airport-permit-days" class="form-control" type="text" disabled style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; color:#b0bec5; font-size:0.8rem; margin-bottom:5px;">
+                            <input type="checkbox" id="chk-airport-permit-img" style="width:14px; height:14px;">
+                            <span>Upload Permit Image (صورة من التصريح)</span>
+                        </label>
+                        <div id="div-airport-permit-img" style="display:none; margin-top:5px;">
+                            <input id="emp-airport-permit-file" type="file" accept="image/*" class="form-control" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px; font-size:0.8rem;">
+                            <div id="view-airport-permit-img" style="margin-top:5px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label id="lbl-city" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">city</label>
+                        <input id="emp-city" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div>
+                        <label id="lbl-region" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Region</label>
+                        <input id="emp-region" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label id="lbl-remarks" style="display:block; color:#b0bec5; font-size:0.8rem; margin-bottom:2px;">Remarks</label>
+                        <input id="emp-remarks" class="form-control" type="text" style="background:#0f172a; border:1px solid #334155; color:#fff; padding:4px 8px; height:32px;">
                     </div>
                 </div>
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                    <button class="btn btn-secondary" id="btn-close-emp">إلغاء</button>
-                    <button class="btn btn-primary" id="btn-save-emp">حفظ</button>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+                    <button class="btn btn-secondary" id="btn-close-emp" style="padding:4px 12px; font-size:0.9rem;">إلغاء</button>
+                    <button class="btn btn-primary" id="btn-save-emp" style="padding:4px 12px; font-size:0.9rem;">حفظ</button>
                 </div>
             </div>
         </div>
@@ -1296,11 +1473,18 @@
                     </div>
                     <div>
                         <label style="display:block; margin-bottom:5px; color:#94a3b8;">العلامة التجارية</label>
-                        <select id="lic-brand" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
-                            <option value="BK">Burger King</option>
-                            <option value="TC">Texas Chicken</option>
-                            <option value="BWW">Buffalo Wild Wings</option>
-                        </select>
+                        <div style="display:flex; gap:5px;">
+                            <select id="lic-brand" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; flex:1;">
+                                <option value="BK">Burger King</option>
+                                <option value="TC">Texas Chicken</option>
+                                <option value="BWW">Buffalo Wild Wings</option>
+                            </select>
+                            <button type="button" onclick="addNewBrand()" class="btn btn-secondary" style="padding:0 10px; font-weight:bold; font-size:1.2rem;" title="إضافة علامة تجارية">+</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:5px; color:#94a3b8;">الكود الموحد (Unified Code)</label>
+                        <input id="lic-unified-code" type="text" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
                     </div>
                 </div>
 
@@ -1337,7 +1521,12 @@
                     
                     <label style="display:block; margin-bottom:5px; color:#94a3b8;">تاريخ الانتهاء</label>
                     <input id="lic-store-date" type="date" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                    <div id="lic-store-days-left" style="font-size: 0.8rem; margin-top: -5px; margin-bottom: 10px; min-height: 20px;"></div>
                 
+                    <label style="display:block; margin-bottom:5px; color:#94a3b8;">صورة الترخيص (PDF/Image)</label>
+                    <input id="lic-store-file" type="file" accept="image/*,application/pdf" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                    <div id="lic-store-file-view" style="margin-bottom:10px;"></div>
+
                     <label style="display:block; margin-bottom:5px; color:#94a3b8;">هل توجد لوحات عمودية؟</label>
                     <select id="lic-has-vertical" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
                         <option value="No">لا</option>
@@ -1365,51 +1554,194 @@
                     
                     <label style="display:block; margin-bottom:5px; color:#94a3b8;">تاريخ الانتهاء</label>
                     <input id="lic-civil-date" type="date" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                    <div id="lic-civil-days-left" style="font-size: 0.8rem; margin-top: 5px; margin-bottom: 10px; min-height: 20px;"></div>
+
+                    <label style="display:block; margin-bottom:5px; color:#94a3b8;">صورة الترخيص (PDF/Image)</label>
+                    <input id="lic-civil-file" type="file" accept="image/*,application/pdf" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                    <div id="lic-civil-file-view" style="margin-bottom:10px;"></div>
                 </div>
 
-                <!-- Permits Row 1 -->
-                <div>
-                    <label style="display:block; margin-bottom:5px; color:#94a3b8;">تصريح 24 ساعة</label>
-                    <select id="lic-p24" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
-                        <option value="Yes">Yes (نعم)</option>
-                        <option value="No">No (لا)</option>
-                        <option value="N/A">N/A (غير متوفر)</option>
-                    </select>
-                    <input id="lic-p24-num" type="text" placeholder="رقم التصريح" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
-                </div>
-                <div>
-                    <label style="display:block; margin-bottom:5px; color:#94a3b8;">تصريح التوصيل المنزلي</label>
-                    <select id="lic-phd" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
-                        <option value="Yes">Yes (نعم)</option>
-                        <option value="No">No (لا)</option>
-                        <option value="N/A">N/A (غير متوفر)</option>
-                    </select>
-                    <input id="lic-phd-num" type="text" placeholder="رقم التصريح" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                <!-- Permits Section -->
+                <div style="grid-column: span 2; display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    
+                    <!-- 24 Hours Permit -->
+                    <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:8px; border:1px solid #334155;">
+                        <h4 style="color:#60a5fa; margin:0 0 10px 0;">تصريح 24 ساعة</h4>
+                        <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; color:#fff; margin-bottom:10px;">
+                            <input type="checkbox" id="lic-p24-exist" style="width:18px; height:18px;">
+                            <span>يوجد تصريح</span>
+                        </label>
+                        
+                        <div id="div-p24-details" style="display:none;">
+                            <label style="display:block; margin-bottom:5px; color:#94a3b8;">رقم التصريح</label>
+                            <input id="lic-p24-num" type="text" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                            
+                            <label style="display:block; margin-bottom:5px; color:#94a3b8;">تاريخ الانتهاء</label>
+                            <input id="lic-p24-date" type="date" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                            
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">التكلفة</label>
+                                <input id="lic-p24-cost" type="number" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Home Delivery Permit -->
+                    <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:8px; border:1px solid #334155;">
+                        <h4 style="color:#f472b6; margin:0 0 10px 0;">تصريح التوصيل</h4>
+                        <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; color:#fff; margin-bottom:10px;">
+                            <input type="checkbox" id="lic-phd-exist" style="width:18px; height:18px;">
+                            <span>يوجد تصريح</span>
+                        </label>
+                        
+                        <div id="div-phd-details" style="display:none;">
+                            <label style="display:block; margin-bottom:5px; color:#94a3b8;">رقم التصريح</label>
+                            <input id="lic-phd-num" type="text" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                            
+                            <label style="display:block; margin-bottom:5px; color:#94a3b8;">تاريخ الانتهاء</label>
+                            <input id="lic-phd-date" type="date" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                            <div id="lic-phd-days-left" style="font-size: 0.8rem; margin-top: -5px; margin-bottom: 10px; min-height: 20px;"></div>
+
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">التكلفة</label>
+                                <input id="lic-phd-cost" type="number" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Outdoor Seating Permit -->
+                    <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:8px; border:1px solid #334155; grid-column: span 2;">
+                        <h4 style="color:#a78bfa; margin:0 0 10px 0;">تصريح الجلسات الخارجية</h4>
+                        <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; color:#fff; margin-bottom:10px;">
+                            <input type="checkbox" id="lic-out-exist" style="width:18px; height:18px;">
+                            <span>يوجد تصريح</span>
+                        </label>
+                        
+                        <div id="div-out-details" style="display:none; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">رقم التصريح</label>
+                                <input id="lic-out-num" type="text" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                                
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">تاريخ الانتهاء</label>
+                                <input id="lic-out-date" type="date" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                                <div id="lic-out-days-left" style="font-size: 0.8rem; margin-top: 5px; margin-bottom: 10px; min-height: 20px;"></div>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">المساحة (م²)</label>
+                                <input id="lic-out-area" type="number" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; margin-bottom:10px;">
+                                
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">التكلفة</label>
+                                <input id="lic-out-cost" type="number" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Advertising Permit -->
                 <div style="grid-column: span 2;">
-                    <h4 style="color:#fbbf24; margin:10px 0 10px 0;">التصريح الإعلاني</h4>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                        <div>
-                            <label style="display:block; margin-bottom:5px; color:#94a3b8;">رقم التصريح</label>
-                            <input id="lic-ads-num" type="text" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                    <h4 style="color:#fbbf24; margin:10px 0 10px 0;">التصاريح الإعلانية</h4>
+                    
+                    <!-- List of existing permits -->
+                    <div id="ads-permits-list" style="margin-bottom:15px; display:flex; flex-direction:column; gap:10px;">
+                        <!-- Dynamic Content -->
+                    </div>
+
+                    <!-- Button to show add form -->
+                    <button type="button" onclick="showAddPermitForm()" class="btn btn-secondary" style="width:100%; border:1px dashed #fbbf24; color:#fbbf24; padding: 10px;">
+                        + إضافة تصريح إعلاني جديد
+                    </button>
+
+                    <!-- Add/Edit Permit Form (Hidden by default) -->
+                    <div id="div-add-permit-form" style="display:none; margin-top:15px; border:1px solid #334155; padding:15px; border-radius:8px; background:rgba(255,255,255,0.02);">
+                        <h5 style="margin-top:0; color:#cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 10px;">تفاصيل التصريح</h5>
+                        <input type="hidden" id="new-ads-id"> <!-- For editing -->
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:10px;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">رقم التصريح</label>
+                                <input id="new-ads-num" type="text" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">تاريخ الانتهاء</label>
+                                <input id="new-ads-date" type="date" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                                <div id="new-ads-days-left" style="font-size: 0.8rem; margin-top: 5px; margin-bottom: 10px; min-height: 20px;"></div>
+                            </div>
                         </div>
-                        <div>
-                            <label style="display:block; margin-bottom:5px; color:#94a3b8;">تاريخ الانتهاء</label>
-                            <input id="lic-ads-date" type="date" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:10px;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">مدة التصريح</label>
+                                <select id="new-ads-duration" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                                    <option value="30">30 يوم</option>
+                                    <option value="60">60 يوم</option>
+                                    <option value="90">90 يوم</option>
+                                    <option value="365">سنة (365 يوم)</option>
+                                    <option value="Other">أخرى</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">التكلفة (ر.س)</label>
+                                <input id="new-ads-cost" type="number" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <label style="display:block; margin-bottom:5px; color:#94a3b8;">صورة الملصق / اللوحة</label>
+                            <input id="new-ads-file" type="file" accept="image/*" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            <img id="new-ads-preview" src="" style="max-width:100%; height:auto; margin-top:10px; border-radius:8px; display:none; border:1px solid #334155;">
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">الطول (cm)</label>
+                                <input id="new-ads-h" type="number" placeholder="مثال: 120" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; color:#94a3b8;">العرض (cm)</label>
+                                <input id="new-ads-w" type="number" placeholder="مثال: 80" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff;">
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:10px;">
+                            <button type="button" onclick="addPermitToList()" class="btn btn-primary" style="flex:1;">حفظ التصريح</button>
+                            <button type="button" onclick="hideAddPermitForm()" class="btn btn-danger" style="flex:1;">إلغاء</button>
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-                <button onclick="document.getElementById('license-modal').style.display='none'" class="btn btn-secondary">إلغاء</button>
-                <button onclick="saveLicense()" class="btn btn-primary">حفظ البيانات</button>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                <button onclick="document.getElementById('license-modal').style.display='none'" class="btn btn-secondary" style="padding:6px 15px;">إلغاء</button>
+                <button onclick="saveLicense()" class="btn btn-primary" style="padding:6px 15px;">حفظ البيانات</button>
             </div>
         </div>
     </div>
 
+    <!-- Brand Modal -->
+    <div id="brand-modal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); z-index:10000;">
+        <div style="background:#1e293b; color:#fff; width:90%; max-width:400px; border-radius:12px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+            <h3 style="margin-top:0; color:#fbbf24; margin-bottom:15px;">إضافة علامة تجارية جديدة</h3>
+            <label style="display:block; margin-bottom:5px; color:#94a3b8;">اسم العلامة التجارية</label>
+            <input id="new-brand-name" type="text" class="form-control" style="background:#0f172a; border-color:#334155; color:#fff; width:100%; margin-bottom:20px;" placeholder="أدخل الاسم هنا...">
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="document.getElementById('brand-modal').style.display='none'" class="btn btn-secondary">إلغاء</button>
+                <button onclick="saveNewBrand()" class="btn btn-primary">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs (Compat version for easier integration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <!-- Config File -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Main Script -->
+    <script src="admin.js"></script>
 </body>
 </html>

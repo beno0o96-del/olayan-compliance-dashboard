@@ -215,6 +215,17 @@ function getTranslation(text, lang) {
     return text; // Return original if no translation found
 }
 
+function safeParse(key, defaultVal) {
+    try {
+        const item = localStorage.getItem(key);
+        if (!item) return defaultVal;
+        return JSON.parse(item);
+    } catch (e) {
+        console.error(`Error parsing ${key} from localStorage:`, e);
+        return defaultVal;
+    }
+}
+
 // Slideshow Logic
 let slideIndex = 0;
 let slideInterval;
@@ -248,10 +259,9 @@ function initSlideshow() {
 
     const heroSection = document.querySelector('.hero');
     // Load Violations Data from LocalStorage if available (Live Sync)
-    const storedViolations = localStorage.getItem('violations_data_override');
-    if(storedViolations) {
+    const vData = safeParse('violations_data_override', null);
+    if(vData) {
         try {
-            const vData = JSON.parse(storedViolations);
             // Check if it's the "stats" structure from Admin
             if(vData.regions) {
                  // Reset
@@ -420,16 +430,11 @@ async function fetchViolationsData() {
     if (!document.getElementById('v-total-count')) return;
 
     // 1. Check LocalStorage (Admin Updates)
-    const localData = localStorage.getItem('violations_data_override');
-    if (localData) {
-        try {
-            const parsed = JSON.parse(localData);
-            console.log("Using LocalStorage Violations Data");
-            updateViolationsDashboard(parsed);
-            return; // Exit if local data exists
-        } catch (e) {
-            console.error("Error parsing local violations data", e);
-        }
+    const parsed = safeParse('violations_data_override', null);
+    if (parsed) {
+        console.log("Using LocalStorage Violations Data");
+        updateViolationsDashboard(parsed);
+        return; // Exit if local data exists
     }
 
     // 2. Fetch from JSON File (Default)
@@ -788,15 +793,10 @@ async function toggleServicesDashboard() {
 
 async function fetchServicesData() {
     // 1. Check LocalStorage Override
-    const localData = localStorage.getItem('services_data_override');
-    if (localData) {
-        try {
-            const parsed = JSON.parse(localData);
-            updateServicesDashboard(parsed);
-            return;
-        } catch (e) {
-            console.error("Error parsing services override", e);
-        }
+    const parsed = safeParse('services_data_override', null);
+    if (parsed) {
+        updateServicesDashboard(parsed);
+        return;
     }
 
     // 2. Fetch from JSON
@@ -900,11 +900,9 @@ async function fetchBoardData() {
     }
 
     // CHECK FOR LOCAL STORAGE OVERRIDES
-    const saved = localStorage.getItem('board_overrides');
-    if (saved) {
+    const overrides = safeParse('board_overrides', null);
+    if (overrides) {
         try {
-            const overrides = JSON.parse(saved);
-            
             // Merge overrides deeply? Or just high level sections?
             // Simple merge for now as structure matches
             if (overrides.header_kpis) data.header_kpis = { ...data.header_kpis, ...overrides.header_kpis };
@@ -1725,7 +1723,7 @@ function initAICustomerService() {
             status: 'new'
         };
 
-        const existing = JSON.parse(localStorage.getItem('complaints') || '[]');
+        const existing = safeParse('complaints', []);
         existing.push(complaint);
         localStorage.setItem('complaints', JSON.stringify(existing));
 

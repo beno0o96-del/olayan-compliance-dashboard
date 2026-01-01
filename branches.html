@@ -383,11 +383,13 @@
 
         // Load Dynamic Branches with Full Details
         document.addEventListener('DOMContentLoaded', () => {
-            // Load all datasets
-            const branchesRaw = JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
-            const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-            const violations = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
-            const licenses = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+            // Load all datasets using safeParse from app.js (if available) or defined here
+            const safeParse = (k, d) => { try { return JSON.parse(localStorage.getItem(k)||JSON.stringify(d)); } catch(e){ return d; } };
+            
+            const branchesRaw = safeParse('admin_branches_data', []);
+            const employees = safeParse('admin_employees', []);
+            const violations = safeParse('admin_violations_raw', []);
+            const licenses = safeParse('admin_licenses', []);
 
             const container = document.getElementById('dynamic-branches');
             
