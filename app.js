@@ -1,5 +1,5 @@
 // Fallback Data Constants (Embedded for local execution/offline support)
-const FALLBACK_DATA = {
+var FALLBACK_DATA = {
     "kpis": {
         "openViolations": 15,
         "closedViolations": 128,
@@ -8,7 +8,7 @@ const FALLBACK_DATA = {
     }
 };
 
-const FALLBACK_VIOLATIONS = {
+var FALLBACK_VIOLATIONS = {
     "summary": {
         "total_violations": 0,
         "total_amount": 0,
@@ -21,7 +21,7 @@ const FALLBACK_VIOLATIONS = {
     "common_types": []
 };
 
-const FALLBACK_BOARD = {
+var FALLBACK_BOARD = {
   "header_kpis": {
     "roi": { "value": "37.8%", "trend": "up", "color": "#4caf50" },
     "effectiveness": { "value": "93.0%", "trend": "flat", "color": "#FFC107" },
@@ -67,54 +67,9 @@ const FALLBACK_BOARD = {
     { "label": { "en": "HR", "ar": "الموارد البشرية" }, "value": "90%" }
   ],
   "violations": {
-    "western": [
-      { 
-        "branch": { "en": "Jeddah Branch", "ar": "فرع جدة" },
-        "type": { "en": "Critical Safety Violation", "ar": "مخالفة سلامة حرجة" },
-        "level": { "en": "High", "ar": "عالي" },
-        "count": 3,
-        "color": "#f44336"
-      },
-      { 
-        "branch": { "en": "Makkah Branch", "ar": "فرع مكة" },
-        "type": { "en": "Hygiene Alert", "ar": "تنبيه نظافة" },
-        "level": { "en": "Medium", "ar": "متوسط" },
-        "count": 2,
-        "color": "#FFC107"
-      }
-    ],
-    "central": [
-      { 
-        "branch": { "en": "TXC Olaya", "ar": "تكساس تشيكن العليا" },
-        "type": { "en": "Unsafe temperatures", "ar": "عدم التقيد بدرجات الحرارة المناسبة لحفظ المواد الغذائية" },
-        "level": { "en": "High", "ar": "عالية" },
-        "count": 5,
-        "color": "#f44336"
-      },
-      { 
-        "branch": { "en": "BK Malaz", "ar": "برجر كنج الملز" },
-        "type": { "en": "Pests detected", "ar": "وجود حشرات أو قوارض" },
-        "level": { "en": "High", "ar": "عالية" },
-        "count": 1,
-        "color": "#f44336"
-      }
-    ],
-    "eastern": [
-       { 
-        "branch": { "en": "BK Dammam", "ar": "برجر كنج الدمام" },
-        "type": { "en": "Expired license", "ar": "انتهاء رخصة المحل" },
-        "level": { "en": "High", "ar": "عالية" },
-        "count": 4,
-        "color": "#f44336"
-      },
-      { 
-        "branch": { "en": "TXC Khobar", "ar": "تكساس تشيكن الخبر" },
-        "type": { "en": "Worker health card expired", "ar": "انتهاء الشهادة الصحية للعامل" },
-        "level": { "en": "Med", "ar": "متوسطة" },
-        "count": 2,
-        "color": "#FFC107"
-      }
-    ]
+    "western": [],
+    "central": [],
+    "eastern": []
   },
   "metrics_row": [
     { "label": { "en": "Overall Compliance", "ar": "الامتثال العام" }, "value": "+95%", "color": "#00d2be", "subtext": { "en": "Licenses & Health Cards", "ar": "الرخص والشهادات الصحية" }, "subcolor": "#4caf50" },
@@ -151,7 +106,7 @@ const FALLBACK_BOARD = {
   ]
 };
 
-const FALLBACK_SERVICES = {
+var FALLBACK_SERVICES = {
   "kpis": {
     "activeRequests": 142,
     "completedToday": 28,
@@ -241,7 +196,7 @@ function setLang(lang) {
 }
 
 // Translation Dictionary for Dynamic Content
-const dictionary = {
+var dictionary = {
     "عدم وجود المحل على الطبيعة": "Shop not physically found",
     "عدم التقيد بدرجات الحرارة المناسبة لحفظ المواد الغذائية": "Non-compliance with food storage temperatures",
     "تلوث الغذاء بالميكروبات أو السموم الممرضة في المنشأة": "Food contamination with microbes/toxins",
@@ -292,6 +247,40 @@ function initSlideshow() {
     window.addEventListener('resize', handleSlideTimer);
 
     const heroSection = document.querySelector('.hero');
+    // Load Violations Data from LocalStorage if available (Live Sync)
+    const storedViolations = localStorage.getItem('violations_data_override');
+    if(storedViolations) {
+        try {
+            const vData = JSON.parse(storedViolations);
+            // Check if it's the "stats" structure from Admin
+            if(vData.regions) {
+                 // Reset
+                 dashboardData.violations = { western: [], central: [], eastern: [] };
+                 
+                 vData.regions.forEach(reg => {
+                     const rName = reg.name.toLowerCase();
+                     let targetKey = '';
+                     if(rName.includes('west') || rName.includes('غرب')) targetKey = 'western';
+                     else if(rName.includes('central') || rName.includes('riyadh') || rName.includes('وسط') || rName.includes('رياض')) targetKey = 'central';
+                     else if(rName.includes('east') || rName.includes('شرق')) targetKey = 'eastern';
+                     
+                     if(targetKey && reg.violations) {
+                         // Map admin violations to dashboard format
+                         dashboardData.violations[targetKey] = reg.violations.slice(0, 5).map(v => ({
+                             branch: { en: v.branch, ar: v.branch },
+                             type: { en: v.type, ar: v.type },
+                             level: { en: "High", ar: "عالية" }, 
+                             count: v.amount || 1,
+                             color: v.status === 'Open' ? "#f44336" : "#4caf50"
+                         }));
+                     }
+                 });
+            }
+        } catch(e) {
+            console.error("Error syncing violations data", e);
+        }
+    }
+
     const heroOverlay = document.querySelector('.hero-overlay');
     if (heroSection && heroOverlay) {
         heroSection.addEventListener('mousemove', (e) => {

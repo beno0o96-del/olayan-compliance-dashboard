@@ -627,5 +627,73 @@
 
     <!-- ================= FOOTER ================= --> 
 
+    <script>
+    // Load Data Function (Shared Logic with Admin)
+    function loadDashboardData() {
+        const storedData = localStorage.getItem('board_overrides');
+        if (storedData) {
+            try {
+                const data = JSON.parse(storedData);
+                
+                // 1. Header KPIs
+                if(data.header_kpis) {
+                    if(data.header_kpis.roi) updateKPI('kpi-roi', data.header_kpis.roi);
+                    if(data.header_kpis.effectiveness) updateKPI('kpi-eff', data.header_kpis.effectiveness);
+                    if(data.header_kpis.risks) updateKPI('kpi-risk', data.header_kpis.risks);
+                }
+
+                // 2. Gauges
+                if(data.gauges && data.gauges.length >= 3) {
+                     // We need to update the CSS var --p and the text
+                     const updateGauge = (id, val, p) => {
+                        const el = document.getElementById(id);
+                        if(el) {
+                            el.style.setProperty('--p', p);
+                            el.innerHTML = val;
+                        }
+                     };
+                     updateGauge('gauge-west', data.gauges[0].value, data.gauges[0].p);
+                     updateGauge('gauge-cen', data.gauges[1].value, data.gauges[1].p);
+                     updateGauge('gauge-east', data.gauges[2].value, data.gauges[2].p);
+                }
+
+                // 3. Projects (Sunburst/Flower)
+                // Note: The flower chart is complex CSS, we update the center text if possible or re-render if we had a builder. 
+                // For now, let's update the legend text if we have IDs or just skip if it's static HTML.
+                // The current HTML has hardcoded values in the "flower" divs. 
+                // To make it dynamic, we would need to rebuild the HTML string. 
+                // Let's stick to updating what's easy or leave it if it's too complex for "Quick Fix".
+                // Actually, let's look for IDs in the flower section.
+                
+                // 4. Stars (Departments)
+                if(data.stars && data.stars.length >= 3) {
+                    const setStar = (id, val) => {
+                        const el = document.getElementById(id);
+                        if(el) el.textContent = val;
+                    }
+                    setStar('star-it', data.stars[0].value);
+                    setStar('star-fin', data.stars[1].value);
+                    setStar('star-maint', data.stars[2].value);
+                }
+
+            } catch(e) {
+                console.error("Error loading board data", e);
+            }
+        }
+    }
+
+    // Helper to update KPI card
+    function updateKPI(id, obj) {
+        const el = document.getElementById(id);
+        if(!el) return;
+        // Assuming obj has { value, trend, color }
+        const valEl = el.querySelector('.kpi-value');
+        if(valEl) valEl.textContent = obj.value;
+        // We could update color/trend icon too if the HTML structure supports it easily
+    }
+
+    // Call on load
+    window.addEventListener('DOMContentLoaded', loadDashboardData);
+    </script>
 </body>
 </html>

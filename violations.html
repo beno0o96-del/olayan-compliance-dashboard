@@ -293,6 +293,29 @@
             toggleBtn.style.display = 'block';
             toggleBtn.onclick = () => sidebar.classList.toggle('active');
         }
+        // Load Violations for Table
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('list-types'); // Using the types list container for now
+            // Or if there is a main table, we should find it. 
+            // Looking at previous Read, there isn't a big table, just "types-list".
+            // Let's inject a proper table if possible or just populate the list.
+            
+            const rawData = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+            const statsData = JSON.parse(localStorage.getItem('violations_data_override') || '{}');
+            
+            // Render Types List (Common Violations)
+            if(container && statsData.common_types) {
+                container.innerHTML = statsData.common_types.map(t => `
+                    <div class="type-item">
+                        <span>${t.type}</span>
+                        <span class="count-badge">${t.count}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // If there's a place for a detailed table, we could add it.
+            // But based on the file content read earlier, it seems to focus on charts and summary cards.
+        });
     </script>
 </body>
 </html>

@@ -97,13 +97,14 @@
                         <a href="#" onclick="showSection('violations')" class="nav-item" id="nav-violations">
                             <i>⚠️</i> المخالفات
                         </a>
-                        <a href="training.html" class="nav-item" id="nav-training">
+                        <a href="training.html" target="_blank" class="nav-item" id="nav-training">
                             <i>🎓</i> التدريب
                         </a>
                         <a href="#" onclick="showSection('branches')" class="nav-item" id="nav-branches">
                             <i>🏬</i> الفروع
                         </a>
-                        <a href="licenses.html" class="nav-item" id="nav-licenses">
+                        <!-- Fixed: Use internal section for Licenses -->
+                        <a href="#" onclick="showSection('licenses')" class="nav-item" id="nav-licenses">
                             <i>📜</i> التراخيص
                         </a>
                         <a href="#" onclick="showSection('advanced-data')" class="nav-item" id="nav-advanced-data">
@@ -128,6 +129,25 @@
                     </div>
                 </div>
 
+                <!-- Group: Quick Access (New) -->
+                <div class="nav-group" id="group-access">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-access')">
+                        <span>🚀 وصول سريع</span>
+                        <i class="arrow-icon">▶</i>
+                    </div>
+                    <div class="nav-group-content" style="display:none;">
+                        <a href="index.html" target="_blank" class="nav-item">
+                            <i>🌐</i> الموقع الرئيسي (Public)
+                        </a>
+                        <a href="login.html" target="_blank" class="nav-item">
+                            <i>🔑</i> دخول الموظفين
+                        </a>
+                        <a href="board.html" target="_blank" class="nav-item">
+                            <i>📊</i> تقرير الإدارة (Public)
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Group 4: System (Collapsed to hide clutter) -->
                 <div class="nav-group" id="group-system">
                     <div class="nav-group-header" onclick="toggleSidebarGroup('group-system')">
@@ -138,26 +158,26 @@
                         <a href="#" onclick="showSection('settings')" class="nav-item" id="nav-settings">
                             <i>⚙️</i> الإعدادات العامة
                         </a>
-                        <a href="#" onclick="showSection('media')" class="nav-item" id="nav-media">
-                            <i>🖼️</i> الوسائط
+                        <a href="#" onclick="showSection('media')" class="nav-item" id="nav-media" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
+                            <i>🖼️</i> الوسائط (قريباً)
                         </a>
-                        <a href="#" onclick="showSection('pages')" class="nav-item" id="nav-pages">
-                            <i>📄</i> الصفحات
+                        <a href="#" onclick="showSection('pages')" class="nav-item" id="nav-pages" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
+                            <i>📄</i> الصفحات (قريباً)
                         </a>
-                        <a href="#" onclick="showSection('comments')" class="nav-item" id="nav-comments">
-                            <i>💬</i> التعليقات
+                        <a href="#" onclick="showSection('comments')" class="nav-item" id="nav-comments" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
+                            <i>💬</i> التعليقات (قريباً)
                         </a>
-                        <a href="#" onclick="showSection('appearance')" class="nav-item" id="nav-appearance">
+                        <a href="#" onclick="showSection('appearance')" class="nav-item" id="nav-appearance" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
                             <i>🎨</i> المظهر
                         </a>
-                        <a href="#" onclick="showSection('plugins')" class="nav-item" id="nav-plugins">
-                            <i>🧩</i> الإضافات
+                        <a href="#" onclick="showSection('plugins')" class="nav-item" id="nav-plugins" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
+                            <i>🧩</i> الإضافات (قريباً)
                         </a>
-                        <a href="#" onclick="showSection('tools')" class="nav-item" id="nav-tools">
-                            <i>🛠️</i> الأدوات
+                        <a href="#" onclick="showSection('tools')" class="nav-item" id="nav-tools" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
+                            <i>🛠️</i> الأدوات (قريباً)
                         </a>
-                        <a href="#" onclick="showSection('email')" class="nav-item" id="nav-email">
-                            <i>✉️</i> البريد
+                        <a href="#" onclick="showSection('email')" class="nav-item" id="nav-email" style="opacity:0.5; cursor:not-allowed;" title="قريباً">
+                            <i>✉️</i> البريد (قريباً)
                         </a>
                     </div>
                 </div>

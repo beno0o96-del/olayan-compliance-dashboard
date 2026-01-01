@@ -173,14 +173,14 @@
             if (id === 'EMP001' && pass === '123456') {
                 localStorage.setItem('current_employee', JSON.stringify({ id: 'EMP001', name: 'Test Employee' }));
                 alert(document.documentElement.lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Login Successful!');
-                window.location.href = 'employees.html';
+                window.location.href = 'index.html'; // Redirect to Home
                 return;
             }
 
             // Generic check
             if (id.length > 2 && pass.length > 3) {
                  localStorage.setItem('current_employee', JSON.stringify({ id: id, name: 'Employee' }));
-                 window.location.href = 'employees.html';
+                 window.location.href = 'index.html'; // Redirect to Home (Public Dashboard) instead of dead link
             } else {
                  alert(document.documentElement.lang === 'ar' ? 'بيانات الدخول غير صحيحة (جرب EMP001 / 123456)' : 'Invalid credentials (Try EMP001 / 123456)');
             }

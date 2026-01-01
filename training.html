@@ -737,6 +737,51 @@
     </footer>
 
     <script>
+        // Data Loading Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load Employees
+            const employees = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+            
+            // Calculate Stats
+            const total = employees.length || 150; // Mock 150 if empty
+            const certified = employees.filter(e => e.train_status_1 === 'Valid').length || 120;
+            const expired = employees.filter(e => e.train_status_1 === 'Expired').length || 15;
+            const pending = total - certified - expired;
+
+            // Update KPIs
+            document.getElementById('val-total')?.setAttribute('data-target', total);
+            document.getElementById('val-certified')?.setAttribute('data-target', certified);
+            document.getElementById('val-expired')?.setAttribute('data-target', expired);
+            document.getElementById('val-pending')?.setAttribute('data-target', pending);
+
+            // Animate Numbers
+            document.querySelectorAll('.kpi-value').forEach(el => {
+                const target = parseInt(el.getAttribute('data-target') || '0');
+                el.textContent = target; // Simplified for now
+            });
+
+            // Update Charts (Mock Data injection for now, can be dynamic)
+            // ... (Keeping existing chart logic as it's mostly CSS based in this template)
+        });
+
+        // Sidebar Group Toggle
+        function toggleSidebarGroup(groupId) {
+            const group = document.getElementById(groupId);
+            if(!group) return;
+            const content = group.querySelector('.nav-group-content');
+            const arrow = group.querySelector('.arrow-icon');
+            const isActive = group.classList.contains('active');
+            if(isActive) {
+                group.classList.remove('active');
+                content.style.display = 'none';
+                if(arrow) arrow.textContent = '▶';
+            } else {
+                group.classList.add('active');
+                content.style.display = 'block';
+                if(arrow) arrow.textContent = '▼';
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Apply language
             const savedLang = localStorage.getItem('preferred-lang') || 'en';

@@ -194,22 +194,26 @@ function checkLogin() {
         if(adminContent) adminContent.style.display = 'flex'; // Flex for sidebar layout
         
         // Load User Info
-        const userStr = localStorage.getItem('current_admin_user');
-        if (userStr) {
-            const user = JSON.parse(userStr);
-            const nameEl = document.getElementById('admin-user-name');
-            if(nameEl) nameEl.textContent = user.username;
+        try {
+            const userStr = localStorage.getItem('current_admin_user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                const nameEl = document.getElementById('admin-user-name');
+                if(nameEl) nameEl.textContent = user.username;
+            }
+        } catch(e) {
+            console.error('Error parsing user info', e);
         }
 
-        // Load Data
-        loadActivityLog();
-        loadComplaints();
-        loadUsers();
-        loadCMSData();
+        // Load Data - Wrapped in try-catch to prevent crash
+        try { loadActivityLog(); } catch(e){}
+        try { loadComplaints(); } catch(e){}
+        try { loadUsers(); } catch(e){}
+        try { loadCMSData(); } catch(e){}
         
         // Initial Employee Load
-        loadEmployeesFromCSV();
-        autoImportEmployeesFromGitHub();
+        try { loadEmployeesFromCSV(); } catch(e){}
+        try { autoImportEmployeesFromGitHub(); } catch(e){}
         
         // Default Section
         showSection('dashboard');
@@ -251,6 +255,8 @@ function showSection(sectionId) {
         targetSection.classList.remove('d-none');
     } else {
         console.error(`Section #section-${sectionId} not found!`);
+        // Fallback to dashboard if section not found to prevent empty screen
+        if(sectionId !== 'dashboard') showSection('dashboard');
         return;
     }
     
@@ -275,7 +281,7 @@ function showSection(sectionId) {
         'cms': 'إعدادات البيانات (CMS)',
         'services': 'الشكاوى والطلبات',
         'media': 'وسائط',
-        'branches': 'فروع',
+        'branches': 'الفروع',
         'pages': 'صفحات',
         'comments': 'تعليقات',
         'appearance': 'مظهر',
@@ -286,7 +292,8 @@ function showSection(sectionId) {
         'violations': 'إدارة المخالفات',
         'tasks': 'إدارة المهام',
         'licenses': 'إدارة التراخيص والتصاريح',
-        'advanced-data': 'إدارة البيانات المتقدمة'
+        'advanced-data': 'إدارة البيانات المتقدمة',
+        'master-upload': 'إدارة البيانات المركزية'
     };
     const titleEl = document.getElementById('page-title');
     if(titleEl && titles[sectionId]) titleEl.textContent = titles[sectionId];
@@ -432,6 +439,17 @@ function applyAdminLang(){
     renderBranchesTable();
 }
 
+// --- SHARED UTILS ---
+
+// Helper to fuzzy find value in row object
+const find = (row, ...keywords) => {
+    const key = Object.keys(row).find(k => {
+        const lower = k.toLowerCase();
+        return keywords.some(kw => lower.includes(kw.toLowerCase()));
+    });
+    return key ? row[key] : null;
+};
+
 // --- EMPLOYEES LOGIC ---
 
 async function loadEmployeesFromCSV() {
@@ -512,8 +530,38 @@ function parseCSV(text) {
 }
 
 function extractBranchesFromData(employees) {
-    const branches = [...new Set(employees.map(e => e.branch).filter(b => b))];
-    localStorage.setItem('admin_branches', JSON.stringify(branches));
+    // 1. Get raw names
+    const rawBranches = [...new Set(employees.map(e => e.branch).filter(b => b && b !== 'Unknown Branch'))];
+    localStorage.setItem('admin_branches', JSON.stringify(rawBranches));
+
+    // 2. Update rich branches data (admin_branches_data) for UI
+    let richData = JSON.parse(localStorage.getItem('admin_branches_data') || '[]');
+    const existingNames = new Set(richData.map(b => typeof b === 'string' ? b : b.name));
+    
+    let addedCount = 0;
+    rawBranches.forEach(name => {
+        if(!existingNames.has(name)) {
+            // Auto-detect brand
+            let brand = 'Olayan';
+            const lower = name.toLowerCase();
+            if(lower.includes('bk') || lower.includes('burger')) brand = 'Burger King';
+            else if(lower.includes('texas') || lower.includes('chicken')) brand = 'Texas Chicken';
+            else if(lower.includes('bww') || lower.includes('buffalo')) brand = 'Buffalo Wild Wings';
+
+            richData.push({
+                name: name,
+                type: 'basic',
+                brand: brand,
+                source: 'auto'
+            });
+            addedCount++;
+        }
+    });
+
+    if(addedCount > 0) {
+        localStorage.setItem('admin_branches_data', JSON.stringify(richData));
+        console.log(`Auto-added ${addedCount} branches to display list.`);
+    }
 }
 
 function generateRandomEmployees() {
@@ -1050,67 +1098,33 @@ function handleEmployeesExcelUpload(e){
             const workbook = XLSX.read(data, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            
+            // Smart Header Detection
+            const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            if (!rawData || rawData.length === 0) { alert('الملف فارغ'); return; }
+
+            let headerRowIndex = 0;
+            const keywords = ['name', 'iqama', 'id', 'branch', 'الاسم', 'الهوية', 'الفرع', 'cost center'];
+            
+            for (let i = 0; i < Math.min(20, rawData.length); i++) {
+                const rowStr = JSON.stringify(rawData[i]).toLowerCase();
+                const matchCount = keywords.filter(k => rowStr.includes(k)).length;
+                if (matchCount >= 2) { 
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+            console.log('Employees Header Row:', headerRowIndex);
+
+            // Parse with correct header
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
             
             if(jsonData.length === 0){ alert('الملف فارغ'); return; }
             
-            // Map Excel Columns to Employee Object
-            const employees = jsonData.map((row, index) => {
-                // Normalize keys to lowercase for easier matching
-                const k = {};
-                Object.keys(row).forEach(key => k[key.toLowerCase().trim()] = row[key]);
-                
-                // Extract branch logic (similar to CSV parser)
-                const branchRaw = k['cost center'] || k['cost_center'] || k['الفرع'] || '';
-                let branchName = branchRaw;
-                if (typeof branchRaw === 'string' && branchRaw.includes('-')) {
-                    const parts = branchRaw.split('-');
-                    if (parts.length >= 3) branchName = parts.slice(2).join('-').trim();
-                    else if (parts.length === 2) branchName = parts[1].trim();
-                }
-
-                // Robust ID extraction
-                const iqama = k['id'] || k['id#'] || k['iqama'] || k['رقم الهوية'] || k['رقم الإقامة'] || '';
-                
-                return {
-                    id: (index + 1).toString(),
-                    name: k['name'] || k['الاسم'] || '',
-                    iqama: String(iqama),
-                    brand: k['band'] || k['brand'] || k['العلامة التجارية'] || '',
-                    branch: branchName || k['branch'] || '',
-                    cost_center: branchRaw,
-                    region: k['region'] || k['المنطقة'] || '',
-                    health_expiry: k['health card expired date'] || k['health_expiry'] || k['انتهاء الصحية'] || '',
-                    status1: k['status1'] || k['status'] || '',
-                    status2: k['status2'] || '',
-                    training_end: k['training end date'] || k['training_end'] || k['انتهاء التدريب'] || '',
-                    email: k['email'] || k['البريد الإلكتروني'] || '',
-                    // Keep extra fields if needed
-                    sap_id: k['sap id'] || k['sap'] || '',
-                    position: k['position'] || k['الوظيفة'] || '',
-                    ops1: k['ops'] || k['ops1'] || '',
-                    hire_date: k['hire date'] || k['hire_date'] || '',
-                    city: k['city'] || k['المدينة'] || ''
-                };
-            }).filter(e => e.name && e.iqama); // Filter invalid
-
-            const mode = getMergeMode();
-            let stats = { added:0, updated:0, total:0 };
+            processEmployeesDataInternal(jsonData);
             
-            if(mode === 'replace'){
-                localStorage.setItem('admin_employees', JSON.stringify(employees));
-                stats.total = employees.length;
-            } else {
-                const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
-                const res = mergeEmployees(existing, employees);
-                localStorage.setItem('admin_employees', JSON.stringify(res.merged));
-                stats = res.stats;
-            }
-            
-            extractBranchesFromData(employees); // Update branches list
-            loadEmployees();
             setLastUpdateSource('manual'); // Mark as manual/excel upload
-            alert(`تم تحديث الموظفين من Excel: مضاف ${stats.added}، محدث ${stats.updated}`);
+            alert(`تم تحديث الموظفين من Excel بنجاح`);
             
         } catch(err){
             console.error(err);
@@ -1836,8 +1850,26 @@ async function handleViolationsExcelUpload(e) {
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // Convert to JSON
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        // Smart Header Detection
+        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        if (!rawData || rawData.length === 0) { alert('الملف فارغ!'); return; }
+
+        let headerRowIndex = 0;
+        // Keywords for Violations
+        const keywords = ['branch', 'violation', 'amount', 'type', 'الفرع', 'المخالفة', 'الغرامة', 'region', 'المنطقة'];
+        
+        for (let i = 0; i < Math.min(20, rawData.length); i++) {
+            const rowStr = JSON.stringify(rawData[i]).toLowerCase();
+            const matchCount = keywords.filter(k => rowStr.includes(k)).length;
+            if (matchCount >= 2) { 
+                headerRowIndex = i;
+                break;
+            }
+        }
+        console.log('Violations Header Row:', headerRowIndex);
+
+        // Convert to JSON with correct header
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
         
         processViolationsData(jsonData, false, file.name);
         upsertUploadHistory(file.name, ['violations']);
@@ -1870,17 +1902,17 @@ async function handleMasterExcelUpload(e) {
         }
     }
 
-    if(statusEl) {
+    if (statusEl) {
         statusEl.innerHTML = globalLog.length > 0 ? globalLog.join('<br>') : '⚠️ لم يتم العثور على بيانات صالحة.';
         statusEl.style.color = globalLog.some(l => l.includes('❌')) ? '#f59e0b' : '#10b981';
     }
     
-    // Refresh All Views
-    loadEmployees();
-    recomputeViolationsFromRaw();
-    renderLicensesTable();
-    renderViolationsEditor();
-    renderUploadFilesList();
+    // Refresh All Views - wrapped in try/catch for safety
+    try { loadEmployees(); } catch(e){}
+    try { recomputeViolationsFromRaw(); } catch(e){}
+    try { renderLicensesTable(); } catch(e){}
+    try { renderViolationsEditor(); } catch(e){}
+    try { renderUploadFilesList(); } catch(e){}
 }
 
 function processSingleFile(file, log) {
@@ -1891,32 +1923,76 @@ function processSingleFile(file, log) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const typesFound = new Set();
+                
                 workbook.SheetNames.forEach(sheetName => {
                     const worksheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
                     
+                    // 1. Smart Header & Type Detection
+                    // Read as array of arrays first
+                    const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (!rawRows || rawRows.length === 0) return;
+
+                    let detectedType = 'unknown';
+                    let headerIndex = 0;
+                    
+                    // Keywords Map
+                    const typeKeywords = {
+                        'employees': ['iqama', 'id#', 'رقم الهوية', 'cost center', 'nationality', 'hire date'],
+                        'violations': ['violation', 'fine', 'amount', 'type', 'المخالفة', 'الغرامة', 'status', 'observation'],
+                        'licenses': ['license', 'baladiya', 'civil defense', 'رخصة', 'انتهاء', 'expiry', 'permit']
+                    };
+
+                    // Check first 20 rows
+                    for (let i = 0; i < Math.min(20, rawRows.length); i++) {
+                        const rowStr = JSON.stringify(rawRows[i]).toLowerCase();
+                        
+                        // Check against each type
+                        for (const [type, keywords] of Object.entries(typeKeywords)) {
+                            const matchCount = keywords.filter(k => rowStr.includes(k.toLowerCase())).length;
+                            if (matchCount >= 2) { // Threshold
+                                detectedType = type;
+                                headerIndex = i;
+                                break;
+                            }
+                        }
+                        if (detectedType !== 'unknown') break;
+                    }
+
+                    // Fallback to Sheet Name if content detection failed
+                    if (detectedType === 'unknown') {
+                        const lowerName = sheetName.toLowerCase();
+                        if (lowerName.includes('employee') || lowerName.includes('staff') || lowerName.includes('موظف')) detectedType = 'employees';
+                        else if (lowerName.includes('violation') || lowerName.includes('penal') || lowerName.includes('مخالف')) detectedType = 'violations';
+                        else if (lowerName.includes('license') || lowerName.includes('permit') || lowerName.includes('رخص')) detectedType = 'licenses';
+                    }
+
+                    if (detectedType === 'unknown') {
+                        log.push(`⚠️ [${file.name}] ورقة "${sheetName}" لم يتم التعرف عليها تلقائياً`);
+                        return;
+                    }
+
+                    // 2. Parse with correct header
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerIndex });
                     if (jsonData.length === 0) return;
 
-                    const type = detectDataType(sheetName, jsonData);
-                    
-                    if (type === 'employees') {
+                    // 3. Process
+                    if (detectedType === 'employees') {
                         processEmployeesDataInternal(jsonData); 
                         log.push(`✅ [${file.name}] تم تحديث الموظفين (${jsonData.length})`);
                         typesFound.add('employees');
                     } 
-                    else if (type === 'violations') {
+                    else if (detectedType === 'violations') {
                         processViolationsData(jsonData, true, file.name); 
                         log.push(`✅ [${file.name}] تم تحديث المخالفات (${jsonData.length})`);
                         typesFound.add('violations');
                     }
-                    else if (type === 'licenses') {
+                    else if (detectedType === 'licenses') {
                         processLicensesData(jsonData); 
                         log.push(`✅ [${file.name}] تم تحديث التراخيص (${jsonData.length})`);
                         typesFound.add('licenses');
-                    } else {
-                        log.push(`⚠️ [${file.name}] ورقة "${sheetName}" غير معروفة`);
                     }
                 });
+                
                 upsertUploadHistory(file.name, Array.from(typesFound));
                 resolve();
             } catch (err) {
@@ -1966,10 +2042,7 @@ function detectDataType(sheetName, rows) {
 
 function processEmployeesDataInternal(jsonData) {
     const employees = jsonData.map((row, index) => {
-        const k = {};
-        Object.keys(row).forEach(key => k[key.toLowerCase().trim()] = row[key]);
-        
-        const branchRaw = k['cost center'] || k['cost_center'] || k['الفرع'] || '';
+        const branchRaw = find(row, 'cost center', 'cost_center', 'الفرع') || '';
         let branchName = branchRaw;
         if (typeof branchRaw === 'string' && branchRaw.includes('-')) {
             const parts = branchRaw.split('-');
@@ -1977,26 +2050,26 @@ function processEmployeesDataInternal(jsonData) {
             else if (parts.length === 2) branchName = parts[1].trim();
         }
 
-        const iqama = k['id'] || k['id#'] || k['iqama'] || k['رقم الهوية'] || k['رقم الإقامة'] || '';
+        const iqama = find(row, 'id', 'id#', 'iqama', 'رقم الهوية', 'رقم الإقامة') || '';
         
         return {
             id: (index + 1).toString(),
-            name: k['name'] || k['الاسم'] || '',
+            name: find(row, 'name', 'الاسم') || '',
             iqama: String(iqama),
-            brand: k['band'] || k['brand'] || k['العلامة التجارية'] || '',
-            branch: branchName || k['branch'] || '',
+            brand: find(row, 'band', 'brand', 'العلامة التجارية') || '',
+            branch: branchName || find(row, 'branch', 'الموقع') || '',
             cost_center: branchRaw,
-            region: k['region'] || k['المنطقة'] || '',
-            health_expiry: k['health card expired date'] || k['health_expiry'] || k['انتهاء الصحية'] || '',
-            status1: k['status1'] || k['status'] || '',
-            status2: k['status2'] || '',
-            training_end: k['training end date'] || k['training_end'] || k['انتهاء التدريب'] || '',
-            email: k['email'] || k['البريد الإلكتروني'] || '',
-            sap_id: k['sap id'] || k['sap'] || '',
-            position: k['position'] || k['الوظيفة'] || '',
-            ops1: k['ops'] || k['ops1'] || '',
-            hire_date: k['hire date'] || k['hire_date'] || '',
-            city: k['city'] || k['المدينة'] || ''
+            region: find(row, 'region', 'المنطقة') || '',
+            health_expiry: find(row, 'health card', 'health_expiry', 'انتهاء الصحية', 'تاريخ انتهاء') || '',
+            status1: find(row, 'status1', 'status', 'الحالة') || '',
+            status2: find(row, 'status2') || '',
+            training_end: find(row, 'training end', 'training_end', 'انتهاء التدريب') || '',
+            email: find(row, 'email', 'البريد') || '',
+            sap_id: find(row, 'sap id', 'sap') || '',
+            position: find(row, 'position', 'job', 'الوظيفة') || '',
+            ops1: find(row, 'ops', 'ops1') || '',
+            hire_date: find(row, 'hire date', 'hire_date', 'تاريخ التعيين') || '',
+            city: find(row, 'city', 'المدينة') || ''
         };
     }).filter(e => e.name && e.iqama);
 
@@ -2009,6 +2082,7 @@ function processEmployeesDataInternal(jsonData) {
         localStorage.setItem('admin_employees', JSON.stringify(res.merged));
     }
     extractBranchesFromData(employees);
+    loadEmployees();
     setLastUpdateSource('manual');
 }
 
@@ -2019,23 +2093,51 @@ function processViolationsData(rows, silent = false, sourceFileName = '') {
     }
 
     const rawViolations = rows.map((row, idx) => {
-        const normalizedRow = {};
-        Object.keys(row).forEach(k => normalizedRow[k.toLowerCase().trim()] = row[k]);
+        // Use global 'find' helper for flexible column matching
+        // Added more keywords based on user feedback and common excel formats
+        const branch = find(row, 'branch', 'restaurant', 'store', 'site', 'location', 'cc', 'cost center', 'الفرع', 'الموقع', 'المتجر', 'مركز التكلفة') || 'Unknown Branch';
+        let region = find(row, 'region', 'area', 'zone', 'المنطقة', 'النطاق') || 'Unknown';
+        const type = find(row, 'violation', 'type', 'observation', 'desc', 'description', 'note', 'reason', 'المخالفة', 'نوع المخالفة', 'الملاحظة', 'السبب', 'البيان') || 'Other';
+        const rawAmount = find(row, 'amount', 'fine', 'cost', 'total', 'price', 'sar', 'value', 'الغرامة', 'المبلغ', 'القيمة', 'الاجمالي', 'التكلفة') || 0;
+        const status = find(row, 'status', 'state', 'paid', 'الحالة', 'الوضع', 'السداد') || 'Open';
         
-        let region = normalizedRow['region'] || normalizedRow['المنطقة'] || 'Unknown';
+        // Date handling - try multiple formats
+        let dateVal = find(row, 'date', 'created', 'time', 'التاريخ', 'وقت', 'يوم');
+        if (dateVal && typeof dateVal === 'number') {
+            // Excel serial date
+            const dateObj = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
+            dateVal = dateObj.toISOString().split('T')[0];
+        } else if (!dateVal) {
+             dateVal = new Date().toISOString().split('T')[0];
+        }
+
+        const date = dateVal;
+
+        // Normalize Region if empty but branch exists (Try to guess or leave Unknown)
+        // If Region is Unknown, maybe we can infer from Branch name if it contains city
+        if (region === 'Unknown' && branch !== 'Unknown Branch') {
+            const bLower = branch.toLowerCase();
+            if (bLower.includes('riyadh') || bLower.includes('ruh') || bLower.includes('الرياض')) region = 'Riyadh';
+            else if (bLower.includes('jeddah') || bLower.includes('jed') || bLower.includes('جدة') || bLower.includes('makkah') || bLower.includes('مكة')) region = 'Western';
+            else if (bLower.includes('dammam') || bLower.includes('dmm') || bLower.includes('khobar') || bLower.includes('الدمام') || bLower.includes('الخبر')) region = 'Eastern';
+        }
+
+        // Normalize Region Standard Names
         if (region.toLowerCase().includes('riyadh') || region.includes('الرياض')) region = 'Riyadh'; 
         else if (region.toLowerCase().includes('central') || region.includes('الوسطى')) region = 'Central';
-        else if (region.toLowerCase().includes('west') || region.includes('الغربية')) region = 'Western';
-        else if (region.toLowerCase().includes('east') || region.includes('الشرقية')) region = 'Eastern';
+        else if (region.toLowerCase().includes('west') || region.includes('الغربية') || region.includes('جدة') || region.includes('مكة')) region = 'Western';
+        else if (region.toLowerCase().includes('east') || region.includes('الشرقية') || region.includes('الدمام') || region.includes('الخبر')) region = 'Eastern';
+        else if (region.toLowerCase().includes('north') || region.includes('الشمالية')) region = 'Northern';
+        else if (region.toLowerCase().includes('south') || region.includes('الجنوبية') || region.includes('عسير') || region.includes('جيزان')) region = 'Southern';
 
         return {
             id: Date.now() + '_' + idx,
-            branch: normalizedRow['branch'] || normalizedRow['الفرع'] || 'Unknown Branch',
+            branch: branch,
             region: region,
-            type: normalizedRow['violation'] || normalizedRow['type'] || normalizedRow['المخالفة'] || 'Other',
-            amount: parseFloat((normalizedRow['amount'] || normalizedRow['fine'] || normalizedRow['الغرامة'] || 0).toString().replace(/[^\d.-]/g, '')) || 0,
-            status: normalizedRow['status'] || normalizedRow['الحالة'] || 'Open',
-            date: normalizedRow['date'] || normalizedRow['التاريخ'] || new Date().toISOString().split('T')[0],
+            type: type,
+            amount: parseFloat(rawAmount.toString().replace(/[^\d.-]/g, '')) || 0,
+            status: status,
+            date: date,
             source_file: sourceFileName || ''
         };
     });
@@ -2557,32 +2659,55 @@ function renderUploadFilesList(){
     if(!list) return;
     const hist = getUploadHistory();
     list.innerHTML = '';
+    
+    // Add "Delete All" button if there are files
+    if (hist.length > 0) {
+        const headerActions = document.createElement('div');
+        headerActions.style.marginBottom = '10px';
+        headerActions.style.textAlign = 'right';
+        
+        const clearBtn = document.createElement('button');
+        clearBtn.textContent = 'مسح جميع الملفات';
+        clearBtn.className = 'btn btn-danger';
+        clearBtn.style.fontSize = '0.8rem';
+        clearBtn.style.padding = '4px 10px';
+        clearBtn.onclick = () => {
+            if(confirm('هل أنت متأكد من حذف سجل جميع الملفات المرفوعة؟ سيتم إعادة ضبط البيانات.')) {
+                setUploadHistory([]);
+                localStorage.removeItem('admin_violations_raw');
+                localStorage.removeItem('violations_data_override');
+                localStorage.removeItem('admin_employees'); // Optional: Clear employees too? Maybe safer to ask.
+                // For now, let's clear history and re-render, user can re-upload.
+                // Actually, clearing raw data is important to remove the effect of files.
+                recomputeViolationsFromRaw(); 
+                renderUploadFilesList();
+                renderViolationsEditor();
+                alert('تم مسح السجل والبيانات المرتبطة.');
+            }
+        };
+        headerActions.appendChild(clearBtn);
+        list.appendChild(headerActions);
+    }
+
     hist.forEach(h => {
         const row = document.createElement('div');
         row.style.display = 'flex';
         row.style.alignItems = 'center';
         row.style.justifyContent = 'space-between';
         row.style.gap = '10px';
+        row.style.padding = '8px';
+        row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        
         const left = document.createElement('div');
-        left.textContent = h.name;
-        left.style.color = '#e2e8f0';
-        const types = document.createElement('div');
-        types.style.display = 'flex';
-        types.style.gap = '6px';
-        h.types.forEach(t=>{
-            const badge = document.createElement('span');
-            badge.textContent = t;
-            badge.style.padding = '2px 8px';
-            badge.style.border = '1px solid #334155';
-            badge.style.borderRadius = '12px';
-            badge.style.fontSize = '0.75rem';
-            badge.style.color = '#94a3b8';
-            types.appendChild(badge);
-        });
-        left.appendChild(types);
+        left.style.display = 'flex';
+        left.style.alignItems = 'center';
+        left.style.gap = '10px';
+        
+        // Checkbox for enable/disable
         const toggle = document.createElement('input');
         toggle.type = 'checkbox';
         toggle.checked = !!h.enabled;
+        toggle.style.cursor = 'pointer';
         toggle.onchange = () => {
             const hist2 = getUploadHistory();
             const idx2 = hist2.findIndex(x=>x.name===h.name);
@@ -2593,8 +2718,63 @@ function renderUploadFilesList(){
                 renderViolationsEditor();
             }
         };
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = h.name;
+        nameSpan.style.color = h.enabled ? '#e2e8f0' : '#64748b';
+        nameSpan.style.fontSize = '0.9rem';
+
+        left.appendChild(toggle);
+        left.appendChild(nameSpan);
+
+        const right = document.createElement('div');
+        right.style.display = 'flex';
+        right.style.alignItems = 'center';
+        right.style.gap = '10px';
+
+        const types = document.createElement('div');
+        types.style.display = 'flex';
+        types.style.gap = '4px';
+        h.types.forEach(t=>{
+            const badge = document.createElement('span');
+            badge.textContent = t;
+            badge.style.padding = '2px 6px';
+            badge.style.border = '1px solid #334155';
+            badge.style.borderRadius = '4px';
+            badge.style.fontSize = '0.7rem';
+            badge.style.color = '#94a3b8';
+            types.appendChild(badge);
+        });
+        
+        // Delete Single File Button
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '×';
+        delBtn.style.background = 'none';
+        delBtn.style.border = 'none';
+        delBtn.style.color = '#ef4444';
+        delBtn.style.fontSize = '1.2rem';
+        delBtn.style.cursor = 'pointer';
+        delBtn.title = 'حذف الملف';
+        delBtn.onclick = () => {
+            if(confirm(`حذف الملف "${h.name}" من السجل؟`)) {
+                const hist3 = getUploadHistory().filter(x => x.name !== h.name);
+                setUploadHistory(hist3);
+                // Also remove data associated with this file from raw storage
+                const raw = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+                const newRaw = raw.filter(r => r.source_file !== h.name);
+                localStorage.setItem('admin_violations_raw', JSON.stringify(newRaw));
+                
+                recomputeViolationsFromRaw();
+                renderUploadFilesList();
+                renderViolationsEditor();
+            }
+        };
+
+        right.appendChild(types);
+        right.appendChild(delBtn);
+        
         row.appendChild(left);
-        row.appendChild(toggle);
+        row.appendChild(right);
         list.appendChild(row);
     });
 }
@@ -2657,15 +2837,6 @@ function handleLicensesExcelUpload(e) {
 
 function processLicensesData(rows) {
     if (!rows || rows.length === 0) { alert('الملف فارغ!'); return; }
-
-    // Helper to fuzzy find value in row object
-    const find = (row, ...keywords) => {
-        const key = Object.keys(row).find(k => {
-            const lower = k.toLowerCase();
-            return keywords.some(kw => lower.includes(kw.toLowerCase()));
-        });
-        return key ? row[key] : null;
-    };
 
     // Parse Rows
     const licenses = rows.map(row => {
