@@ -62,62 +62,109 @@
                 <span class="sidebar-brand">لوحة التحكم</span>
             </div>
             <nav class="sidebar-nav">
-                <a href="#" onclick="showSection('dashboard')" class="nav-item active" id="nav-dashboard">
-                    <i>📊</i> الرئيسية
-                </a>
-                <a href="#" onclick="showSection('analytics')" class="nav-item" id="nav-analytics">
-                    <i>🧠</i> التحليل الاستراتيجي (AI)
-                </a>
-                <a href="#" onclick="showSection('violations')" class="nav-item" id="nav-violations">
-                    <i>⚠️</i> إدارة المخالفات
-                </a>
-                <a href="#" onclick="showSection('employees')" class="nav-item" id="nav-employees">
-                    <i>👥</i> الموظفين
-                </a>
-                <a href="#" onclick="showSection('media')" class="nav-item" id="nav-media">
-                    <i>🖼️</i> وسائط
-                </a>
-                <a href="#" onclick="showSection('pages')" class="nav-item" id="nav-pages">
-                    <i>📄</i> صفحات
-                </a>
-                <a href="#" onclick="showSection('comments')" class="nav-item" id="nav-comments">
-                    <i>💬</i> تعليقات
-                </a>
-                <a href="#" onclick="showSection('appearance')" class="nav-item" id="nav-appearance">
-                    <i>🎨</i> مظهر
-                </a>
-                <a href="#" onclick="showSection('plugins')" class="nav-item" id="nav-plugins">
-                    <i>🧩</i> إضافات
-                </a>
-                <a href="#" onclick="showSection('users')" class="nav-item" id="nav-users">
-                    <i>👤</i> أعضاء
-                </a>
-                <a href="#" onclick="showSection('tools')" class="nav-item" id="nav-tools">
-                    <i>🛠️</i> أدوات
-                </a>
-                <a href="#" onclick="showSection('settings')" class="nav-item" id="nav-settings">
-                    <i>⚙️</i> الإعدادات
-                </a>
-                <a href="#" onclick="showSection('email')" class="nav-item" id="nav-email">
-                    <i>✉️</i> ايميل
-                </a>
-                <a href="#" onclick="showSection('branches')" class="nav-item" id="nav-branches">
-                    <i>🏬</i> فروع
-                </a>
-                <a href="#" onclick="showSection('tasks')" class="nav-item" id="nav-tasks">
-                    <i>✅</i> مهام
-                </a>
-                <a href="#" onclick="showSection('services')" class="nav-item" id="nav-services">
-                    <i>📩</i> الشكاوى والطلبات
-                </a>
-                <a href="#" onclick="showSection('advanced-data')" class="nav-item" id="nav-advanced-data">
-                    <i>💾</i> البيانات المتقدمة
-                </a>
-                <a href="#" onclick="showSection('licenses')" class="nav-item" id="nav-licenses">
-                    <i>📜</i> التراخيص
-                </a>
-                <div style="border-top: 1px solid #eee; margin: 10px 20px;"></div>
-                <a href="board.html" target="_blank" class="nav-item">
+                <!-- Group 1: Leadership -->
+                <div class="nav-group active" id="group-leadership">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-leadership')">
+                        <span>📊 القيادة والتحليل</span>
+                        <i class="arrow-icon">▼</i>
+                    </div>
+                    <div class="nav-group-content">
+                        <a href="#" onclick="showSection('dashboard')" class="nav-item active" id="nav-dashboard">
+                            <i>🏠</i> الرئيسية
+                        </a>
+                        <a href="#" onclick="showSection('analytics')" class="nav-item" id="nav-analytics">
+                            <i>🧠</i> التحليل الاستراتيجي (AI)
+                        </a>
+                        <a href="#" onclick="showSection('tasks')" class="nav-item" id="nav-tasks">
+                            <i>✅</i> المهام
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Group 2: Data Management -->
+                <div class="nav-group" id="group-data">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-data')">
+                        <span>📂 إدارة البيانات</span>
+                        <i class="arrow-icon">▶</i>
+                    </div>
+                    <div class="nav-group-content" style="display:none;">
+                        <a href="#" onclick="showSection('master-upload')" class="nav-item" id="nav-master-upload">
+                            <i>💾</i> إدارة البيانات (Master)
+                        </a>
+                        <a href="#" onclick="showSection('employees')" class="nav-item" id="nav-employees">
+                            <i>👥</i> الموظفين
+                        </a>
+                        <a href="#" onclick="showSection('violations')" class="nav-item" id="nav-violations">
+                            <i>⚠️</i> المخالفات
+                        </a>
+                        <a href="training.html" class="nav-item" id="nav-training">
+                            <i>🎓</i> التدريب
+                        </a>
+                        <a href="#" onclick="showSection('branches')" class="nav-item" id="nav-branches">
+                            <i>🏬</i> الفروع
+                        </a>
+                        <a href="licenses.html" class="nav-item" id="nav-licenses">
+                            <i>📜</i> التراخيص
+                        </a>
+                        <a href="#" onclick="showSection('advanced-data')" class="nav-item" id="nav-advanced-data">
+                            <i>💾</i> البيانات المتقدمة
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Group 3: Users & Services -->
+                <div class="nav-group" id="group-users">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-users')">
+                        <span>👥 المستخدمين والشكاوى</span>
+                        <i class="arrow-icon">▶</i>
+                    </div>
+                    <div class="nav-group-content" style="display:none;">
+                        <a href="#" onclick="showSection('users')" class="nav-item" id="nav-users">
+                            <i>👤</i> الأعضاء
+                        </a>
+                        <a href="#" onclick="showSection('services')" class="nav-item" id="nav-services">
+                            <i>📩</i> الشكاوى والطلبات
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Group 4: System (Collapsed to hide clutter) -->
+                <div class="nav-group" id="group-system">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-system')">
+                        <span>⚙️ إعدادات النظام</span>
+                        <i class="arrow-icon">▶</i>
+                    </div>
+                    <div class="nav-group-content" style="display:none;">
+                        <a href="#" onclick="showSection('settings')" class="nav-item" id="nav-settings">
+                            <i>⚙️</i> الإعدادات العامة
+                        </a>
+                        <a href="#" onclick="showSection('media')" class="nav-item" id="nav-media">
+                            <i>🖼️</i> الوسائط
+                        </a>
+                        <a href="#" onclick="showSection('pages')" class="nav-item" id="nav-pages">
+                            <i>📄</i> الصفحات
+                        </a>
+                        <a href="#" onclick="showSection('comments')" class="nav-item" id="nav-comments">
+                            <i>💬</i> التعليقات
+                        </a>
+                        <a href="#" onclick="showSection('appearance')" class="nav-item" id="nav-appearance">
+                            <i>🎨</i> المظهر
+                        </a>
+                        <a href="#" onclick="showSection('plugins')" class="nav-item" id="nav-plugins">
+                            <i>🧩</i> الإضافات
+                        </a>
+                        <a href="#" onclick="showSection('tools')" class="nav-item" id="nav-tools">
+                            <i>🛠️</i> الأدوات
+                        </a>
+                        <a href="#" onclick="showSection('email')" class="nav-item" id="nav-email">
+                            <i>✉️</i> البريد
+                        </a>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 20px;"></div>
+                
+                <a href="board.html" target="_blank" class="nav-item" style="margin: 0 10px;">
                     <i>🔗</i> الذهاب للموقع
                 </a>
             </nav>
@@ -136,6 +183,16 @@
                 <button id="sidebar-toggle" class="btn btn-secondary" style="margin-inline-end: 10px; display: none;">☰</button>
                 <div class="header-title" id="page-title">ملخص النظام</div>
                 <div class="header-actions">
+                    <!-- Status Indicators (Moved to Header) -->
+                    <div id="merge-mode-indicator" class="status-pill">
+                        <span class="status-dot"></span>
+                        <span class="status-text">وضع الدمج: تحديث فقط</span>
+                    </div>
+                    <div id="update-source-indicator" class="status-pill">
+                        <span class="status-icon">📊</span>
+                        <span class="status-text">آخر تحديث: Excel</span>
+                    </div>
+
                     <!-- Language Switcher -->
                     <div class="lang-toggle">
                         <button class="btn-icon-text active" id="btn-lang-ar">عربي</button>
@@ -152,20 +209,7 @@
                         
                         <!-- Dropdown Menu -->
                         <div id="control-menu" class="control-menu-dropdown">
-                            <!-- Status Indicators (Moved Here) -->
-                            <div class="menu-status-bar">
-                                <div id="merge-mode-indicator" class="status-badge">
-                                    <span class="status-dot"></span>
-                                    <span class="status-text">وضع الدمج: تحديث فقط</span>
-                                </div>
-                                <div id="update-source-indicator" class="status-badge">
-                                    <span class="status-icon">📊</span>
-                                    <span class="status-text">آخر تحديث: Excel</span>
-                                </div>
-                            </div>
-
-                            <hr class="menu-divider">
-
+                            
                             <div class="menu-actions-grid">
                                 <button class="menu-action-btn" onclick="document.getElementById('excel-employees-file').click()">
                                     <i>👥</i> تحديث الموظفين (Excel)
@@ -212,6 +256,66 @@
 
             <div class="admin-content-wrapper">
                 
+                <!-- SECTION: MASTER DATA UPLOAD (NEW) -->
+                <div id="section-master-upload" class="d-none">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <span class="section-title">إدارة البيانات المركزية (Master Data)</span>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 96, 0.1)); border: 1px solid rgba(79,172,254,0.2); padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">📂</div>
+                            <h3 style="margin-top: 0; color: #fff;">الرفع الموحد (Master Excel)</h3>
+                            <p style="color: #94a3b8; font-size: 1rem; max-width: 600px; margin: 0 auto 20px auto;">
+                                قم برفع ملف Excel واحد يحتوي على عدة ورقات (Sheets) لتحديث النظام بالكامل تلقائياً.
+                                <br>
+                                <span style="font-size: 0.85rem; color: #4facfe;">(Licenses, Violations, Employees)</span>
+                            </p>
+                            
+                            <input type="file" id="master-excel-upload" multiple accept=".xlsx, .xls, .csv" style="display: none;">
+                            <button class="btn btn-primary" onclick="document.getElementById('master-excel-upload').click()" style="padding: 12px 30px; font-size: 1.1rem; border-radius: 50px; background: linear-gradient(90deg, #4facfe, #00f260); border: none;">
+                                🚀 رفع ملفات متعددة (Smart Upload)
+                            </button>
+                            <div id="master-upload-status" style="margin-top: 15px; font-weight: bold; color: #f59e0b;"></div>
+                            
+                            <div style="margin-top: 20px; text-align: left;">
+                                <h4 style="margin: 0 0 10px 0; color: #fff;">الملفات المرفوعة</h4>
+                                <div id="upload-files-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Violations Editor -->
+                        <div class="section-header">
+                            <span class="section-title">تعديل المخالفات يدوياً</span>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="vio-search" placeholder="بحث في المخالفات..." class="form-control" style="width: 200px;">
+                                <button class="btn btn-danger" onclick="clearViolationsData()">🗑️ مسح الكل</button>
+                            </div>
+                        </div>
+                        
+                        <div style="overflow-x: auto; max-height: 600px; border: 1px solid #334155; border-radius: 8px;">
+                            <table class="data-table" style="width: 100%;">
+                                <thead style="position: sticky; top: 0; background: #0f172a; z-index: 10;">
+                                    <tr>
+                                        <th>الفرع</th>
+                                        <th>المنطقة</th>
+                                        <th>نوع المخالفة</th>
+                                        <th>المبلغ</th>
+                                        <th>التاريخ</th>
+                                        <th>الحالة</th>
+                                        <th>إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="violations-editor-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="vio-pagination" style="margin-top: 15px; color: #94a3b8; font-size: 0.9rem;"></div>
+
+                    </div>
+                </div>
+
                 <!-- SECTION: DASHBOARD -->
                 <div id="section-dashboard">
                     <!-- Welcome Header -->

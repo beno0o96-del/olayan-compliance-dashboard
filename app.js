@@ -572,7 +572,8 @@ function renderRegionalComparison(regions) {
         // If data has "Central", we display it as "Riyadh (Central)" or just "Riyadh"
         
         let displayName = region.name;
-        if (region.name === "Central") displayName = currentLang === 'ar' ? "منطقة الرياض" : "Riyadh Region";
+        if (region.name === "Central") displayName = currentLang === 'ar' ? "منطقة الرياض (الوسطى)" : "Riyadh (Central)";
+        else if (region.name === "Riyadh") displayName = currentLang === 'ar' ? "منطقة الرياض" : "Riyadh Region";
         else if (region.name === "Western") displayName = currentLang === 'ar' ? "المنطقة الغربية" : "Western Region";
         else if (region.name === "Eastern") displayName = currentLang === 'ar' ? "المنطقة الشرقية" : "Eastern Region";
         else if (region.name === "Northern") displayName = currentLang === 'ar' ? "المنطقة الشمالية" : "Northern Region";

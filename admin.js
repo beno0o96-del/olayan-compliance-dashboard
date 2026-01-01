@@ -219,6 +219,27 @@ function checkLogin() {
     }
 }
 
+// Navigation Group Toggle
+function toggleSidebarGroup(groupId) {
+    const group = document.getElementById(groupId);
+    if(!group) return;
+    
+    const content = group.querySelector('.nav-group-content');
+    const arrow = group.querySelector('.arrow-icon');
+    
+    const isActive = group.classList.contains('active');
+    
+    if(isActive) {
+        group.classList.remove('active');
+        content.style.display = 'none';
+        if(arrow) arrow.textContent = '▶';
+    } else {
+        group.classList.add('active');
+        content.style.display = 'block';
+        if(arrow) arrow.textContent = '▼';
+    }
+}
+
 // NAVIGATION
 function showSection(sectionId) {
     // Hide all sections
@@ -236,7 +257,15 @@ function showSection(sectionId) {
     // Update Sidebar Active State
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(el => el.classList.remove('active'));
     const navItem = document.getElementById('nav-' + sectionId);
-    if(navItem) navItem.classList.add('active');
+    if(navItem) {
+        navItem.classList.add('active');
+        
+        // Auto-expand parent group
+        const parentGroup = navItem.closest('.nav-group');
+        if(parentGroup && !parentGroup.classList.contains('active')) {
+            toggleSidebarGroup(parentGroup.id);
+        }
+    }
 
     // Update Header Title
     const titles = {
@@ -1721,6 +1750,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- VIOLATIONS MANAGEMENT LOGIC ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Master Excel Upload
+    const masterUpload = document.getElementById('master-excel-upload');
+    if (masterUpload) {
+        masterUpload.addEventListener('change', handleMasterExcelUpload);
+    }
+    const listEl = document.getElementById('upload-files-list');
+    if (listEl) renderUploadFilesList();
+
     // Violations Excel Upload (Old & New inputs)
     const vioExcelInput = document.getElementById('vio-excel-file');
     if (vioExcelInput) {
@@ -1802,104 +1839,324 @@ async function handleViolationsExcelUpload(e) {
         // Convert to JSON
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
         
-        processViolationsData(jsonData);
+        processViolationsData(jsonData, false, file.name);
+        upsertUploadHistory(file.name, ['violations']);
+        renderUploadFilesList();
     };
     reader.readAsArrayBuffer(file);
 }
 
-function processViolationsData(rows) {
+// --- MASTER DATA & VIOLATIONS LOGIC ---
+
+async function handleMasterExcelUpload(e) {
+    if(typeof XLSX === 'undefined'){ alert('مكتبة SheetJS غير محملة.'); return; }
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const statusEl = document.getElementById('master-upload-status');
+    if(statusEl) statusEl.textContent = `⏳ جاري معالجة ${files.length} ملفات...`;
+
+    let globalLog = [];
+    let processedCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+            await processSingleFile(file, globalLog);
+            processedCount++;
+        } catch (err) {
+            console.error(`Error processing ${file.name}:`, err);
+            globalLog.push(`❌ فشل معالجة ${file.name}`);
+        }
+    }
+
+    if(statusEl) {
+        statusEl.innerHTML = globalLog.length > 0 ? globalLog.join('<br>') : '⚠️ لم يتم العثور على بيانات صالحة.';
+        statusEl.style.color = globalLog.some(l => l.includes('❌')) ? '#f59e0b' : '#10b981';
+    }
+    
+    // Refresh All Views
+    loadEmployees();
+    recomputeViolationsFromRaw();
+    renderLicensesTable();
+    renderViolationsEditor();
+    renderUploadFilesList();
+}
+
+function processSingleFile(file, log) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const typesFound = new Set();
+                workbook.SheetNames.forEach(sheetName => {
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (jsonData.length === 0) return;
+
+                    const type = detectDataType(sheetName, jsonData);
+                    
+                    if (type === 'employees') {
+                        processEmployeesDataInternal(jsonData); 
+                        log.push(`✅ [${file.name}] تم تحديث الموظفين (${jsonData.length})`);
+                        typesFound.add('employees');
+                    } 
+                    else if (type === 'violations') {
+                        processViolationsData(jsonData, true, file.name); 
+                        log.push(`✅ [${file.name}] تم تحديث المخالفات (${jsonData.length})`);
+                        typesFound.add('violations');
+                    }
+                    else if (type === 'licenses') {
+                        processLicensesData(jsonData); 
+                        log.push(`✅ [${file.name}] تم تحديث التراخيص (${jsonData.length})`);
+                        typesFound.add('licenses');
+                    } else {
+                        log.push(`⚠️ [${file.name}] ورقة "${sheetName}" غير معروفة`);
+                    }
+                });
+                upsertUploadHistory(file.name, Array.from(typesFound));
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function detectDataType(sheetName, rows) {
+    const lowerName = sheetName.toLowerCase();
+    
+    // 1. Check Sheet Name first
+    if (lowerName.includes('employee') || lowerName.includes('موظف') || lowerName.includes('staff')) return 'employees';
+    if (lowerName.includes('violation') || lowerName.includes('مخالف') || lowerName.includes('penal')) return 'violations';
+    if (lowerName.includes('license') || lowerName.includes('permit') || lowerName.includes('تراخيص') || lowerName.includes('رخص')) return 'licenses';
+
+    // 2. Smart Content Detection (Check first row headers)
+    if (rows.length > 0) {
+        const headers = Object.keys(rows[0]).map(k => k.toLowerCase());
+        const headerStr = headers.join(' ');
+
+        // Employees Keywords
+        if ((headerStr.includes('iqama') || headerStr.includes('id#') || headerStr.includes('هوية')) && 
+            (headerStr.includes('name') || headerStr.includes('اسم'))) {
+            return 'employees';
+        }
+
+        // Violations Keywords
+        if ((headerStr.includes('violation') || headerStr.includes('مخالفة') || headerStr.includes('fine') || headerStr.includes('غرامة')) && 
+            (headerStr.includes('amount') || headerStr.includes('مبلغ') || headerStr.includes('status'))) {
+            return 'violations';
+        }
+
+        // Licenses Keywords
+        if ((headerStr.includes('license') || headerStr.includes('baladiya') || headerStr.includes('civil') || headerStr.includes('رخصة')) && 
+            (headerStr.includes('expire') || headerStr.includes('انتهاء'))) {
+            return 'licenses';
+        }
+    }
+
+    return 'unknown';
+}
+
+
+function processEmployeesDataInternal(jsonData) {
+    const employees = jsonData.map((row, index) => {
+        const k = {};
+        Object.keys(row).forEach(key => k[key.toLowerCase().trim()] = row[key]);
+        
+        const branchRaw = k['cost center'] || k['cost_center'] || k['الفرع'] || '';
+        let branchName = branchRaw;
+        if (typeof branchRaw === 'string' && branchRaw.includes('-')) {
+            const parts = branchRaw.split('-');
+            if (parts.length >= 3) branchName = parts.slice(2).join('-').trim();
+            else if (parts.length === 2) branchName = parts[1].trim();
+        }
+
+        const iqama = k['id'] || k['id#'] || k['iqama'] || k['رقم الهوية'] || k['رقم الإقامة'] || '';
+        
+        return {
+            id: (index + 1).toString(),
+            name: k['name'] || k['الاسم'] || '',
+            iqama: String(iqama),
+            brand: k['band'] || k['brand'] || k['العلامة التجارية'] || '',
+            branch: branchName || k['branch'] || '',
+            cost_center: branchRaw,
+            region: k['region'] || k['المنطقة'] || '',
+            health_expiry: k['health card expired date'] || k['health_expiry'] || k['انتهاء الصحية'] || '',
+            status1: k['status1'] || k['status'] || '',
+            status2: k['status2'] || '',
+            training_end: k['training end date'] || k['training_end'] || k['انتهاء التدريب'] || '',
+            email: k['email'] || k['البريد الإلكتروني'] || '',
+            sap_id: k['sap id'] || k['sap'] || '',
+            position: k['position'] || k['الوظيفة'] || '',
+            ops1: k['ops'] || k['ops1'] || '',
+            hire_date: k['hire date'] || k['hire_date'] || '',
+            city: k['city'] || k['المدينة'] || ''
+        };
+    }).filter(e => e.name && e.iqama);
+
+    const mode = getMergeMode();
+    if(mode === 'replace'){
+        localStorage.setItem('admin_employees', JSON.stringify(employees));
+    } else {
+        const existing = JSON.parse(localStorage.getItem('admin_employees') || '[]');
+        const res = mergeEmployees(existing, employees);
+        localStorage.setItem('admin_employees', JSON.stringify(res.merged));
+    }
+    extractBranchesFromData(employees);
+    setLastUpdateSource('manual');
+}
+
+function processViolationsData(rows, silent = false, sourceFileName = '') {
     if (!rows || rows.length === 0) {
-        alert('الملف فارغ!');
+        if(!silent) alert('الملف فارغ!');
         return;
     }
 
-    // Expected Columns (flexible matching):
-    // Branch, Region, Violation, Amount, Status, Date
-    
+    const rawViolations = rows.map((row, idx) => {
+        const normalizedRow = {};
+        Object.keys(row).forEach(k => normalizedRow[k.toLowerCase().trim()] = row[k]);
+        
+        let region = normalizedRow['region'] || normalizedRow['المنطقة'] || 'Unknown';
+        if (region.toLowerCase().includes('riyadh') || region.includes('الرياض')) region = 'Riyadh'; 
+        else if (region.toLowerCase().includes('central') || region.includes('الوسطى')) region = 'Central';
+        else if (region.toLowerCase().includes('west') || region.includes('الغربية')) region = 'Western';
+        else if (region.toLowerCase().includes('east') || region.includes('الشرقية')) region = 'Eastern';
+
+        return {
+            id: Date.now() + '_' + idx,
+            branch: normalizedRow['branch'] || normalizedRow['الفرع'] || 'Unknown Branch',
+            region: region,
+            type: normalizedRow['violation'] || normalizedRow['type'] || normalizedRow['المخالفة'] || 'Other',
+            amount: parseFloat((normalizedRow['amount'] || normalizedRow['fine'] || normalizedRow['الغرامة'] || 0).toString().replace(/[^\d.-]/g, '')) || 0,
+            status: normalizedRow['status'] || normalizedRow['الحالة'] || 'Open',
+            date: normalizedRow['date'] || normalizedRow['التاريخ'] || new Date().toISOString().split('T')[0],
+            source_file: sourceFileName || ''
+        };
+    });
+
+    const existing = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const merged = existing.concat(rawViolations);
+    localStorage.setItem('admin_violations_raw', JSON.stringify(merged));
+    recomputeViolationsFromRaw();
+    if(!silent) alert('تم معالجة الملف وحفظ البيانات بنجاح!');
+}
+
+function calculateViolationsStats(rows) {
     let totalViolations = 0;
     let totalAmount = 0;
     let openViolations = 0;
     let closedViolations = 0;
     
-    const regionsMap = {}; // { RegionName: { count, amount } }
-    const branchesMap = {}; // { BranchName: { count, amount, risk_score } }
-    const typesMap = {}; // { TypeName: count }
+    const regionsMap = {}; 
+    const branchesMap = {}; 
+    const typesMap = {}; 
 
     rows.forEach(row => {
-        // Normalize keys (lowercase, trim)
-        const normalizedRow = {};
-        Object.keys(row).forEach(k => normalizedRow[k.toLowerCase().trim()] = row[k]);
-
-        // Extract fields with fallbacks
-        const branch = normalizedRow['branch'] || normalizedRow['الفرع'] || 'Unknown Branch';
-        const region = normalizedRow['region'] || normalizedRow['المنطقة'] || 'Unknown Region';
-        const type = normalizedRow['violation'] || normalizedRow['type'] || normalizedRow['المخالفة'] || 'Other';
-        const amountRaw = normalizedRow['amount'] || normalizedRow['fine'] || normalizedRow['الغرامة'] || 0;
-        const statusRaw = normalizedRow['status'] || normalizedRow['الحالة'] || '';
+        const isOpen = row.status.toLowerCase().includes('open') || row.status.includes('مفتوح');
         
-        // Clean Amount
-        let amount = 0;
-        if (typeof amountRaw === 'number') amount = amountRaw;
-        else if (typeof amountRaw === 'string') amount = parseFloat(amountRaw.replace(/[^\d.-]/g, '')) || 0;
-
-        // Clean Status
-        const isOpen = statusRaw.toLowerCase().includes('open') || statusRaw.includes('مفتوح') || statusRaw.includes('new') || statusRaw.includes('جديد');
-        
-        // Aggregate Global
         totalViolations++;
-        totalAmount += amount;
+        totalAmount += row.amount;
         if (isOpen) openViolations++;
         else closedViolations++;
 
-        // Aggregate Region
-        if (!regionsMap[region]) regionsMap[region] = { count: 0, amount: 0 };
-        regionsMap[region].count++;
-        regionsMap[region].amount += amount;
+        if (!regionsMap[row.region]) regionsMap[row.region] = { count: 0, amount: 0 };
+        regionsMap[row.region].count++;
+        regionsMap[row.region].amount += row.amount;
 
-        // Aggregate Branch
-        if (!branchesMap[branch]) branchesMap[branch] = { count: 0, amount: 0 };
-        branchesMap[branch].count++;
-        branchesMap[branch].amount += amount;
+        if (!branchesMap[row.branch]) branchesMap[row.branch] = { count: 0, amount: 0 };
+        branchesMap[row.branch].count++;
+        branchesMap[row.branch].amount += row.amount;
 
-        // Aggregate Type
-        if (!typesMap[type]) typesMap[type] = 0;
-        typesMap[type]++;
+        if (!typesMap[row.type]) typesMap[row.type] = 0;
+        typesMap[row.type]++;
     });
 
-    // Format for App
     const finalData = {
-        summary: {
-            total_violations: totalViolations,
-            total_amount: totalAmount,
-            open_violations: openViolations,
-            closed_violations: closedViolations
-        },
-        regions: Object.keys(regionsMap).map(r => ({
-            name: r,
-            count: regionsMap[r].count,
-            amount: regionsMap[r].amount
-        })),
-        top_branches_frequency: Object.keys(branchesMap)
-            .map(b => ({ branch: b, count: branchesMap[b].count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 5),
-        top_branches_risk: Object.keys(branchesMap)
-            .map(b => ({ branch: b, amount: branchesMap[b].amount }))
-            .sort((a, b) => b.amount - a.amount)
-            .slice(0, 5),
-        common_types: Object.keys(typesMap)
-            .map(t => ({ type: t, count: typesMap[t], icon: "⚠️" })) // Default icon
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 5)
+        summary: { total_violations: totalViolations, total_amount: totalAmount, open_violations: openViolations, closed_violations: closedViolations },
+        regions: Object.keys(regionsMap).map(r => ({ name: r, count: regionsMap[r].count, amount: regionsMap[r].amount })),
+        top_branches_frequency: Object.keys(branchesMap).map(b => ({ branch: b, count: branchesMap[b].count })).sort((a, b) => b.count - a.count).slice(0, 5),
+        top_branches_risk: Object.keys(branchesMap).map(b => ({ branch: b, amount: branchesMap[b].amount })).sort((a, b) => b.amount - a.amount).slice(0, 5),
+        common_types: Object.keys(typesMap).map(t => ({ type: t, count: typesMap[t], icon: "⚠️" })).sort((a, b) => b.count - a.count).slice(0, 5)
     };
 
-    // Save to LocalStorage
     localStorage.setItem('violations_data_override', JSON.stringify(finalData));
-    
-    // Update UI
-    loadViolationsStats();
-    alert('تم معالجة الملف وحفظ البيانات بنجاح! سيتم تحديث اللوحة.');
 }
+
+function renderViolationsEditor() {
+    const tbody = document.getElementById('violations-editor-body');
+    if(!tbody) return;
+    
+    const rowsAll = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const enabled = getEnabledSourceNames();
+    const rows = rowsAll.filter(r => !r.source_file || enabled.includes(r.source_file));
+    const pagination = document.getElementById('vio-pagination');
+    
+    if(rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">لا توجد بيانات. قم برفع ملف Excel.</td></tr>';
+        if(pagination) pagination.textContent = '';
+        return;
+    }
+
+    const search = document.getElementById('vio-search')?.value.toLowerCase() || '';
+    const filtered = rows.filter(r => 
+        r.branch.toLowerCase().includes(search) || 
+        r.region.toLowerCase().includes(search) ||
+        r.type.toLowerCase().includes(search)
+    );
+
+    const displayRows = filtered.slice(0, 50);
+
+    tbody.innerHTML = displayRows.map(r => `
+        <tr>
+            <td><input type="text" value="${r.branch}" onchange="updateViolation('${r.id}', 'branch', this.value)" class="form-control" style="width:150px;"></td>
+            <td><input type="text" value="${r.region}" onchange="updateViolation('${r.id}', 'region', this.value)" class="form-control" style="width:100px;"></td>
+            <td><input type="text" value="${r.type}" onchange="updateViolation('${r.id}', 'type', this.value)" class="form-control" style="width:150px;"></td>
+            <td><input type="number" value="${r.amount}" onchange="updateViolation('${r.id}', 'amount', this.value)" class="form-control" style="width:80px;"></td>
+            <td><input type="text" value="${r.date}" onchange="updateViolation('${r.id}', 'date', this.value)" class="form-control" style="width:100px;"></td>
+            <td>
+                <select onchange="updateViolation('${r.id}', 'status', this.value)" class="form-control" style="width:100px;">
+                    <option value="Open" ${r.status==='Open'?'selected':''}>Open</option>
+                    <option value="Closed" ${r.status==='Closed'?'selected':''}>Closed</option>
+                </select>
+            </td>
+            <td><button onclick="deleteViolation('${r.id}')" class="btn btn-danger" style="padding:2px 6px;">🗑️</button></td>
+        </tr>
+    `).join('');
+
+    if(pagination) pagination.textContent = `عرض ${displayRows.length} من أصل ${rows.length}`;
+}
+
+window.updateViolation = function(id, field, value) {
+    const rows = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const idx = rows.findIndex(r => r.id === id);
+    if(idx !== -1) {
+        if(field === 'amount') value = parseFloat(value) || 0;
+        rows[idx][field] = value;
+        localStorage.setItem('admin_violations_raw', JSON.stringify(rows));
+        recomputeViolationsFromRaw();
+    }
+};
+
+window.deleteViolation = function(id) {
+    if(!confirm('حذف هذه المخالفة؟')) return;
+    let rows = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    rows = rows.filter(r => r.id !== id);
+    localStorage.setItem('admin_violations_raw', JSON.stringify(rows));
+    recomputeViolationsFromRaw();
+    renderViolationsEditor();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const search = document.getElementById('vio-search');
+    if(search) search.addEventListener('input', renderViolationsEditor);
+    renderViolationsEditor();
+});
 
 function handleViolationsJsonUpload(e) {
     const file = e.target.files[0];
@@ -2278,6 +2535,80 @@ function formatBoardJson() {
     }
 }
 
+function getUploadHistory(){
+    try{ return JSON.parse(localStorage.getItem('admin_upload_history') || '[]'); }catch(e){ return []; }
+}
+function setUploadHistory(arr){
+    localStorage.setItem('admin_upload_history', JSON.stringify(arr));
+}
+function upsertUploadHistory(name, types){
+    const hist = getUploadHistory();
+    const idx = hist.findIndex(h => h.name === name);
+    const entry = { name, types: Array.isArray(types)?types:[], enabled: true, ts: Date.now() };
+    if(idx !== -1){
+        hist[idx] = { ...hist[idx], types: entry.types, enabled: true, ts: entry.ts };
+    } else {
+        hist.push(entry);
+    }
+    setUploadHistory(hist);
+}
+function renderUploadFilesList(){
+    const list = document.getElementById('upload-files-list');
+    if(!list) return;
+    const hist = getUploadHistory();
+    list.innerHTML = '';
+    hist.forEach(h => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.justifyContent = 'space-between';
+        row.style.gap = '10px';
+        const left = document.createElement('div');
+        left.textContent = h.name;
+        left.style.color = '#e2e8f0';
+        const types = document.createElement('div');
+        types.style.display = 'flex';
+        types.style.gap = '6px';
+        h.types.forEach(t=>{
+            const badge = document.createElement('span');
+            badge.textContent = t;
+            badge.style.padding = '2px 8px';
+            badge.style.border = '1px solid #334155';
+            badge.style.borderRadius = '12px';
+            badge.style.fontSize = '0.75rem';
+            badge.style.color = '#94a3b8';
+            types.appendChild(badge);
+        });
+        left.appendChild(types);
+        const toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.checked = !!h.enabled;
+        toggle.onchange = () => {
+            const hist2 = getUploadHistory();
+            const idx2 = hist2.findIndex(x=>x.name===h.name);
+            if(idx2!==-1){
+                hist2[idx2].enabled = toggle.checked;
+                setUploadHistory(hist2);
+                recomputeViolationsFromRaw();
+                renderViolationsEditor();
+            }
+        };
+        row.appendChild(left);
+        row.appendChild(toggle);
+        list.appendChild(row);
+    });
+}
+function getEnabledSourceNames(){
+    return getUploadHistory().filter(h=>h.enabled).map(h=>h.name);
+}
+function recomputeViolationsFromRaw(){
+    const raw = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const enabled = getEnabledSourceNames();
+    const filtered = raw.filter(r => !r.source_file || enabled.includes(r.source_file));
+    calculateViolationsStats(filtered);
+    loadViolationsStats();
+}
+
 // --- LICENSES & PERMITS LOGIC ---
 
 function handleLicensesExcelUpload(e) {
@@ -2318,6 +2649,8 @@ function handleLicensesExcelUpload(e) {
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
         
         processLicensesData(jsonData);
+        upsertUploadHistory(file.name, ['licenses']);
+        renderUploadFilesList();
     };
     reader.readAsArrayBuffer(file);
 }
@@ -2527,4 +2860,3 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLicensesTable();
     loadLicensesConfig();
 });
-

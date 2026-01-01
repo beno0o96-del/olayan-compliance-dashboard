@@ -5,214 +5,316 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحليل التراخيص | Licenses Dashboard</title>
     <link rel="stylesheet" href="style-admin.css">
+    <link rel="icon" type="image/svg+xml" href="olayan-mark.svg">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #fff;
-            --text-muted: #94a3b8;
-            --accent: #10b981;
-        }
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .dash-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .dash-title h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            color: var(--accent);
-        }
-        .dash-title p {
-            margin: 5px 0 0;
-            color: var(--text-muted);
-        }
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .kpi-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            text-align: center;
-        }
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 10px 0;
-            color: #fff;
-        }
-        .kpi-label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .chart-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            min-height: 300px;
-        }
-        .chart-title {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-            color: #e2e8f0;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 10px;
-        }
-        .table-container {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #e2e8f0;
-        }
-        th, td {
-            padding: 12px;
-            text-align: right;
-            border-bottom: 1px solid #334155;
-        }
-        th {
-            background: #0f172a;
-            color: var(--accent);
-        }
-        .status-valid { color: #10b981; }
-        .status-near { color: #f59e0b; }
-        .status-expired { color: #ef4444; }
-    </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
+    <script src="admin.js?v=6" defer></script>
 </head>
-<body>
+<body class="admin-body ar">
 
-    <div class="dashboard-container">
-        <!-- Header -->
-        <div class="dash-header">
-            <div class="dash-title">
-                <h1>KSA Store License & Civil Defense Dashboard</h1>
-                <p>لوحة تحليل التراخيص وتصاريح الدفاع المدني</p>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="olayan-logo.png" class="sidebar-logo" alt="Logo">
+                <span class="sidebar-brand">لوحة التحكم</span>
             </div>
-            <div>
-                <button onclick="window.close()" class="btn btn-secondary">إغلاق</button>
-                <button onclick="location.reload()" class="btn btn-primary">تحديث البيانات</button>
-            </div>
-        </div>
+            <nav class="sidebar-nav">
+                <!-- Group 1: Leadership -->
+                <div class="nav-group" id="group-leadership">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-leadership')">
+                        <span>📊 القيادة والتحليل</span>
+                        <i class="arrow-icon">▶</i>
+                    </div>
+                    <div class="nav-group-content" style="display:none;">
+                        <a href="admin.html" class="nav-item" id="nav-dashboard">
+                            <i>🏠</i> الرئيسية
+                        </a>
+                        <a href="admin.html" class="nav-item" id="nav-analytics">
+                            <i>🧠</i> التحليل الاستراتيجي (AI)
+                        </a>
+                        <a href="admin.html" class="nav-item" id="nav-tasks">
+                            <i>✅</i> المهام
+                        </a>
+                    </div>
+                </div>
 
-        <!-- KPIs -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-label">إجمالي الفروع</div>
-                <div class="kpi-value" id="kpi-total">0</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">رخص منتهية (Store)</div>
-                <div class="kpi-value status-expired" id="kpi-store-exp">0</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">دفاع مدني منتهي</div>
-                <div class="kpi-value status-expired" id="kpi-civil-exp">0</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">إجمالي التكلفة التشغيلية</div>
-                <div class="kpi-value" style="color: #4facfe;" id="kpi-cost">0</div>
-            </div>
-        </div>
+                <!-- Group 2: Data Management -->
+                <div class="nav-group active" id="group-data">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-data')">
+                        <span>📂 إدارة البيانات</span>
+                        <i class="arrow-icon">▼</i>
+                    </div>
+                    <div class="nav-group-content">
+                        <a href="admin.html" class="nav-item" id="nav-employees">
+                            <i>👥</i> الموظفين
+                        </a>
+                        <a href="violations.html" class="nav-item" id="nav-violations">
+                            <i>⚠️</i> المخالفات
+                        </a>
+                        <a href="training.html" class="nav-item" id="nav-training">
+                            <i>🎓</i> التدريب
+                        </a>
+                        <a href="branches.html" class="nav-item" id="nav-branches">
+                            <i>🏬</i> الفروع
+                        </a>
+                        <a href="licenses.html" class="nav-item active" id="nav-licenses">
+                            <i>📜</i> التراخيص
+                        </a>
+                        <a href="admin.html" class="nav-item" id="nav-advanced-data">
+                            <i>💾</i> البيانات المتقدمة
+                        </a>
+                    </div>
+                </div>
 
-        <!-- Charts Row 1 -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h3 class="chart-title">حالة الدفاع المدني (Civil Defense)</h3>
-                <canvas id="chart-civil"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 class="chart-title">حالة رخصة البلدية (Store License)</h3>
-                <canvas id="chart-store"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 class="chart-title">التوزيع حسب المنطقة (Region)</h3>
-                <canvas id="chart-region"></canvas>
-            </div>
-        </div>
+                <!-- Group 3: Users & Services -->
+                <div class="nav-group" id="group-users">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-users')">
+                        <span>👥 المستخدمين والشكاوى</span>
+                        <i class="arrow-icon">▶</i>
+                    </div>
+                    <div class="nav-group-content" style="display:none;">
+                        <a href="admin.html" class="nav-item" id="nav-users">
+                            <i>👤</i> الأعضاء
+                        </a>
+                        <a href="admin.html" class="nav-item" id="nav-services">
+                            <i>📩</i> الشكاوى والطلبات
+                        </a>
+                    </div>
+                </div>
 
-        <!-- Charts Row 2 -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h3 class="chart-title">الفروع حسب العلامة (Brand)</h3>
-                <canvas id="chart-brand"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 class="chart-title">تصاريح 24 ساعة</h3>
-                <canvas id="chart-24h"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 class="chart-title">تصاريح HD</h3>
-                <canvas id="chart-hd"></canvas>
-            </div>
-        </div>
+                <!-- Group 4: System -->
+                <div class="nav-group" id="group-system">
+                    <div class="nav-group-header" onclick="toggleSidebarGroup('group-system')">
+                        <span>⚙️ إعدادات النظام</span>
+                        <i class="arrow-icon">▶</i>
+                    </div>
+                    <div class="nav-group-content" style="display:none;">
+                        <a href="admin.html" class="nav-item" id="nav-settings">
+                            <i>⚙️</i> الإعدادات العامة
+                        </a>
+                        <a href="admin.html" class="nav-item"><i>🖼️</i> الوسائط</a>
+                        <a href="admin.html" class="nav-item"><i>📄</i> الصفحات</a>
+                        <a href="admin.html" class="nav-item"><i>💬</i> التعليقات</a>
+                        <a href="admin.html" class="nav-item"><i>🎨</i> المظهر</a>
+                        <a href="admin.html" class="nav-item"><i>🧩</i> الإضافات</a>
+                        <a href="admin.html" class="nav-item"><i>🛠️</i> الأدوات</a>
+                        <a href="admin.html" class="nav-item"><i>✉️</i> البريد</a>
+                    </div>
+                </div>
 
-        <!-- Data Table -->
-        <div class="table-container">
-            <h3 class="chart-title">تفاصيل الفروع والتكاليف</h3>
-            <table id="data-table">
-                <thead>
-                    <tr>
-                        <th>الفرع</th>
-                        <th>المنطقة</th>
-                        <th>رخصة البلدية</th>
-                        <th>الدفاع المدني</th>
-                        <th>التكلفة</th>
-                        <th>العلامة</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- JS Populated -->
-                </tbody>
-            </table>
-        </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 20px;"></div>
+                
+                <a href="board.html" target="_blank" class="nav-item" style="margin: 0 10px;">
+                    <i>🔗</i> الذهاب للموقع
+                </a>
+            </nav>
+            <div style="padding: 20px;">
+                <button id="logout" class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="location.href='index.html'">تسجيل خروج</button>
+            </div>
+            <div class="sidebar-footer" style="padding: 10px 20px; text-align: center; font-size: 0.7rem; color: #64748b; border-top: 1px solid #eee;">
+                <div style="margin-bottom: 5px;">جميع الحقوق محفوظة لدى شركة العليان للخدمات الغذائية © 2025</div>
+                <div style="direction: ltr;">Developed by Bandar A. Abdulwahab</div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <button id="sidebar-toggle" class="btn btn-secondary" style="margin-inline-end: 10px; display: none;">☰</button>
+                <div class="header-title">لوحة تحليل التراخيص وتصاريح الدفاع المدني</div>
+                <div class="header-actions">
+                    <button onclick="location.reload()" class="btn btn-secondary">🔄 تحديث</button>
+                    
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <div class="user-name">Admin</div>
+                            <div class="user-role">مسؤول النظام</div>
+                        </div>
+                        <div class="user-avatar">A</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="admin-content-wrapper">
+                
+                <!-- Control Section (Upload) -->
+                <div class="card-section" style="margin-bottom: 30px; background: linear-gradient(to left, rgba(16, 185, 129, 0.1), rgba(30, 41, 75, 0.4)); border-color: rgba(16, 185, 129, 0.2);">
+                    <div class="section-header">
+                        <span class="section-title" style="color: #10b981;">📤 تحديث البيانات (Control)</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
+                            قم برفع ملف Excel لتحديث الإحصائيات في اللوحة أدناه.
+                        </p>
+                        <input type="file" id="lic-excel-file" accept=".xlsx, .xls, .csv" style="display: none;">
+                        <button class="btn btn-primary" onclick="document.getElementById('lic-excel-file').click()" style="background-color: #10b981;">📂 رفع ملف Excel</button>
+                        <button class="btn btn-secondary" onclick="downloadLicensesTemplate()">⬇️ تحميل نموذج</button>
+                        <span id="lic-file-name" style="color: #fff; font-size: 0.9rem;"></span>
+                        
+                        <div style="margin-right: auto; display: flex; gap: 10px;">
+                            <button onclick="clearLicensesData()" class="btn btn-danger" style="font-size: 0.8rem;">🗑️ مسح البيانات</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPIs Row -->
+                <div class="dash-metrics-row">
+                    <div class="dash-metric-card">
+                        <div class="dm-icon" style="color:#4facfe;">🏬</div>
+                        <div class="dm-info">
+                            <h4>إجمالي الفروع</h4>
+                            <span class="dm-val" id="kpi-total">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-metric-card" style="border-color: rgba(239, 68, 68, 0.3);">
+                        <div class="dm-icon" style="color:#ef4444;">📜</div>
+                        <div class="dm-info">
+                            <h4>رخص منتهية (Store)</h4>
+                            <span class="dm-val" id="kpi-store-exp" style="color: #ef4444;">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-metric-card" style="border-color: rgba(239, 68, 68, 0.3);">
+                        <div class="dm-icon" style="color:#ef4444;">🚒</div>
+                        <div class="dm-info">
+                            <h4>دفاع مدني منتهي</h4>
+                            <span class="dm-val" id="kpi-civil-exp" style="color: #ef4444;">0</span>
+                        </div>
+                    </div>
+                    <div class="dash-metric-card">
+                        <div class="dm-icon" style="color:#10b981;">💰</div>
+                        <div class="dm-info">
+                            <h4>إجمالي التكلفة التشغيلية</h4>
+                            <span class="dm-val" id="kpi-cost" style="color: #10b981; font-size: 1.5rem;">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1 -->
+                <div class="dash-grid-split" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); margin-bottom: 30px;">
+                    <div class="dash-panel">
+                        <div class="dash-panel-header">
+                            <span class="dash-panel-title">حالة الدفاع المدني (Civil Defense)</span>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="chart-civil"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-panel">
+                        <div class="dash-panel-header">
+                            <span class="dash-panel-title">حالة رخصة البلدية (Store License)</span>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="chart-store"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-panel">
+                        <div class="dash-panel-header">
+                            <span class="dash-panel-title">التوزيع حسب المنطقة (Region)</span>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="chart-region"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div class="dash-grid-split" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: 30px;">
+                    <div class="dash-panel">
+                        <div class="dash-panel-header">
+                            <span class="dash-panel-title">الفروع حسب العلامة (Brand)</span>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="chart-brand"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-panel">
+                        <div class="dash-panel-header">
+                            <span class="dash-panel-title">تصاريح 24 ساعة</span>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="chart-24h"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-panel">
+                        <div class="dash-panel-header">
+                            <span class="dash-panel-title">تصاريح HD</span>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="chart-hd"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="card-section">
+                    <div class="section-header">
+                        <span class="section-title">تفاصيل الفروع والتكاليف</span>
+                        <input type="text" id="search-table" class="form-control" style="width: 200px;" placeholder="بحث..." onkeyup="filterTable()">
+                    </div>
+                    <div style="overflow-x: auto; max-height: 600px;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>الفرع</th>
+                                    <th>المنطقة</th>
+                                    <th>رخصة البلدية</th>
+                                    <th>الدفاع المدني</th>
+                                    <th>التكلفة</th>
+                                    <th>العلامة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="licenses-table-body">
+                                <!-- JS Populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            loadDashboardData();
+            // Override admin.js render function to update charts when data changes
+            // We save the original function first if it exists (it should from admin.js)
+            const originalRender = window.renderLicensesTable;
+            
+            window.renderLicensesTable = function() {
+                // 1. Run the original logic to populate the table with Cost inputs
+                // We need to ensure the element ID matches what admin.js expects (licenses-table-body)
+                // We renamed it in HTML to match.
+                // Re-implementing specific parts if needed, but calling original is safer if available.
+                
+                // Since admin.js is defer, it might not be defined yet if this runs too early,
+                // but this is inside DOMContentLoaded, so admin.js (defer) should have run.
+                
+                if (typeof originalRender === 'function') {
+                    originalRender(); 
+                } else {
+                    // Fallback if admin.js logic isn't available or fails
+                    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+                    renderTableFallback(data);
+                }
+
+                // 2. Update Dashboard Charts & KPIs
+                updateDashboardStats();
+            };
+
+            // Initial Load
+            setTimeout(window.renderLicensesTable, 100);
         });
 
-        function loadDashboardData() {
+        function updateDashboardStats() {
             const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
             
             if (data.length === 0) {
-                alert('لا توجد بيانات. يرجى رفع ملف Excel من لوحة التحكم أولاً.');
+                // Zero out KPIs
+                document.getElementById('kpi-total').textContent = '0';
+                document.getElementById('kpi-store-exp').textContent = '0';
+                document.getElementById('kpi-civil-exp').textContent = '0';
+                document.getElementById('kpi-cost').textContent = '0';
                 return;
             }
 
@@ -233,13 +335,13 @@
                 // Store License
                 const sStatus = (item.store_license?.status || '').toLowerCase();
                 if (sStatus.includes('valid') || sStatus.includes('ساري')) storeValid++;
-                else if (sStatus.includes('near')) storeNear++;
+                else if (sStatus.includes('near') || sStatus.includes('close')) storeNear++;
                 else storeExp++;
 
                 // Civil Defense
                 const cStatus = (item.civil_defense?.status || '').toLowerCase();
                 if (cStatus.includes('valid') || cStatus.includes('ساري')) civilValid++;
-                else if (cStatus.includes('near')) civilNear++;
+                else if (cStatus.includes('near') || cStatus.includes('close')) civilNear++;
                 else civilExp++;
 
                 // Permits
@@ -265,115 +367,67 @@
             document.getElementById('kpi-civil-exp').textContent = civilExp;
             document.getElementById('kpi-cost').textContent = totalCost.toLocaleString() + ' SAR';
 
-            // --- Charts ---
+            // Update Charts
+            updateChart('chart-region', 'bar', Object.keys(regionMap), Object.values(regionMap), '#4facfe');
+            updateChart('chart-brand', 'doughnut', Object.keys(brandMap), Object.values(brandMap), ['#f5c518', '#e11d48', '#f59e0b', '#10b981', '#6366f1']);
+            updateChart('chart-civil', 'doughnut', ['ساري (Valid)', 'قريب الانتهاء', 'منتهي (Expired)'], [civilValid, civilNear, civilExp], ['#10b981', '#f59e0b', '#ef4444']);
+            updateChart('chart-store', 'doughnut', ['ساري (Valid)', 'قريب الانتهاء', 'منتهي (Expired)'], [storeValid, storeNear, storeExp], ['#10b981', '#f59e0b', '#ef4444']);
+            updateChart('chart-24h', 'pie', ['يوجد (Yes)', 'لا يوجد (No)'], [p24Valid, p24Exp], ['#3b82f6', '#475569']);
+            updateChart('chart-hd', 'pie', ['يوجد (Yes)', 'لا يوجد (No)'], [hdValid, hdExp], ['#8b5cf6', '#475569']);
+        }
+
+        // Chart Instances Store
+        const chartInstances = {};
+
+        function updateChart(canvasId, type, labels, data, colors) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
             const commonOptions = {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom', labels: { color: '#fff' } }
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Segoe UI' } } }
                 }
             };
+            
+            if(type === 'bar') {
+                commonOptions.plugins.legend.display = false;
+                commonOptions.scales = { y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } };
+            }
 
-            // Region Chart
-            const regionLabels = Object.keys(regionMap);
-            const regionData = Object.values(regionMap);
-            new Chart(document.getElementById('chart-region'), {
-                type: 'bar',
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: type,
                 data: {
-                    labels: regionLabels,
+                    labels: labels,
                     datasets: [{
-                        label: 'Branches by Region',
-                        data: regionData,
-                        backgroundColor: '#4facfe',
-                        borderRadius: 4
-                    }]
-                },
-                options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#334155' } }, x: { grid: { display: false } } } }
-            });
-
-            // Brand Chart
-            const brandLabels = Object.keys(brandMap);
-            const brandData = Object.values(brandMap);
-            new Chart(document.getElementById('chart-brand'), {
-                type: 'doughnut',
-                data: {
-                    labels: brandLabels,
-                    datasets: [{
-                        data: brandData,
-                        backgroundColor: ['#f5c518', '#e11d48', '#f59e0b', '#10b981', '#6366f1'],
-                        borderWidth: 0
+                        label: 'Count',
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        borderRadius: type === 'bar' ? 4 : 0
                     }]
                 },
                 options: commonOptions
             });
+        }
 
-            // Civil Defense Chart
-            new Chart(document.getElementById('chart-civil'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Valid', 'Near Expire', 'Expired'],
-                    datasets: [{
-                        data: [civilValid, civilNear, civilExp],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: commonOptions
-            });
-
-            // Store License Chart
-            new Chart(document.getElementById('chart-store'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Valid', 'Near Expire', 'Expired'],
-                    datasets: [{
-                        data: [storeValid, storeNear, storeExp],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: commonOptions
-            });
-
-            // 24H Permit
-            new Chart(document.getElementById('chart-24h'), {
-                type: 'pie',
-                data: {
-                    labels: ['Valid / Yes', 'Expired / No'],
-                    datasets: [{
-                        data: [p24Valid, p24Exp],
-                        backgroundColor: ['#3b82f6', '#94a3b8'],
-                        borderWidth: 0
-                    }]
-                },
-                options: commonOptions
-            });
-
-            // HD Permit
-            new Chart(document.getElementById('chart-hd'), {
-                type: 'pie',
-                data: {
-                    labels: ['Valid / Yes', 'Expired / No'],
-                    datasets: [{
-                        data: [hdValid, hdExp],
-                        backgroundColor: ['#8b5cf6', '#94a3b8'],
-                        borderWidth: 0
-                    }]
-                },
-                options: commonOptions
-            });
-
-            // --- Table ---
-            const tbody = document.getElementById('table-body');
+        function renderTableFallback(data) {
+            const tbody = document.getElementById('licenses-table-body');
             tbody.innerHTML = '';
-            data.slice(0, 50).forEach(item => { // Show first 50
+            data.forEach(item => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${item.branch}</td>
-                    <td>${item.region || '-'}</td>
+                    <td style="font-weight:bold;">${item.branch}</td>
+                    <td>${(item.cost||0).toLocaleString()}</td>
                     <td class="${getStatusClass(item.store_license.status)}">${item.store_license.status}</td>
                     <td class="${getStatusClass(item.civil_defense.status)}">${item.civil_defense.status}</td>
-                    <td>${(item.cost||0).toLocaleString()}</td>
-                    <td>${item.brand || '-'}</td>
+                    <td>${item.permit_24?.status || '-'}</td>
+                    <td>${item.permit_hd?.status || '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -382,10 +436,30 @@
         function getStatusClass(status) {
             if(!status) return '';
             const s = status.toLowerCase();
-            if(s.includes('valid')) return 'status-valid';
+            if(s.includes('valid') || s.includes('ساري')) return 'status-valid';
             if(s.includes('near')) return 'status-near';
             return 'status-expired';
         }
+
+        function filterTable() {
+            const input = document.getElementById('search-table');
+            const filter = input.value.toLowerCase();
+            const rows = document.getElementById('licenses-table-body').getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const txt = rows[i].textContent.toLowerCase();
+                rows[i].style.display = txt.includes(filter) ? "" : "none";
+            }
+        }
+        
+        // Add CSS class styles dynamically for status if not in style-admin.css
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .status-valid { color: #10b981; font-weight: bold; }
+            .status-near { color: #f59e0b; font-weight: bold; }
+            .status-expired { color: #ef4444; font-weight: bold; }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
