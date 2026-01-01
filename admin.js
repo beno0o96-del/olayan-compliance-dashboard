@@ -253,6 +253,10 @@ function showSection(sectionId) {
     const targetSection = document.getElementById('section-' + sectionId);
     if (targetSection) {
         targetSection.classList.remove('d-none');
+        // Scroll to top to prevent confusion
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const main = document.querySelector('.admin-main');
+        if(main) main.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         console.error(`Section #section-${sectionId} not found!`);
         // Fallback to dashboard if section not found to prevent empty screen
@@ -2231,6 +2235,10 @@ function renderViolationsEditor() {
     const rows = rowsAll.filter(r => !r.source_file || enabled.includes(r.source_file));
     const pagination = document.getElementById('vio-pagination');
     
+    // Pagination State
+    if (!window.vioCurrentPage) window.vioCurrentPage = 1;
+    const rowsPerPage = 50;
+
     if(rows.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">لا توجد بيانات. قم برفع ملف Excel.</td></tr>';
         if(pagination) pagination.textContent = '';
@@ -2244,9 +2252,16 @@ function renderViolationsEditor() {
         r.type.toLowerCase().includes(search)
     );
 
-    const displayRows = filtered.slice(0, 50);
+    // Calculate Pagination
+    const totalPages = Math.ceil(filtered.length / rowsPerPage);
+    if (window.vioCurrentPage > totalPages) window.vioCurrentPage = 1;
+    
+    const start = (window.vioCurrentPage - 1) * rowsPerPage;
+    const displayRows = filtered.slice(start, start + rowsPerPage);
 
-    tbody.innerHTML = displayRows.map(r => `
+    tbody.innerHTML = displayRows.map(r => {
+        const isHidden = !!r.hidden;
+        return `
         <tr>
             <td><input type="text" value="${r.branch}" onchange="updateViolation('${r.id}', 'branch', this.value)" class="form-control" style="width:150px;"></td>
             <td><input type="text" value="${r.region}" onchange="updateViolation('${r.id}', 'region', this.value)" class="form-control" style="width:100px;"></td>
@@ -2259,11 +2274,27 @@ function renderViolationsEditor() {
                     <option value="Closed" ${r.status==='Closed'?'selected':''}>Closed</option>
                 </select>
             </td>
+            <td>
+                <label class="switch" style="font-size: 12px;">
+                    <input type="checkbox" ${!isHidden ? 'checked' : ''} onchange="updateViolation('${r.id}', 'hidden', !this.checked)">
+                    <span class="slider round"></span>
+                </label>
+                <span style="font-size:0.8rem; margin-right:5px; color:${!isHidden?'#4ade80':'#94a3b8'}">${!isHidden?'ظاهر':'مخفي'}</span>
+            </td>
             <td><button onclick="deleteViolation('${r.id}')" class="btn btn-danger" style="padding:2px 6px;">🗑️</button></td>
         </tr>
-    `).join('');
+    `}).join('');
 
-    if(pagination) pagination.textContent = `عرض ${displayRows.length} من أصل ${rows.length}`;
+    // Render Pagination Controls
+    if(pagination) {
+        pagination.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px; direction:ltr;">
+                <button class="btn btn-secondary" onclick="window.vioCurrentPage--; renderViolationsEditor();" ${window.vioCurrentPage === 1 ? 'disabled' : ''}>Prev</button>
+                <span style="color:#94a3b8;">Page ${window.vioCurrentPage} of ${totalPages} (${filtered.length} total)</span>
+                <button class="btn btn-secondary" onclick="window.vioCurrentPage++; renderViolationsEditor();" ${window.vioCurrentPage >= totalPages ? 'disabled' : ''}>Next</button>
+            </div>
+        `;
+    }
 }
 
 window.updateViolation = function(id, field, value) {
@@ -2276,6 +2307,20 @@ window.updateViolation = function(id, field, value) {
         recomputeViolationsFromRaw();
     }
 };
+
+function recomputeViolationsFromRaw() {
+    const rows = JSON.parse(localStorage.getItem('admin_violations_raw') || '[]');
+    const enabled = getEnabledSourceNames();
+    
+    // Filter active files AND non-hidden violations
+    const activeRows = rows.filter(r => 
+        (!r.source_file || enabled.includes(r.source_file)) && 
+        !r.hidden
+    );
+    
+    calculateViolationsStats(activeRows);
+    renderViolationsEditor();
+}
 
 window.deleteViolation = function(id) {
     if(!confirm('حذف هذه المخالفة؟')) return;
@@ -2408,101 +2453,130 @@ function generateStrategicReport() {
             if(divEff) divEff.innerHTML = `💡 <strong>تحليل عام ${yearFilter}:</strong> يوضح الرسم البياني أعلاه اتجاه المخالفات الشهري لعام ${yearFilter}.`;
         }
 
-        // A. Render Risk Map
-        const sortedRisk = [...filteredRiskData].sort((a,b) => b.count - a.count).slice(0, 7);
-        renderAdminChart('chart-risk-map', sortedRisk, 'count', 'name');
+    // 2. AI Processing (Simulated Logic)
+    
+    // Insight 1: Operational Efficiency (Based on Closed vs Open Violations)
+    const totalVio = violationsData.summary?.total_violations || 0;
+    const closedVio = violationsData.summary?.closed_violations || 0;
+    const closureRate = totalVio > 0 ? Math.round((closedVio / totalVio) * 100) : 0;
+    
+    let opsInsight = '';
+    if(closureRate > 80) opsInsight = `✅ <strong>كفاءة ممتازة:</strong> يتم إغلاق ${closureRate}% من المخالفات في الوقت المناسب.`;
+    else if(closureRate > 50) opsInsight = `⚠️ <strong>تحتاج تحسين:</strong> معدل الإغلاق ${closureRate}%، يوصى بتسريع إجراءات المعالجة.`;
+    else opsInsight = `🚨 <strong>وضع حرج:</strong> معدل الإغلاق ${closureRate}% فقط! يجب مراجعة فريق العمليات فوراً.`;
+    
+    const divOps = document.getElementById('ai-insight-ops');
+    if(divOps) divOps.innerHTML = opsInsight;
 
-        // B. Render Trend (Efficiency/Trend Chart)
-        if (filteredTrendData.length > 0) {
-            renderAdminChart('chart-efficiency', filteredTrendData, 'count', 'month');
-        } else {
-            document.getElementById('chart-efficiency').innerHTML = '<div style="text-align:center;color:#888;padding:20px;">لا توجد بيانات لهذا العام</div>';
-        }
+    // Insight 2: Financial Risk
+    const totalAmount = violationsData.summary?.total_amount || 0;
+    let riskInsight = '';
+    if(totalAmount > 100000) riskInsight = `🚨 <strong>مخاطر عالية:</strong> إجمالي الغرامات (${totalAmount.toLocaleString()}) يتجاوز الحد الآمن. المناطق الأكثر تأثراً: ${violationsData.regions?.[0]?.name || 'غير محدد'}.`;
+    else if(totalAmount > 50000) riskInsight = `⚠️ <strong>مخاطر متوسطة:</strong> الغرامات (${totalAmount.toLocaleString()}) تتطلب مراقبة دقيقة لتقليل الهدر المالي.`;
+    else riskInsight = `✅ <strong>وضع مستقر:</strong> الغرامات (${totalAmount.toLocaleString()}) ضمن الحدود المقبولة.`;
+    
+    const divRisk = document.getElementById('ai-insight-risk');
+    if(divRisk) divRisk.innerHTML = riskInsight;
 
-        // C. Correlation (Training vs Violations - Mock/Simulated)
-        // Logic: Find branches with high violations and check their training status
-        // For now, we simulate a negative correlation
-        const correlationData = [
-            { label: 'High Training', value: 12 }, // Low Violations
-            { label: 'Med Training', value: 45 },
-            { label: 'Low Training', value: 88 }  // High Violations
-        ];
-        renderAdminChart('chart-correlation', correlationData, 'value', 'label');
+    // Insight 3: HR / Workforce (Mock logic linking employees count to violations)
+    const topRiskBranch = violationsData.top_branches_frequency?.[0];
+    let hrInsight = 'جاري تحليل البيانات...';
+    if(topRiskBranch) {
+        hrInsight = `🔍 <strong>تحليل القوى العاملة:</strong> الفرع "${topRiskBranch.branch}" يسجل أعلى معدل مخالفات (${topRiskBranch.count}). قد يكون هناك نقص في التدريب أو عدد الموظفين.`;
+    } else {
+        hrInsight = `✅ <strong>استقرار عام:</strong> لا توجد فروع تسجل شذوذاً كبيراً في عدد المخالفات مقارنة بحجم القوى العاملة.`;
+    }
+    const divHr = document.getElementById('ai-insight-hr');
+    if(divHr) divHr.innerHTML = hrInsight;
 
-        // D. Generate Insights
-        const insights = [];
-        
-        // Insight 1: Violations
-        const totalVio = violationsData.summary?.total_violations || 0;
-        if(totalVio > 50) insights.push(`⚠️ <strong>ارتفاع المخالفات:</strong> تم رصد ${totalVio} مخالفة. يوصى بتكثيف الرقابة.`);
-        else insights.push(`✅ <strong>وضع المخالفات:</strong> المعدل ضمن النطاق المقبول (${totalVio}).`);
+    // Insight 4: Recommendation
+    const commonType = violationsData.common_types?.[0]?.type || 'غير محدد';
+    const divRec = document.getElementById('ai-recommendation');
+    if(divRec) {
+        divRec.textContent = `💡 التوصية الاستراتيجية: التركيز على معالجة مخالفات "${commonType}" لأنها الأكثر تكراراً، وتكثيف التدريب في المنطقة "${violationsData.regions?.[0]?.name || 'الغربية'}".`;
+    }
 
-        // Insight 2: Training (from Employees)
-        const expiredHealth = employees.filter(e => {
-            if(!e.health_expiry) return false;
-            return new Date(e.health_expiry) < new Date();
-        }).length;
-        if(expiredHealth > 0) insights.push(`🚨 <strong>الشهادات الصحية:</strong> يوجد ${expiredHealth} موظف بشهادات منتهية. يجب التجديد فوراً.`);
+    // 3. Render Charts
+    renderAiCharts(violationsData);
+    renderTopOffendersTable(violationsData.top_branches_frequency || []);
 
-        // Insight 3: AI Recommendation
-        const commonType = violationsData.common_types?.[0]?.type || 'N/A';
-        if(commonType !== 'N/A') insights.push(`💡 <strong>توصية AI:</strong> أكثر المخالفات تكراراً هي "${commonType}". اقترح عقد ورشة عمل مخصصة لهذا الموضوع.`);
-
-        // Render Recommendations
-        const recList = document.getElementById('ai-recommendations-list');
-        if(recList) {
-            recList.innerHTML = insights.map(i => `
-                <div class="ai-rec-item">
-                    <div class="rec-icon">🤖</div>
-                    <div class="rec-content">${i}</div>
-                </div>
-            `).join('');
-        }
-
-        // Update Insight Boxes
-        const divCorr = document.getElementById('insight-correlation');
-        if(divCorr) divCorr.innerHTML = '💡 <strong>تحليل AI:</strong> توجد علاقة عكسية قوية. الفروع الملتزمة بالتدريب تقل مخالفاتها بنسبة 60%.';
-        
-        if(btn) {
-            btn.disabled = false;
-            btn.innerHTML = '🔄 تحديث التحليل';
-        }
-        
-        // alert('تم تحديث التقرير الاستراتيجي بنجاح!'); // Removed alert to avoid annoyance
-
-    }, 800);
+    if(btn) {
+        btn.disabled = false;
+        btn.innerHTML = '🔄 تحديث التحليل';
+    }
+}, 1500);
 }
 
-function renderAdminChart(id, data, valKey, labelKey) {
-    const container = document.getElementById(id);
+function renderAiCharts(data) {
+    // Risk Map Chart
+    const riskOptions = {
+        series: [{
+            name: 'Violations',
+            data: (data.regions || []).map(r => r.count)
+        }],
+        chart: { type: 'bar', height: 300, toolbar: {show:false}, background:'transparent' },
+        plotOptions: { bar: { borderRadius: 4, horizontal: true } },
+        colors: ['#ef4444'],
+        xaxis: { categories: (data.regions || []).map(r => r.name), labels:{style:{colors:'#cbd5e1'}} },
+        yaxis: { labels:{style:{colors:'#cbd5e1'}} },
+        theme: { mode: 'dark' }
+    };
+    new ApexCharts(document.querySelector("#chart-ai-risk-map"), riskOptions).render();
+
+    // Trend Chart (Mock Data for Demo)
+    const trendOptions = {
+        series: [{
+            name: 'Violations Trend',
+            data: [12, 19, 15, 25, 32, 20, 15, 10, 5, 8, 12, 15] // Mock monthly data
+        }],
+        chart: { type: 'area', height: 300, toolbar: {show:false}, background:'transparent' },
+        stroke: { curve: 'smooth', width:3 },
+        colors: ['#3b82f6'],
+        xaxis: { categories: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], labels:{style:{colors:'#cbd5e1'}} },
+        yaxis: { labels:{style:{colors:'#cbd5e1'}} },
+        theme: { mode: 'dark' }
+    };
+    new ApexCharts(document.querySelector("#chart-ai-trend"), trendOptions).render();
+}
+
+function renderTopOffendersTable(branches) {
+    const container = document.getElementById('ai-top-offenders-table');
     if(!container) return;
-    container.innerHTML = '';
     
-    if(!data || data.length === 0) {
-        container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">لا توجد بيانات</div>';
+    if(branches.length === 0) {
+        container.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">لا توجد بيانات كافية.</p>';
         return;
     }
 
-    const max = Math.max(...data.map(d => d[valKey] || 0)) || 100;
+    let html = `
+        <table class="data-table" style="width:100%; margin-top:10px;">
+            <thead>
+                <tr style="background:rgba(255,255,255,0.05);">
+                    <th style="padding:10px;">الفرع</th>
+                    <th style="padding:10px;">عدد المخالفات</th>
+                    <th style="padding:10px;">مستوى الخطر</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    branches.forEach(b => {
+        let riskLevel = 'Low';
+        let color = '#4ade80'; // Green
+        if(b.count > 10) { riskLevel = 'High'; color = '#ef4444'; }
+        else if(b.count > 5) { riskLevel = 'Medium'; color = '#fbbf24'; }
 
-    data.forEach(item => {
-        const val = item[valKey] || 0;
-        const percent = (val / max) * 100;
-        const label = item[labelKey] || 'Unknown';
-        
-        const bar = document.createElement('div');
-        bar.style.marginBottom = '10px';
-        bar.innerHTML = `
-            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:2px;">
-                <span>${label}</span>
-                <span>${val}</span>
-            </div>
-            <div style="background:rgba(255,255,255,0.1);height:8px;border-radius:4px;overflow:hidden;">
-                <div style="width:${percent}%;height:100%;background:#4facfe;border-radius:4px;"></div>
-            </div>
+        html += `
+            <tr>
+                <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">${b.branch}</td>
+                <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:bold;">${b.count}</td>
+                <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); color:${color}; font-weight:bold;">${riskLevel}</td>
+            </tr>
         `;
-        container.appendChild(bar);
     });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
 }
 
 function processAICommand() {
@@ -2963,6 +3037,8 @@ function downloadLicensesTemplate() {
     XLSX.writeFile(wb, "Licenses_Template.xlsx");
 }
 
+let licenseEditIndex = -1;
+
 function renderLicensesTable() {
     const tbody = document.getElementById('licenses-table-body');
     if(!tbody) return;
@@ -2971,7 +3047,7 @@ function renderLicensesTable() {
     tbody.innerHTML = '';
 
     if(data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">لا توجد بيانات. قم برفع ملف Excel.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#888;">لا توجد بيانات. قم برفع ملف Excel أو إضافة جديد.</td></tr>';
         return;
     }
 
@@ -2987,8 +3063,13 @@ function renderLicensesTable() {
             return '';
         };
 
+        const isHidden = !!item.hidden;
+
         tr.innerHTML = `
-            <td>${item.branch}</td>
+            <td>
+                ${item.branch}<br>
+                <span style="font-size:0.75rem; color:#64748b;">${item.brand || '-'} | ${item.region || '-'}</span>
+            </td>
             <td>
                 <input type="number" class="form-control" style="width:80px; padding:2px 5px;" 
                        value="${item.cost || 0}" 
@@ -3004,6 +3085,17 @@ function renderLicensesTable() {
             </td>
             <td>${item.permit_24.status}</td>
             <td>${item.permit_hd.status}</td>
+            <td>
+                <label class="switch" style="font-size: 12px;">
+                    <input type="checkbox" ${!isHidden ? 'checked' : ''} onchange="toggleLicenseVisibility(${index}, this.checked)">
+                    <span class="slider round"></span>
+                </label>
+                <span style="font-size:0.8rem; margin-right:5px; color:${!isHidden?'#4ade80':'#94a3b8'}">${!isHidden?'ظاهر':'مخفي'}</span>
+            </td>
+            <td>
+                <button class="btn btn-secondary" onclick="openLicenseModal(${index})" style="padding:2px 8px; font-size:0.8rem;">تعديل</button>
+                <button class="btn btn-danger" onclick="deleteLicense(${index})" style="padding:2px 8px; font-size:0.8rem;">حذف</button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -3015,6 +3107,168 @@ function updateLicenseCost(index, value) {
         data[index].cost = parseFloat(value) || 0;
         localStorage.setItem('admin_licenses', JSON.stringify(data));
     }
+}
+
+function toggleLicenseVisibility(index, isVisible) {
+    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    if(data[index]) {
+        data[index].hidden = !isVisible;
+        localStorage.setItem('admin_licenses', JSON.stringify(data));
+        renderLicensesTable();
+    }
+}
+
+function deleteLicense(index) {
+    if(confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+        const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+        data.splice(index, 1);
+        localStorage.setItem('admin_licenses', JSON.stringify(data));
+        renderLicensesTable();
+    }
+}
+
+function openLicenseModal(index = -1) {
+    licenseEditIndex = index;
+    const modal = document.getElementById('license-modal');
+    if(!modal) return;
+
+    if(index === -1) {
+        // Add Mode
+        document.getElementById('lic-branch').value = '';
+        document.getElementById('lic-region').value = 'Western';
+        document.getElementById('lic-brand').value = 'BK';
+        document.getElementById('lic-cost').value = '';
+        document.getElementById('lic-hidden').checked = false; 
+        
+        document.getElementById('lic-store-num').value = '';
+        document.getElementById('lic-store-status').value = 'Valid';
+        document.getElementById('lic-store-date').value = '';
+        document.getElementById('lic-has-vertical').value = 'No';
+        document.getElementById('lic-unipole-file').value = ''; 
+        document.getElementById('div-unipole-img').style.display = 'none';
+
+        document.getElementById('lic-civil-num').value = '';
+        document.getElementById('lic-civil-status').value = 'Valid';
+        document.getElementById('lic-civil-date').value = '';
+        
+        document.getElementById('lic-p24').value = 'N/A';
+        document.getElementById('lic-p24-num').value = '';
+        
+        document.getElementById('lic-phd').value = 'N/A';
+        document.getElementById('lic-phd-num').value = '';
+
+        document.getElementById('lic-ads-num').value = '';
+        document.getElementById('lic-ads-date').value = '';
+
+    } else {
+        // Edit Mode
+        const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+        const item = data[index];
+        if(!item) return;
+
+        document.getElementById('lic-branch').value = item.branch || '';
+        document.getElementById('lic-region').value = item.region || 'Western';
+        document.getElementById('lic-brand').value = item.brand || 'BK';
+        document.getElementById('lic-cost').value = item.cost || '';
+        document.getElementById('lic-hidden').checked = !!item.hidden;
+
+        document.getElementById('lic-store-num').value = item.store_license?.number || '';
+        document.getElementById('lic-store-status').value = item.store_license?.status || 'Valid';
+        document.getElementById('lic-store-date').value = item.store_license?.exp_g || '';
+        
+        const hasVertical = item.store_license?.has_vertical || 'No';
+        document.getElementById('lic-has-vertical').value = hasVertical;
+        document.getElementById('div-unipole-img').style.display = hasVertical === 'Yes' ? 'block' : 'none';
+
+        document.getElementById('lic-civil-num').value = item.civil_defense?.number || '';
+        document.getElementById('lic-civil-status').value = item.civil_defense?.status || 'Valid';
+        document.getElementById('lic-civil-date').value = item.civil_defense?.exp_g || '';
+
+        document.getElementById('lic-p24').value = item.permit_24?.status || 'N/A';
+        document.getElementById('lic-p24-num').value = item.permit_24?.number || '';
+
+        document.getElementById('lic-phd').value = item.permit_hd?.status || 'N/A';
+        document.getElementById('lic-phd-num').value = item.permit_hd?.number || '';
+
+        document.getElementById('lic-ads-num').value = item.ads_permit?.number || '';
+        document.getElementById('lic-ads-date').value = item.ads_permit?.exp_g || '';
+    }
+
+    // Add event listener for unipole toggle
+    document.getElementById('lic-has-vertical').onchange = (e) => {
+        document.getElementById('div-unipole-img').style.display = e.target.value === 'Yes' ? 'block' : 'none';
+    };
+
+    modal.style.display = 'flex';
+}
+
+async function saveLicense() {
+    const branch = document.getElementById('lic-branch').value.trim();
+    if(!branch) { alert('يرجى إدخال اسم الفرع'); return; }
+
+    // Handle File Upload (Mock implementation - usually needs FileReader)
+    let unipoleImg = '';
+    const fileInput = document.getElementById('lic-unipole-file');
+    if(fileInput.files && fileInput.files[0]) {
+        unipoleImg = await readFileAsBase64(fileInput.files[0]);
+    } else if (licenseEditIndex >= 0) {
+        // Keep existing image if not changed
+        const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+        unipoleImg = data[licenseEditIndex]?.store_license?.unipole_img || '';
+    }
+
+    const item = {
+        branch: branch,
+        region: document.getElementById('lic-region').value,
+        brand: document.getElementById('lic-brand').value,
+        cost: parseFloat(document.getElementById('lic-cost').value) || 0,
+        hidden: document.getElementById('lic-hidden').checked,
+        store_license: {
+            number: document.getElementById('lic-store-num').value,
+            status: document.getElementById('lic-store-status').value,
+            exp_g: document.getElementById('lic-store-date').value,
+            has_vertical: document.getElementById('lic-has-vertical').value,
+            unipole_img: unipoleImg
+        },
+        civil_defense: {
+            number: document.getElementById('lic-civil-num').value,
+            status: document.getElementById('lic-civil-status').value,
+            exp_g: document.getElementById('lic-civil-date').value,
+        },
+        permit_24: { 
+            status: document.getElementById('lic-p24').value,
+            number: document.getElementById('lic-p24-num').value
+        },
+        permit_hd: { 
+            status: document.getElementById('lic-phd').value,
+            number: document.getElementById('lic-phd-num').value
+        },
+        ads_permit: {
+            number: document.getElementById('lic-ads-num').value,
+            exp_g: document.getElementById('lic-ads-date').value
+        }
+    };
+
+    const data = JSON.parse(localStorage.getItem('admin_licenses') || '[]');
+    
+    if(licenseEditIndex >= 0) {
+        data[licenseEditIndex] = item;
+    } else {
+        data.push(item);
+    }
+
+    localStorage.setItem('admin_licenses', JSON.stringify(data));
+    document.getElementById('license-modal').style.display = 'none';
+    renderLicensesTable();
+}
+
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 function saveBranchCosts() {
