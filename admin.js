@@ -4180,106 +4180,125 @@ function renderAdsPermitsList() {
 }
 
 async function saveLicense() {
-    const branch = document.getElementById('lic-branch').value.trim();
-    if(!branch) { showToast(getMsg('error_branch_name'), 'error'); return; }
+    try {
+        const branchInput = document.getElementById('lic-branch');
+        if (!branchInput) {
+            console.error('Save failed: #lic-branch element not found');
+            showToast('خطأ: نافذة البيانات غير مكتملة', 'error');
+            return;
+        }
 
-    const data = safeParse('admin_licenses', []);
-    const existingItem = licenseEditIndex >= 0 ? data[licenseEditIndex] : null;
+        const branch = branchInput.value.trim();
+        if(!branch) { showToast(getMsg('error_branch_name'), 'error'); return; }
 
-    // --- Unipole Image ---
-    let unipoleImg = existingItem?.store_license?.unipole_img || '';
-    const fileInput = document.getElementById('lic-unipole-file');
-    if(fileInput.files && fileInput.files[0]) {
-        const fbUrl = await uploadFileToFirebase(fileInput.files[0], 'licenses/unipole');
-        if(fbUrl) unipoleImg = fbUrl;
-        else unipoleImg = await readFileAsBase64(fileInput.files[0]);
+        const data = safeParse('admin_licenses', []);
+        const existingItem = licenseEditIndex >= 0 ? data[licenseEditIndex] : null;
+
+        // Helper to safely get value
+        const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
+        const getCheck = (id) => document.getElementById(id)?.checked || false;
+
+        // --- Unipole Image ---
+        let unipoleImg = existingItem?.store_license?.unipole_img || '';
+        const unipoleFileIn = document.getElementById('lic-unipole-file');
+        if(unipoleFileIn && unipoleFileIn.files && unipoleFileIn.files[0]) {
+            const fbUrl = await uploadFileToFirebase(unipoleFileIn.files[0], 'licenses/unipole');
+            unipoleImg = fbUrl || await readFileAsBase64(unipoleFileIn.files[0]);
+        }
+
+        // --- Store License File ---
+        let storeFile = existingItem?.store_license?.file || '';
+        const storeFileInput = document.getElementById('lic-store-file');
+        if(storeFileInput && storeFileInput.files && storeFileInput.files[0]) {
+            const fbUrl = await uploadFileToFirebase(storeFileInput.files[0], 'licenses/store');
+            storeFile = fbUrl || await readFileAsBase64(storeFileInput.files[0]);
+        }
+
+        // --- Civil Defense File ---
+        let civilFile = existingItem?.civil_defense?.file || '';
+        const civilFileInput = document.getElementById('lic-civil-file');
+        if(civilFileInput && civilFileInput.files && civilFileInput.files[0]) {
+            const fbUrl = await uploadFileToFirebase(civilFileInput.files[0], 'licenses/civil');
+            civilFile = fbUrl || await readFileAsBase64(civilFileInput.files[0]);
+        }
+
+        const item = {
+            id: existingItem ? existingItem.id : Date.now(),
+            branch: branch,
+            region: getVal('lic-region'),
+            brand: getVal('lic-brand'),
+            unified_code: getVal('lic-unified-code'),
+            cost: parseFloat(getVal('lic-cost')) || 0,
+            hidden: getCheck('lic-hidden'),
+            
+            store_license: {
+                number: getVal('lic-store-num'),
+                status: getVal('lic-store-status'),
+                exp_g: getVal('lic-store-date'),
+                has_vertical: getVal('lic-has-vertical'),
+                unipole_img: unipoleImg,
+                file: storeFile
+            },
+            
+            civil_defense: {
+                number: getVal('lic-civil-num'),
+                status: getVal('lic-civil-status'),
+                exp_g: getVal('lic-civil-date'),
+                file: civilFile
+            },
+
+            permit_24: { 
+                exists: getCheck('lic-p24-exist'),
+                number: getVal('lic-p24-num'),
+                exp_g: getVal('lic-p24-date'),
+                cost: parseFloat(getVal('lic-p24-cost')) || 0,
+                status: getCheck('lic-p24-exist') ? 'Valid' : 'Not Required'
+            },
+            
+            permit_hd: { 
+                exists: getCheck('lic-phd-exist'),
+                number: getVal('lic-phd-num'),
+                exp_g: getVal('lic-phd-date'),
+                cost: parseFloat(getVal('lic-phd-cost')) || 0,
+                status: getCheck('lic-phd-exist') ? 'Valid' : 'Not Required'
+            },
+            
+            permit_out: {
+                exists: getCheck('lic-out-exist'),
+                number: getVal('lic-out-num'),
+                exp_g: getVal('lic-out-date'),
+                area: getVal('lic-out-area'),
+                cost: parseFloat(getVal('lic-out-cost')) || 0,
+                status: getCheck('lic-out-exist') ? 'Valid' : 'Not Required'
+            },
+            
+            ads_permits: (typeof currentAdsPermits !== 'undefined') ? currentAdsPermits : [] 
+        };
+
+        if(licenseEditIndex >= 0) {
+            data[licenseEditIndex] = item;
+        } else {
+            data.push(item);
+        }
+
+        localStorage.setItem('admin_licenses', JSON.stringify(data));
+        
+        // Backup to Firestore
+        if (typeof firebase !== 'undefined') {
+            try {
+                const db = firebase.firestore();
+                await db.collection('licenses').doc(String(item.id)).set(item);
+            } catch(e) { console.error("Firestore Backup Error", e); }
+        }
+
+        document.getElementById('license-modal').style.display = 'none';
+        if(typeof renderLicensesTable === 'function') renderLicensesTable();
+        showToast(getMsg('success_license_saved'), 'success');
+
+    } catch(e) {
+        console.error("Save Error", e);
+        showToast("حدث خطأ غير متوقع: " + e.message, "error");
     }
-
-    // --- Store License File ---
-    let storeFile = existingItem?.store_license?.file || '';
-    const storeFileInput = document.getElementById('lic-store-file');
-    if(storeFileInput.files && storeFileInput.files[0]) {
-        const fbUrl = await uploadFileToFirebase(storeFileInput.files[0], 'licenses/store');
-        if(fbUrl) storeFile = fbUrl;
-        else storeFile = await readFileAsBase64(storeFileInput.files[0]);
-    }
-
-    // --- Civil Defense File ---
-    let civilFile = existingItem?.civil_defense?.file || '';
-    const civilFileInput = document.getElementById('lic-civil-file');
-    if(civilFileInput.files && civilFileInput.files[0]) {
-        const fbUrl = await uploadFileToFirebase(civilFileInput.files[0], 'licenses/civil');
-        if(fbUrl) civilFile = fbUrl;
-        else civilFile = await readFileAsBase64(civilFileInput.files[0]);
-    }
-
-    // --- Ads Permits Images (Loop through new ones) ---
-    // Note: This logic assumes currentAdsPermits already has image URLs or Base64
-    // Ideally, when adding an ad permit, we should upload the image immediately.
-    // Let's keep it as is for now, but ensure future ad permits use upload logic.
-
-    const item = {
-        branch: branch,
-        region: document.getElementById('lic-region').value,
-        brand: document.getElementById('lic-brand').value,
-        unified_code: document.getElementById('lic-unified-code').value,
-        cost: parseFloat(document.getElementById('lic-cost').value) || 0,
-        hidden: document.getElementById('lic-hidden').checked,
-        store_license: {
-            number: document.getElementById('lic-store-num').value,
-            status: document.getElementById('lic-store-status').value,
-            exp_g: document.getElementById('lic-store-date').value,
-            has_vertical: document.getElementById('lic-has-vertical').value,
-            unipole_img: unipoleImg,
-            file: storeFile
-        },
-        civil_defense: {
-            number: document.getElementById('lic-civil-num').value,
-            status: document.getElementById('lic-civil-status').value,
-            exp_g: document.getElementById('lic-civil-date').value,
-            file: civilFile
-        },
-        permit_24: { 
-            exists: document.getElementById('lic-p24-exist').checked,
-            number: document.getElementById('lic-p24-num').value,
-            exp_g: document.getElementById('lic-p24-date').value,
-            cost: document.getElementById('lic-p24-cost').value
-        },
-        permit_hd: { 
-            exists: document.getElementById('lic-phd-exist').checked,
-            number: document.getElementById('lic-phd-num').value,
-            exp_g: document.getElementById('lic-phd-date').value,
-            cost: document.getElementById('lic-phd-cost').value
-        },
-        permit_out: {
-            exists: document.getElementById('lic-out-exist').checked,
-            number: document.getElementById('lic-out-num').value,
-            exp_g: document.getElementById('lic-out-date').value,
-            area: document.getElementById('lic-out-area').value,
-            cost: document.getElementById('lic-out-cost').value
-        },
-        ads_permits: currentAdsPermits // Save the array of ads permits
-    };
-
-    if(licenseEditIndex >= 0) {
-        data[licenseEditIndex] = item;
-    } else {
-        data.push(item);
-    }
-
-    localStorage.setItem('admin_licenses', JSON.stringify(data));
-    
-    // Backup to Firestore
-    if (typeof firebase !== 'undefined') {
-        try {
-            const db = firebase.firestore();
-            await db.collection('licenses').doc(branch + '_' + Date.now()).set(item);
-        } catch(e) { console.error("Firestore Backup Error", e); }
-    }
-
-    document.getElementById('license-modal').style.display = 'none';
-    renderLicensesTable();
-    showToast(getMsg('success_license_saved'), 'success');
 }
 
 function readFileAsBase64(file) {

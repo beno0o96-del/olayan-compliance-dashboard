@@ -55,7 +55,11 @@
     </style>
     
     <!-- Scripts -->
-    <script src="app.js?v=6" defer></script>
+    <script src="app.js?v=8" defer></script>
+    <script src="data-integration.js" defer></script>
+    <script src="location-manager.js" defer></script>
+    <script src="slider-fix.js" defer></script>
+    <script src="violations-charts.js" defer></script>
 </head>
 <body class="ar">
 
@@ -293,28 +297,32 @@
             toggleBtn.style.display = 'block';
             toggleBtn.onclick = () => sidebar.classList.toggle('active');
         }
-        // Load Violations for Table
+        // Load Violations for Table - Using centralized data system
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('list-types'); 
             
-            // Define safeParse locally
-            const safeParse = (k, d) => { try { return JSON.parse(localStorage.getItem(k)||JSON.stringify(d)); } catch(e){ return d; } };
-            
-            const rawData = safeParse('admin_violations_raw', []);
-            const statsData = safeParse('violations_data_override', {});
-            
-            // Render Types List (Common Violations)
-            if(container && statsData.common_types) {
-                container.innerHTML = statsData.common_types.map(t => `
-                    <div class="type-item">
-                        <span>${t.type}</span>
-                        <span class="count-badge">${t.count}</span>
-                    </div>
-                `).join('');
+            // Wait for data to be loaded from centralized system
+            const checkData = setInterval(() => {
+                if (window.OlayanData && window.OlayanData.violations) {
+                    clearInterval(checkData);
+                    loadViolationsData();
+                }
+            }, 100);
+
+            function loadViolationsData() {
+                const violations = window.OlayanData.violations || [];
+                const statsData = window.OlayanData.violationsStats || {};
+                
+                // Render Types List (Common Violations)
+                if(container && statsData.common_types) {
+                    container.innerHTML = statsData.common_types.map(t => `
+                        <div class="type-item">
+                            <span>${t.type}</span>
+                            <span class="count-badge">${t.count}</span>
+                        </div>
+                    `).join('');
+                }
             }
-            
-            // If there's a place for a detailed table, we could add it.
-            // But based on the file content read earlier, it seems to focus on charts and summary cards.
         });
     </script>
 </body>

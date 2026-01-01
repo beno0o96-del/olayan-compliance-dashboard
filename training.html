@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,14 @@
     <link rel="apple-touch-icon" href="olayan-logo.png">
     <link rel="mask-icon" href="olayan-mark.svg" color="#2d6cdf">
     <meta name="theme-color" content="#0b0e2b">
-    <script src="app.js?v=6" defer></script>
+    <script src="app.js?v=8" defer></script>
     <script src="od_config.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.37.0/dist/msal-browser.min.js" defer></script>
     <script src="onedrive_activity.js" defer></script>
     <script src="github_activity.js" defer></script>
+    <script src="data-integration.js" defer></script>
+    <script src="location-manager.js" defer></script>
+    <script src="slider-fix.js" defer></script>
     <style>
         :root {
             --bg-dark: #0b0e2b;
@@ -733,36 +736,41 @@
             جميع الحقوق محفوظة لدى شركة العليان للخدمات الغذائية © 2025 
         </span> 
         <br> 
-        Developed by <strong>Bandar A. Abdulwahab</strong> 
+        <span data-ar="تطوير وتصميم: بندر عبدا لوهاب" data-en="Developed by Bandar A. Abdulwahab">Developed by Bandar A. Abdulwahab</span> 
     </footer>
 
     <script>
-        // Data Loading Logic
+        // Data Loading Logic - Using centralized data system
         document.addEventListener('DOMContentLoaded', () => {
-            // Load Employees using safeParse locally
-            const safeParse = (k, d) => { try { return JSON.parse(localStorage.getItem(k)||JSON.stringify(d)); } catch(e){ return d; } };
-            const employees = safeParse('admin_employees', []);
-            
-            // Calculate Stats
-            const total = employees.length || 150; // Mock 150 if empty
-            const certified = employees.filter(e => e.train_status_1 === 'Valid').length || 120;
-            const expired = employees.filter(e => e.train_status_1 === 'Expired').length || 15;
-            const pending = total - certified - expired;
+            // Wait for data to be loaded from centralized system
+            const checkData = setInterval(() => {
+                if (window.OlayanData && window.OlayanData.employees) {
+                    clearInterval(checkData);
+                    loadTrainingData();
+                }
+            }, 100);
 
-            // Update KPIs
-            document.getElementById('val-total')?.setAttribute('data-target', total);
-            document.getElementById('val-certified')?.setAttribute('data-target', certified);
-            document.getElementById('val-expired')?.setAttribute('data-target', expired);
-            document.getElementById('val-pending')?.setAttribute('data-target', pending);
+            function loadTrainingData() {
+                const employees = window.OlayanData.employees || [];
+                
+                // Calculate Stats
+                const total = employees.length || 150; // Mock 150 if empty
+                const certified = employees.filter(e => e.train_status_1 === 'Valid').length || 120;
+                const expired = employees.filter(e => e.train_status_1 === 'Expired').length || 15;
+                const pending = total - certified - expired;
 
-            // Animate Numbers
-            document.querySelectorAll('.kpi-value').forEach(el => {
-                const target = parseInt(el.getAttribute('data-target') || '0');
-                el.textContent = target; // Simplified for now
-            });
+                // Update KPIs
+                document.getElementById('val-total')?.setAttribute('data-target', total);
+                document.getElementById('val-certified')?.setAttribute('data-target', certified);
+                document.getElementById('val-expired')?.setAttribute('data-target', expired);
+                document.getElementById('val-pending')?.setAttribute('data-target', pending);
 
-            // Update Charts (Mock Data injection for now, can be dynamic)
-            // ... (Keeping existing chart logic as it's mostly CSS based in this template)
+                // Animate Numbers
+                document.querySelectorAll('.kpi-value').forEach(el => {
+                    const target = parseInt(el.getAttribute('data-target') || '0');
+                    el.textContent = target; // Simplified for now
+                });
+            }
         });
 
         // Sidebar Group Toggle
@@ -786,7 +794,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Apply language
             const savedLang = localStorage.getItem('preferred-lang') || 'en';
-            setLang(savedLang);
+            if (window.setLang) {
+                setLang(savedLang);
+            }
 
             fetch('training_data.json?t=' + new Date().getTime())
                 .then(response => response.json())
@@ -796,7 +806,9 @@
                     renderKPIs(data);
                     
                     // Re-apply language to translate new elements
-                    setLang(localStorage.getItem('preferred-lang') || 'en');
+                    if (window.setLang) {
+                        setLang(localStorage.getItem('preferred-lang') || 'en');
+                    }
                 })
                 .catch(err => console.error('Error:', err));
 
