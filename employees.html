@@ -186,6 +186,25 @@
     </div>
 
     <script>
+        // Footer injection
+        document.addEventListener('DOMContentLoaded', () => {
+             const sideMenu = document.querySelector('.side-menu');
+             if(sideMenu) {
+                 const footer = document.createElement('div');
+                 footer.style.padding = '20px';
+                 footer.style.textAlign = 'center';
+                 footer.style.fontSize = '0.7rem';
+                 footer.style.color = '#e2e8f0';
+                 footer.style.borderTop = '1px solid rgba(255,255,255,0.05)';
+                 footer.style.marginTop = 'auto'; // Push to bottom
+                 footer.innerHTML = `
+                    <div style="margin-bottom: 5px;">جميع الحقوق محفوظة لدى شركة العليان للخدمات الغذائية © 2025</div>
+                    <div class="sidebar-footer-credit" style="direction: ltr; font-size: 0.85rem; font-weight: 800; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; filter: drop-shadow(0 0 3px rgba(79, 172, 254, 0.4));">Developed by Bandar A. Abdulwahab</div>
+                 `;
+                 sideMenu.appendChild(footer);
+             }
+        });
+
         const employees = [
             { id: "EMP001", name: "Ahmed Ali", role: "Manager", branch: "Riyadh - Olaya", training: "2025-12-31", health: "2025-06-30", photo: "https://ui-avatars.com/api/?name=Ahmed+Ali&background=0D8ABC&color=fff" },
             { id: "EMP002", name: "Sarah Smith", role: "Supervisor", branch: "Jeddah - Corniche", training: "2024-11-15", health: "2025-01-20", photo: "https://ui-avatars.com/api/?name=Sarah+Smith&background=random" },

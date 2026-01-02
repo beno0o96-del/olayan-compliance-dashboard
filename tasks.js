@@ -10,13 +10,25 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTasks();
     setupDragAndDrop();
     updateCounts();
+    
+    // Welcome Toast
+    setTimeout(() => {
+        showToast('👋 Welcome to Tasks Management');
+    }, 500);
 });
 
 // Load Employees from LocalStorage (shared with Admin)
 function loadEmployees() {
     const storedEmployees = localStorage.getItem('admin_employees');
-    if (storedEmployees) {
+    if (storedEmployees && JSON.parse(storedEmployees).length > 0) {
         employees = JSON.parse(storedEmployees);
+    } else {
+        // Dummy Employees for Demo
+        employees = [
+            { name: "Ahmed Al-Fahad", position: "Manager" },
+            { name: "Sarah Smith", position: "Supervisor" },
+            { name: "Mohammed Ali", position: "Staff" }
+        ];
     }
     populateEmployeeSelect();
 }
@@ -24,6 +36,8 @@ function loadEmployees() {
 // Populate Select Dropdown
 function populateEmployeeSelect() {
     const select = document.getElementById('taskAssignee');
+    if (!select) return;
+    
     // Keep first option (Select Employee...)
     select.innerHTML = select.options[0].outerHTML;
     
@@ -38,8 +52,15 @@ function populateEmployeeSelect() {
 // Load Tasks from LocalStorage
 function loadTasks() {
     const storedTasks = localStorage.getItem('admin_tasks');
+    let loaded = [];
     if (storedTasks) {
-        tasks = JSON.parse(storedTasks);
+        try {
+            loaded = JSON.parse(storedTasks);
+        } catch(e) { console.error("Error parsing tasks", e); }
+    }
+
+    if (loaded.length > 0) {
+        tasks = loaded;
     } else {
         // Sample Data if empty
         tasks = [
@@ -47,7 +68,7 @@ function loadTasks() {
                 id: '1',
                 title: 'Review Safety Protocols',
                 desc: 'Check the new fire safety regulations and update the branch guide.',
-                assignee: 'محمد علي',
+                assignee: 'Mohammed Ali',
                 priority: 'high',
                 dueDate: '2025-02-15',
                 status: 'pending'
@@ -56,10 +77,19 @@ function loadTasks() {
                 id: '2',
                 title: 'Staff Training L1',
                 desc: 'Complete Level 1 training for new hires in Riyadh branch.',
-                assignee: 'فهد السالم',
+                assignee: 'Sarah Smith',
                 priority: 'medium',
                 dueDate: '2025-02-20',
                 status: 'inprogress'
+            },
+            {
+                id: '3',
+                title: 'Inventory Audit',
+                desc: 'Monthly check of stock levels.',
+                assignee: 'Ahmed Al-Fahad',
+                priority: 'low',
+                dueDate: '2025-02-10',
+                status: 'completed'
             }
         ];
         saveTasks();
@@ -82,7 +112,7 @@ function renderTasks() {
     };
 
     // Clear columns
-    Object.values(columns).forEach(col => col.innerHTML = '');
+    Object.values(columns).forEach(col => { if(col) col.innerHTML = ''; });
 
     tasks.forEach(task => {
         const card = createTaskCard(task);
@@ -95,39 +125,35 @@ function renderTasks() {
 // Create HTML for Task Card
 function createTaskCard(task) {
     const div = document.createElement('div');
-    div.className = 'task-card';
+    div.className = 'task-card priority-' + (task.priority ? task.priority.toLowerCase() : 'medium');
     div.draggable = true;
     div.dataset.id = task.id;
     div.ondragstart = drag;
 
-    const priorityLabels = { high: 'High', medium: 'Medium', low: 'Low' };
-    const priorityAr = { high: 'عالية', medium: 'متوسطة', low: 'منخفضة' };
-    
-    // Check current lang for display, but here we render mixed or just English/Arabic
-    // Better to use data attributes for translation if possible, but JS dynamic rendering is tricky with static translation script.
-    // We will assume the page might reload on lang switch or we just render text. 
-    // Let's use simple text for now or try to use the data-en/data-ar pattern if the app.js handles it dynamically.
-    // app.js usually handles static content. For dynamic content, we might need a helper.
-    // I'll just put English for now or dual.
-
     div.innerHTML = `
-        <div class="task-actions">
-            <button class="btn-icon" onclick="editTask('${task.id}')">✏️</button>
-            <button class="btn-icon" onclick="deleteTask('${task.id}')">🗑️</button>
-        </div>
-        <span class="task-tag priority-${task.priority}">
-            ${priorityLabels[task.priority]}
-        </span>
-        <div class="task-title">${task.title}</div>
-        <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px;">${task.desc}</div>
-        <div class="task-meta">
-            <div class="task-assignee">
-                <div class="task-avatar">${getInitials(task.assignee)}</div>
-                <span>${task.assignee || 'Unassigned'}</span>
+        <div class="task-priority"></div>
+        <div class="task-content">
+            <div class="task-title">${task.title}</div>
+            <div class="task-desc">${task.desc || ''}</div>
+            <div class="task-meta">
+                <div class="task-assignee">
+                    <div class="assignee-avatar">${getInitials(task.assignee)}</div>
+                    <span>${task.assignee || 'Unassigned'}</span>
+                </div>
+                <div class="task-date">📅 ${task.dueDate || 'N/A'}</div>
             </div>
-            <div>📅 ${task.dueDate}</div>
+        </div>
+        
+        <div class="task-actions-overlay" style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.2s; display: flex; gap: 5px;">
+             <button onclick="editTask('${task.id}')" title="Edit" style="background: rgba(0,0,0,0.5); border: none; border-radius: 4px; color: #fff; cursor: pointer; padding: 6px; backdrop-filter: blur(4px);">✏️</button>
+             <button onclick="deleteTask('${task.id}')" title="Delete" style="background: rgba(239, 68, 68, 0.8); border: none; border-radius: 4px; color: #fff; cursor: pointer; padding: 6px; backdrop-filter: blur(4px);">🗑️</button>
         </div>
     `;
+    
+    // Add hover effect for actions
+    div.onmouseenter = () => div.querySelector('.task-actions-overlay').style.opacity = '1';
+    div.onmouseleave = () => div.querySelector('.task-actions-overlay').style.opacity = '0';
+
     return div;
 }
 
@@ -144,21 +170,27 @@ function openTaskModal(taskId = null) {
     
     if (taskId) {
         const task = tasks.find(t => t.id === taskId);
-        document.getElementById('taskId').value = task.id;
-        document.getElementById('taskTitle').value = task.title;
-        document.getElementById('taskDesc').value = task.desc;
-        document.getElementById('taskAssignee').value = task.assignee;
-        document.getElementById('taskPriority').value = task.priority;
-        document.getElementById('taskDueDate').value = task.dueDate;
-        title.setAttribute('data-en', 'Edit Task');
-        title.setAttribute('data-ar', 'تعديل المهمة');
-        title.textContent = 'Edit Task'; // Fallback
+        if(task) {
+            document.getElementById('taskId').value = task.id;
+            document.getElementById('taskTitle').value = task.title;
+            document.getElementById('taskDesc').value = task.desc;
+            document.getElementById('taskAssignee').value = task.assignee;
+            document.getElementById('taskPriority').value = task.priority;
+            document.getElementById('taskDueDate').value = task.dueDate;
+            if(title) {
+                title.setAttribute('data-en', 'Edit Task');
+                title.setAttribute('data-ar', 'تعديل المهمة');
+                title.textContent = document.body.classList.contains('ar') ? 'تعديل المهمة' : 'Edit Task';
+            }
+        }
     } else {
         form.reset();
         document.getElementById('taskId').value = '';
-        title.setAttribute('data-en', 'Add New Task');
-        title.setAttribute('data-ar', 'إضافة مهمة جديدة');
-        title.textContent = 'Add New Task';
+        if(title) {
+            title.setAttribute('data-en', 'Add New Task');
+            title.setAttribute('data-ar', 'إضافة مهمة جديدة');
+            title.textContent = document.body.classList.contains('ar') ? 'إضافة مهمة جديدة' : 'Add New Task';
+        }
     }
     
     modal.style.display = 'flex';
@@ -182,6 +214,7 @@ function handleTaskSubmit(e) {
         const taskIndex = tasks.findIndex(t => t.id === id);
         if (taskIndex > -1) {
             tasks[taskIndex] = { ...tasks[taskIndex], title, desc, assignee, priority, dueDate };
+            showToast('Task updated successfully');
         }
     } else {
         // Add
@@ -195,6 +228,7 @@ function handleTaskSubmit(e) {
             status: 'pending' // Default to pending
         };
         tasks.push(newTask);
+        showToast('New task added');
     }
 
     saveTasks();
@@ -211,33 +245,75 @@ function deleteTask(id) {
         tasks = tasks.filter(t => t.id !== id);
         saveTasks();
         renderTasks();
+        showToast('Task deleted');
     }
 }
 
 // Drag and Drop
 function allowDrop(ev) {
     ev.preventDefault();
+    ev.currentTarget.classList.add('drag-over');
 }
 
 function drag(ev) {
     ev.dataTransfer.setData("text", ev.target.dataset.id);
+    ev.target.classList.add('dragging');
 }
 
 function drop(ev, newStatus) {
     ev.preventDefault();
+    ev.currentTarget.classList.remove('drag-over');
     const id = ev.dataTransfer.getData("text");
     const taskIndex = tasks.findIndex(t => t.id === id);
     
     if (taskIndex > -1) {
-        tasks[taskIndex].status = newStatus;
-        saveTasks();
-        renderTasks();
+        // Only update if status changed
+        if (tasks[taskIndex].status !== newStatus) {
+            tasks[taskIndex].status = newStatus;
+            saveTasks();
+            renderTasks();
+            showToast(`Task moved to ${newStatus}`);
+        }
     }
 }
 
-function setupDragAndDrop() {
-    // Already handled via inline HTML attributes (ondrop, ondragover, ondragstart)
-    // but we could add listeners here if we wanted to separate logic.
+// Toast Notification
+function showToast(message) {
+    // Remove existing toast
+    const existing = document.getElementById('task-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'task-toast';
+    toast.textContent = message;
+    Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%) translateY(100px)',
+        backgroundColor: '#3b82f6',
+        color: '#fff',
+        padding: '12px 24px',
+        borderRadius: '50px',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+        zIndex: '3000',
+        transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        fontWeight: 'bold',
+        fontSize: '0.95rem'
+    });
+
+    document.body.appendChild(toast);
+
+    // Animate In
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+    }, 10);
+
+    // Remove after 3s
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(100px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 function updateCounts() {
@@ -247,7 +323,12 @@ function updateCounts() {
         completed: tasks.filter(t => t.status === 'completed').length
     };
 
-    document.getElementById('count-pending').textContent = counts.pending;
-    document.getElementById('count-inprogress').textContent = counts.inprogress;
-    document.getElementById('count-completed').textContent = counts.completed;
+    const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if(el) el.textContent = val;
+    };
+
+    setTxt('count-pending', counts.pending);
+    setTxt('count-inprogress', counts.inprogress);
+    setTxt('count-completed', counts.completed);
 }

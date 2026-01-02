@@ -1,0 +1,105 @@
+
+/* --- Control Menu Improvements --- */
+
+.control-menu-dropdown {
+    /* Existing styles are fine, but ensuring padding */
+    padding: 20px !important; 
+    /* Ensure visible when active handled by JS, but let's make sure it transitions well */
+    display: none; /* JS toggles this */
+    flex-direction: column;
+    gap: 15px;
+}
+
+.control-menu-dropdown.active {
+    display: flex; /* Override none */
+    height: auto;
+}
+
+.menu-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.menu-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: right;
+}
+
+body:not(.ar) .menu-action-btn { text-align: left; }
+
+.menu-action-btn i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.menu-action-btn:hover {
+    background: rgba(79, 172, 254, 0.1);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.menu-action-btn:active {
+    transform: scale(0.98);
+}
+
+/* Merge Controls (Toggle) */
+.merge-controls {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lbl-merge {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.toggle-group {
+    display: flex;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px;
+    border-radius: 30px; /* Pill shape */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.toggle-btn {
+    padding: 6px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-btn.active {
+    background: var(--primary-gradient);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(79, 172, 254, 0.4);
+}
+
+.toggle-btn:hover:not(.active) {
+    color: #fff;
+}

@@ -1,0 +1,250 @@
+/* --- TASKS KANBAN BOARD --- */
+
+/* Page Header Improvements */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5%;
+    background: linear-gradient(to right, rgba(30, 41, 75, 0.9), rgba(30, 41, 75, 0.7));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 30px;
+    border-radius: 0 0 20px 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.dashboard-title {
+    display: flex;
+    flex-direction: column; /* Stack icon and text if needed, or row */
+    align-items: flex-start;
+    gap: 5px;
+}
+
+/* Centered Title Mode (if class added) */
+.dashboard-header.centered-title {
+    justify-content: center;
+    position: relative;
+    text-align: center;
+}
+
+.dashboard-header.centered-title .dashboard-title {
+    align-items: center; /* Center align items */
+}
+
+.dashboard-header.centered-title > div:last-child {
+    position: absolute;
+    right: 5%;
+}
+
+/* RTL Support for centered title */
+body.ar .dashboard-header.centered-title > div:last-child {
+    right: auto;
+    left: 5%;
+}
+
+/* Layout */
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 20px 5%; /* Align with container */
+    margin-top: 20px;
+    align-items: start;
+}
+
+/* Columns */
+.kanban-column {
+    background: rgba(30, 41, 75, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.kanban-column:hover {
+    background: rgba(30, 41, 75, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Column Headers */
+.kanban-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.task-count {
+    background: rgba(255, 255, 255, 0.1);
+    color: #a0c4ff;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Specific Column Colors (Borders/Accents) */
+.kanban-header.status-pending { border-bottom-color: #f59e0b; }
+.kanban-header.status-progress { border-bottom-color: #4facfe; }
+.kanban-header.status-completed { border-bottom-color: #10b981; }
+
+/* Task Cards Container */
+.kanban-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-height: 100px; /* Drop zone area */
+}
+
+/* Task Cards */
+.task-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
+    cursor: grab;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.task-card:hover {
+    transform: translateY(-3px) scale(1.02);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+    z-index: 10;
+}
+
+.task-card:active {
+    cursor: grabbing;
+    transform: scale(0.98);
+}
+
+/* Priority Indicators */
+.task-priority {
+    position: absolute;
+    top: 15px;
+    left: 15px; /* LTR default */
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+body.ar .task-priority {
+    left: auto;
+    right: 15px;
+}
+
+.priority-high .task-priority { background-color: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
+.priority-medium .task-priority { background-color: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
+.priority-low .task-priority { background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
+
+.task-content {
+    margin-top: 5px;
+}
+
+.task-title {
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    padding-inline-start: 15px; /* Space for priority dot */
+}
+
+.task-desc {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 10px;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.task-assignee {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.assignee-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: bold;
+}
+
+.task-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Drag & Drop States */
+.kanban-body.drag-over {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.task-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+/* Modal Styles - Overrides if needed or new additions */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 2000;
+    display: none; /* JS toggles flex */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background: rgba(22, 33, 62, 0.9) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5) !important;
+    backdrop-filter: blur(15px) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .kanban-board {
+        grid-template-columns: 1fr; /* Stack columns on mobile */
+    }
+    .kanban-column {
+        min-height: auto;
+    }
+}

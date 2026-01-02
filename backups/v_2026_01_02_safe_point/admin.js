@@ -462,69 +462,6 @@ document.addEventListener('DOMContentLoaded',()=>{
         };
     }
     
-    // Navigation Group Toggle
-    document.querySelectorAll('.nav-group-header').forEach(header => {
-        // Remove old listeners to prevent duplicates if re-run
-        const newHeader = header.cloneNode(true);
-        header.parentNode.replaceChild(newHeader, header);
-        
-        newHeader.addEventListener('click', function() {
-            const group = this.parentElement;
-            const content = group.querySelector('.nav-group-content');
-            
-            // Close other groups (accordion style) - Optional
-            /*
-            document.querySelectorAll('.nav-group.active').forEach(g => {
-                if(g !== group) {
-                    g.classList.remove('active');
-                    if(g.querySelector('.nav-group-content')) g.querySelector('.nav-group-content').style.display = 'none';
-                }
-            });
-            */
-
-            group.classList.toggle('active');
-            
-            // Handle content display for transition
-            if(group.classList.contains('active')) {
-                content.style.display = 'block';
-                // Small timeout to allow display:block to apply before opacity transition
-                setTimeout(() => content.style.opacity = '1', 10);
-            } else {
-                content.style.opacity = '0';
-                setTimeout(() => content.style.display = 'none', 300); // Match CSS transition time
-            }
-        });
-    });
-
-    // Control Menu Toggle
-    const btnControl = document.getElementById('btn-control-menu');
-    const menuControl = document.getElementById('control-menu');
-    
-    if(btnControl && menuControl) {
-        btnControl.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isActive = menuControl.classList.contains('active');
-            
-            if(isActive) {
-                menuControl.classList.remove('active');
-                menuControl.style.height = '0';
-            } else {
-                menuControl.classList.add('active');
-                menuControl.style.height = 'auto'; // Let CSS handle opacity/transform
-                // For height transition if needed, we can calculate scrollHeight
-                // menuControl.style.height = menuControl.scrollHeight + 'px'; 
-            }
-        });
-
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if(!menuControl.contains(e.target) && !btnControl.contains(e.target)) {
-                menuControl.classList.remove('active');
-                menuControl.style.height = '0';
-            }
-        });
-    }
-
     checkLogin();
     applyAdminLang();
     renderMergeModeUI();
@@ -571,11 +508,18 @@ function checkLogin() {
     }
 }
 
-// Navigation Group Toggle (Handled in init)
+// Navigation Group Toggle
 function toggleSidebarGroup(groupId) {
-    // Legacy function support if called directly
     const group = document.getElementById(groupId);
-    if(group) group.click(); // Trigger the listener
+    if(!group) return;
+    
+    // Ensure inline display doesn't block CSS transition
+    const content = group.querySelector('.nav-group-content');
+    if(content) {
+        content.style.display = ''; 
+    }
+
+    group.classList.toggle('active');
 }
 
 // NAVIGATION
@@ -625,252 +569,7 @@ function showSection(sectionId) {
         renderTasksSummary();
     } else if(sectionId === 'advanced-data') {
         loadBoardJson();
-    } else if(sectionId === 'roles') {
-        loadRolesTable();
-    } else if(sectionId === 'messages') {
-        // Initial bot setup if needed
-    } else if(sectionId === 'activity') {
-        loadActivityLogPage();
     }
-}
-
-// --- ACTIVITY LOG SYSTEM ---
-// logActivity(user, action, details)
-function logActivity(user, action, details) {
-    let logs = safeParse('activity_log', []);
-    const newLog = {
-        user: user,
-        action: action,
-        details: details,
-        timestamp: new Date().toLocaleString()
-    };
-    logs.unshift(newLog); // Add to top
-    if (logs.length > 100) logs = logs.slice(0, 100); // Keep last 100 logs
-    localStorage.setItem('activity_log', JSON.stringify(logs));
-}
-
-function loadActivityLogPage() {
-    const tableBody = document.getElementById('activity-log-table');
-    if (!tableBody) return;
-    
-    const logs = safeParse('activity_log', []);
-    tableBody.innerHTML = '';
-    
-    if (logs.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد نشاطات مسجلة</td></tr>';
-        return;
-    }
-
-    logs.forEach(log => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${log.user}</td>
-            <td>${log.action}</td>
-            <td>${log.details}</td>
-            <td>${log.timestamp}</td>
-        `;
-        tableBody.appendChild(tr);
-    });
-}
-
-// --- ROLES MANAGEMENT ---
-// Using 'admin_users' in localStorage: [ { username, pin, role, lastActive } ]
-// Roles: Administrator (High), Moderator (Med), Member (Low)
-
-function loadRolesTable() {
-    const tableBody = document.getElementById('roles-users-table');
-    if (!tableBody) return;
-    
-    const users = safeParse('admin_users', []);
-    // Also include the Root Admin (if stored separately) or merge for view
-    const rootUser = localStorage.getItem('admin_root_user');
-    
-    tableBody.innerHTML = '';
-    
-    // Display Root User (Static/Owner)
-    if (rootUser) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${rootUser} <span class="status-pill" style="background:rgba(239,68,68,0.2);color:#ef4444;font-size:0.7rem;">Owner</span></td>
-            <td>Administrator</td>
-            <td>Now</td>
-            <td><span style="color:#666;font-size:0.8rem;">Cannot Edit</span></td>
-        `;
-        tableBody.appendChild(tr);
-    }
-
-    // Display Other Users
-    users.forEach((user, index) => {
-        const tr = document.createElement('tr');
-        const roleColor = user.role === 'Administrator' ? '#ef4444' : (user.role === 'Moderator' ? '#f59e0b' : '#3b82f6');
-        
-        // Generate Badge HTML based on role
-        let badgeHTML = '';
-        if (user.role === 'Administrator') {
-            badgeHTML = `<span class="status-pill" style="background:rgba(239,68,68,0.2);color:#ef4444;font-size:0.7rem;margin-inline-start:5px;">👑 Admin</span>`;
-        } else if (user.role === 'Moderator') {
-            badgeHTML = `<span class="status-pill" style="background:rgba(245,158,11,0.2);color:#f59e0b;font-size:0.7rem;margin-inline-start:5px;">🛡️ Mod</span>`;
-        } else {
-            badgeHTML = `<span class="status-pill" style="background:rgba(59,130,246,0.2);color:#3b82f6;font-size:0.7rem;margin-inline-start:5px;">👤 Member</span>`;
-        }
-
-        tr.innerHTML = `
-            <td>${user.username} ${badgeHTML}</td>
-            <td><span style="color:${roleColor};font-weight:bold;">${user.role || 'Member'}</span></td>
-            <td>${user.lastActive || '-'}</td>
-            <td>
-                <button class="btn btn-danger" onclick="deleteUser(${index})" style="padding:2px 8px;font-size:0.7rem;">حذف</button>
-            </td>
-        `;
-        tableBody.appendChild(tr);
-    });
-}
-
-function assignUserRole() {
-    const username = document.getElementById('role-assign-username').value.trim();
-    const pin = document.getElementById('role-assign-pin').value.trim();
-    const role = document.getElementById('role-assign-select').value;
-    
-    if (!username) {
-        showToast('يرجى إدخال اسم المستخدم', 'error');
-        return;
-    }
-    
-    // Check if user exists in admin_users
-    let users = safeParse('admin_users', []);
-    const existingIndex = users.findIndex(u => u.username === username);
-    
-    if (existingIndex >= 0) {
-        // Update existing
-        users[existingIndex].role = role;
-        if(pin) users[existingIndex].pin = pin; // Update PIN only if provided
-        showToast(`تم تحديث دور ${username} إلى ${role}`);
-        logActivity('Admin', 'Update Role', `Updated role for ${username} to ${role}`);
-    } else {
-        if (!pin) {
-            showToast('يرجى إدخال الرقم السري (PIN) للمستخدم الجديد', 'error');
-            return;
-        }
-        // Create new user
-        users.push({
-            username: username,
-            pin: pin,
-            role: role,
-            lastActive: '-'
-        });
-        showToast(`تم إضافة ${username} كـ ${role}`);
-        logActivity('Admin', 'Add User', `Added new user ${username} as ${role}`);
-    }
-    
-    localStorage.setItem('admin_users', JSON.stringify(users));
-    loadRolesTable();
-    document.getElementById('role-assign-username').value = '';
-    document.getElementById('role-assign-pin').value = '';
-}
-
-function deleteUser(index) {
-    if(!confirm(getMsg('confirm_delete_user'))) return;
-    let users = safeParse('admin_users', []);
-    const deletedUser = users[index]?.username || 'Unknown';
-    users.splice(index, 1);
-    localStorage.setItem('admin_users', JSON.stringify(users));
-    loadRolesTable();
-    showToast('تم حذف المستخدم');
-    logActivity('Admin', 'Delete User', `Deleted user ${deletedUser}`);
-}
-
-// --- MESSAGING & ARCHIVE BOT ---
-let simulatedMessages = [];
-let archivedDocs = safeParse('archived_docs', []);
-
-function simulateMessage() {
-    const input = document.getElementById('sim-msg-content');
-    const content = input.value.trim();
-    if (!content) return;
-    
-    const msg = {
-        id: Date.now(),
-        sender: 'User_' + Math.floor(Math.random() * 100),
-        content: content,
-        timestamp: new Date().toLocaleTimeString()
-    };
-    
-    simulatedMessages.push(msg);
-    renderMessages();
-    input.value = '';
-    
-    // Auto-run bot check after 1 second
-    setTimeout(runArchiveBot, 1000);
-}
-
-function renderMessages() {
-    const container = document.getElementById('messages-stream');
-    if (!container) return;
-    
-    if (simulatedMessages.length === 0) {
-        container.innerHTML = '<div style="text-align: center; color: #666; padding-top: 100px;">لا توجد رسائل جديدة...</div>';
-        return;
-    }
-    
-    container.innerHTML = simulatedMessages.map(m => `
-        <div style="background: rgba(255,255,255,0.05); padding: 8px; margin-bottom: 8px; border-radius: 6px; border-left: 3px solid #3b82f6;">
-            <div style="font-size: 0.75rem; color: #94a3b8; display:flex; justify-content:space-between;">
-                <span>${m.sender}</span>
-                <span>${m.timestamp}</span>
-            </div>
-            <div style="color: #fff; margin-top: 4px;">${m.content}</div>
-        </div>
-    `).join('');
-    container.scrollTop = container.scrollHeight;
-}
-
-function runArchiveBot() {
-    const keywords = ['سري', 'ملف', 'confidential', 'وثيقة', 'pass', 'password', 'secret'];
-    let archivedCount = 0;
-    
-    // Filter messages that need archiving
-    const toArchive = simulatedMessages.filter(m => {
-        return keywords.some(k => m.content.toLowerCase().includes(k));
-    });
-    
-    if (toArchive.length > 0) {
-        // Move to archive
-        archivedDocs = [...archivedDocs, ...toArchive];
-        localStorage.setItem('archived_docs', JSON.stringify(archivedDocs));
-        
-        // Remove from stream (Simulating "Move")
-        simulatedMessages = simulatedMessages.filter(m => !toArchive.includes(m));
-        
-        renderMessages();
-        renderArchive();
-        showToast(`🤖 البوت: تم أرشفة ${toArchive.length} رسائل حساسة بنجاح!`, 'info');
-    } else {
-        // showToast('🤖 البوت: لم يتم العثور على رسائل حساسة جديدة.');
-    }
-    
-    // Also render archive initially
-    renderArchive();
-}
-
-function renderArchive() {
-    const container = document.getElementById('archive-container');
-    if (!container) return;
-    
-    const docs = safeParse('archived_docs', []);
-    if (docs.length === 0) {
-        container.innerHTML = '<div style="text-align: center; color: #666; padding-top: 100px;">الأرشيف فارغ</div>';
-        return;
-    }
-    
-    container.innerHTML = docs.map(d => `
-        <div style="background: rgba(16, 185, 129, 0.1); padding: 8px; margin-bottom: 8px; border-radius: 6px; border-right: 3px solid #10b981;">
-            <div style="font-size: 0.75rem; color: #6ee7b7; display:flex; justify-content:space-between;">
-                <span>🔒 Archived from ${d.sender}</span>
-                <span>${d.timestamp}</span>
-            </div>
-            <div style="color: #d1fae5; margin-top: 4px;">${d.content}</div>
-        </div>
-    `).join('');
 }
 
 function setAdminLang(lang){
@@ -2824,12 +2523,6 @@ function processSingleFile(file, log) {
                         typesFound.add('licenses');
                     }
                 });
-
-                // --- AI Analysis Step ---
-                const aiAnalysis = generateExcelAIAnalysis(workbook, typesFound);
-                if (aiAnalysis && aiAnalysis.summary.length > 0) {
-                    displayExcelAIReport(aiAnalysis);
-                }
                 
                 upsertUploadHistory(file.name, Array.from(typesFound));
                 resolve();
@@ -2852,27 +2545,22 @@ function detectDataType(sheetName, rows) {
 
     // 2. Smart Content Detection (Check first row headers)
     if (rows.length > 0) {
-        // Try to find header row by scanning first few rows
-        let headerRow = rows[0];
-        // If first row is just metadata/empty, try second
-        if (Object.keys(headerRow).length < 2 && rows.length > 1) headerRow = rows[1];
-
-        const headers = Object.keys(headerRow).map(k => k.toLowerCase());
+        const headers = Object.keys(rows[0]).map(k => k.toLowerCase());
         const headerStr = headers.join(' ');
 
-        // Employees Keywords (Enhanced)
+        // Employees Keywords
         if ((headerStr.includes('iqama') || headerStr.includes('id#') || headerStr.includes('هوية')) && 
             (headerStr.includes('name') || headerStr.includes('اسم'))) {
             return 'employees';
         }
 
-        // Violations Keywords (Enhanced)
+        // Violations Keywords
         if ((headerStr.includes('violation') || headerStr.includes('مخالفة') || headerStr.includes('fine') || headerStr.includes('غرامة')) && 
             (headerStr.includes('amount') || headerStr.includes('مبلغ') || headerStr.includes('status'))) {
             return 'violations';
         }
 
-        // Licenses Keywords (Enhanced)
+        // Licenses Keywords
         if ((headerStr.includes('license') || headerStr.includes('baladiya') || headerStr.includes('civil') || headerStr.includes('رخصة')) && 
             (headerStr.includes('expire') || headerStr.includes('انتهاء'))) {
             return 'licenses';
@@ -3594,45 +3282,35 @@ function generateStrategicReport() {
 }
 
 function renderAiCharts(data) {
-    // Clear containers to prevent duplication
-    const riskContainer = document.querySelector("#chart-ai-risk-map");
-    const trendContainer = document.querySelector("#chart-ai-trend");
-    if(riskContainer) riskContainer.innerHTML = '';
-    if(trendContainer) trendContainer.innerHTML = '';
-
     // Risk Map Chart
-    if (riskContainer) {
-        const riskOptions = {
-            series: [{
-                name: 'Violations',
-                data: (data.regions || []).map(r => r.count)
-            }],
-            chart: { type: 'bar', height: 300, toolbar: {show:false}, background:'transparent' },
-            plotOptions: { bar: { borderRadius: 4, horizontal: true } },
-            colors: ['#ef4444'],
-            xaxis: { categories: (data.regions || []).map(r => r.name), labels:{style:{colors:'#cbd5e1'}} },
-            yaxis: { labels:{style:{colors:'#cbd5e1'}} },
-            theme: { mode: 'dark' }
-        };
-        new ApexCharts(riskContainer, riskOptions).render();
-    }
+    const riskOptions = {
+        series: [{
+            name: 'Violations',
+            data: (data.regions || []).map(r => r.count)
+        }],
+        chart: { type: 'bar', height: 300, toolbar: {show:false}, background:'transparent' },
+        plotOptions: { bar: { borderRadius: 4, horizontal: true } },
+        colors: ['#ef4444'],
+        xaxis: { categories: (data.regions || []).map(r => r.name), labels:{style:{colors:'#cbd5e1'}} },
+        yaxis: { labels:{style:{colors:'#cbd5e1'}} },
+        theme: { mode: 'dark' }
+    };
+    new ApexCharts(document.querySelector("#chart-ai-risk-map"), riskOptions).render();
 
     // Trend Chart (Mock Data for Demo)
-    if (trendContainer) {
-        const trendOptions = {
-            series: [{
-                name: 'Violations Trend',
-                data: [12, 19, 15, 25, 32, 20, 15, 10, 5, 8, 12, 15] // Mock monthly data
-            }],
-            chart: { type: 'area', height: 300, toolbar: {show:false}, background:'transparent' },
-            stroke: { curve: 'smooth', width:3 },
-            colors: ['#3b82f6'],
-            xaxis: { categories: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], labels:{style:{colors:'#cbd5e1'}} },
-            yaxis: { labels:{style:{colors:'#cbd5e1'}} },
-            theme: { mode: 'dark' }
-        };
-        new ApexCharts(trendContainer, trendOptions).render();
-    }
+    const trendOptions = {
+        series: [{
+            name: 'Violations Trend',
+            data: [12, 19, 15, 25, 32, 20, 15, 10, 5, 8, 12, 15] // Mock monthly data
+        }],
+        chart: { type: 'area', height: 300, toolbar: {show:false}, background:'transparent' },
+        stroke: { curve: 'smooth', width:3 },
+        colors: ['#3b82f6'],
+        xaxis: { categories: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], labels:{style:{colors:'#cbd5e1'}} },
+        yaxis: { labels:{style:{colors:'#cbd5e1'}} },
+        theme: { mode: 'dark' }
+    };
+    new ApexCharts(document.querySelector("#chart-ai-trend"), trendOptions).render();
 }
 
 function renderTopOffendersTable(branches) {
@@ -4974,6 +4652,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-// --- Inspirational Quotes Feature (Handled Globally in app.js now) ---
-// function initInspirationalQuotes() { ... }

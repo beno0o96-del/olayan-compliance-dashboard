@@ -25,7 +25,7 @@ function diagnoseAdminPage() {
     });
     
     // Check 2: Verify required scripts are loaded
-    const requiredScripts = ['app.js', 'admin.js', 'license-enhanced.js'];
+    const requiredScripts = ['app.js', 'admin.js'];
     const scripts = Array.from(document.querySelectorAll('script[src]'));
     
     requiredScripts.forEach(scriptName => {
@@ -65,12 +65,12 @@ function diagnoseAdminPage() {
         }
     });
     
-    // Check 5: Verify EnhancedLicenseManager
-    if (typeof window.EnhancedLicenseManager === 'undefined') {
-        issues.push('❌ EnhancedLicenseManager not loaded');
-    } else {
-        console.log('✅ EnhancedLicenseManager found');
-    }
+    // Check 5: Verify EnhancedLicenseManager (Removed)
+    // if (typeof window.EnhancedLicenseManager === 'undefined') {
+    //    issues.push('❌ EnhancedLicenseManager not loaded');
+    // } else {
+    //    console.log('✅ EnhancedLicenseManager found');
+    // }
     
     // Check 6: Verify localStorage access
     try {
@@ -109,7 +109,8 @@ function safeAdminInit() {
                 if (issues.length === 0) {
                     console.log('✅ Safe initialization completed successfully');
                     
-                    // Try to initialize EnhancedLicenseManager
+                    // Try to initialize EnhancedLicenseManager (Skipped)
+                    /*
                     if (window.EnhancedLicenseManager) {
                         try {
                             window.EnhancedLicenseManager.init();
@@ -118,6 +119,7 @@ function safeAdminInit() {
                             console.error('❌ Failed to initialize EnhancedLicenseManager:', error);
                         }
                     }
+                    */
                     
                     // Show admin content if login section exists
                     const loginSection = document.getElementById('login-section');
